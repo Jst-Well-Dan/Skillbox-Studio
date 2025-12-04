@@ -1,0 +1,112 @@
+{
+  "app": {
+    "title": "Claude Workbench",
+    "subtitle": "Professional desktop application and toolkit for Claude CLI"
+  },
+  "navigation": {
+
+    "ccProjects": "CC Projects",
+    "settings": "Settings",
+    "usage": "Usage Dashboard",
+    "mcpManager": "MCP Manager"
+  },
+  "buttons": {
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "run": "Run",
+    "stop": "Stop",
+    "resume": "Resume",
+    "export": "Export",
+    "import": "Import",
+    "browse": "Browse",
+    "select": "Select",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "refresh": "Refresh",
+    "search": "Search",
+    "clear": "Clear",
+    "copy": "Copy",
+    "paste": "Paste",
+    "upload": "Upload",
+    "download": "Download"
+  },
+
+  "projects": {
+    "title": "CC Projects",
+    "projectName": "Project Name",
+    "sessions": "Sessions",
+    "lastModified": "Last Modified",
+    "noProjects": "No projects found",
+    "openProject": "Open Project",
+    "newSession": "New Session"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeDescription": "Choose interface theme",
+    "claudeBinary": "Claude Binary",
+    "storage": "Storage"
+  },
+  "usage": {
+    "title": "Usage Dashboard",
+    "totalCost": "Total Cost",
+    "tokensUsed": "Tokens Used",
+    "requests": "Requests",
+    "byModel": "By Model",
+    "byProject": "By Project",
+    "byDate": "By Date"
+  },
+  "mcp": {
+    "title": "MCP Manager",
+    "servers": "Servers",
+    "addServer": "Add Server",
+    "serverName": "Server Name",
+    "serverUrl": "Server URL",
+    "status": "Status",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "networkError": "Network error",
+    "fileNotFound": "File not found",
+    "permissionDenied": "Permission denied",
+    "invalidInput": "Invalid input",
+    "claudeNotFound": "Claude Code not found"
+  },
+  "messages": {
+    "success": "Success",
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "copied": "Copied to clipboard",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "connecting": "Connecting...",
+    "disconnecting": "Disconnecting..."
+  },
+  "common": {
+    "backToHome": "← Back to Home",
+    "newProject": "New Project",
+    "newClaudeSession": "New Claude Code session",
+    "browseClaudeSessions": "Browse your Claude Code sessions",
+    "noProjectsFound": "No projects found in ~/.claude/projects",
+    "ccProjectsTitle": "CC Projects",
+    "loadingProjects": "Failed to load projects. Please ensure ~/.claude directory exists.",
+    "loadingSessions": "Failed to load sessions for this project.",
+    "claudeStillResponding": "Claude is still responding. If you leave, Claude will continue running in the background.\n\nYou can return to this session from the projects view.\n\nDo you want to continue?",
+    "configureClaudePreferences": "Configure Claude Code preferences",
+    "savingSettings": "Saving...",
+    "saveSettings": "Save Settings"
+  }
+}

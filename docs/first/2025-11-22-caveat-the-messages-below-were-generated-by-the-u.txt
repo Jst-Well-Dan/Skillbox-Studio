@@ -1,0 +1,760 @@
+
+╭─── Claude Code v2.0.50 ──────────────────────────────────────────────────────╮
+│                                                │ Tips for getting started    │
+│                  Welcome back!                 │ Run /init to create a CLAU… │
+│                                                │ ─────────────────────────── │
+│                     ▐▛███▜▌                    │ Recent activity             │
+│                    ▝▜█████▛▘                   │ No recent activity          │
+│                      ▘▘ ▝▝                     │                             │
+│                                                │                             │
+│         Sonnet 4.5 · API Usage Billing         │                             │
+│   E:\Python_Doc\AI Learning\claude-workbench   │                             │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+> /plugin 
+  ⎿  (no content)
+
+> /plugin 
+  ⎿  ✓ Enabled feature-dev. Restart Claude Code to apply changes.
+
+> /feature-dev:feature-dev is running… 
+我的目标是构建一个计算机小白也能使用的claude code的GUI可视化界面，通过外装claude
+ code plugins，把claude code视为一个agent平台。
+我fork了一个开源项目claude workbench，目前这个应用界面与功能已经很成熟。但对于计
+算机小白来说不需要这么多可以进行设置的内容，因此我希望对这个应用做减法
+1. 如图：E:\Python_Doc\AI 
+Learning\claude-workbench\界面1.png，在初始界面的顶部栏中，我只需要主题、使用统
+计、拓展、设置，这几项。不需要claude.md，MCP管理器，查看会话这几项。
+2. 在设置界面中，保留常规栏中的的语言选项，保留环境变量栏，保留代理商栏，剩余设
+置全部可以删除。& 'e:\Python_Doc\AI Learning\claude-workbench\设置-常规栏.png',&
+ 'e:\Python_Doc\AI Learning\claude-workbench\设置-代理商栏.png',& 
+'e:\Python_Doc\AI Learning\claude-workbench\设置-环境变量栏.png' think hard 
+
+● I'll help you simplify the Claude Workbench interface for non-technical
+  users. Let me start by understanding the current structure and then create
+   a plan.
+
+● Let me first read the screenshots to understand the current interface:
+
+● Read(界面1.png)
+  ⎿  Read image (210.8KB)
+
+● Read(设置-常规栏.png)
+  ⎿  Read image (203.7KB)
+
+● Read(设置-代理商栏.png)
+  ⎿  Read image (111KB)
+
+● Read(设置-环境变量栏.png)
+  ⎿  Read image (130.2KB)
+
+● Perfect! I can see the current interface clearly. Now let me use the Plan
+  agent to explore the codebase and understand the implementation structure.
+
+● Plan(Explore UI structure and settings)
+  ⎿  Done (27 tool uses · 69.2k tokens · 2m 50s)                           
+                                                                           
+● User answered Claude's questions:
+  ⎿  · 在顶部栏中，我注意到有 '查看会话' 
+     (显示会话数量)。您想保留还是删除这一项？ → 删除 - 简化界面
+     · 在常规设置中，除了语言选项外，还有主题选择器。因为顶部栏已经有主题切
+     换按钮，您想如何处理？ → 删除常规中的主题
+     · 对于删除的功能（如钩子、命令、MCP管理器等），您希望如何处理？ → 
+     只是隐藏UI
+     · 在常规设置中，是否需要保留其他选项？比如'显示系统初始化信息'、'包含Co
+     -authored By'等？ → 只保留语言
+
+● Perfect! Thank you for the clarifications. Now let me update the plan and
+  present it to you.
+                                                                           
+● User approved Claude's plan
+  ⎿  简化 Claude Workbench 界面计划
+
+     目标
+
+     为计算机小白打造简洁的 Claude Code GUI 界面
+
+     修改方案（隐藏UI，保留底层代码）
+
+     1️⃣ 顶部菜单栏简化
+
+     文件: src/components/Topbar.tsx
+
+     保留的菜单项:
+     - ✅ 主题切换 (ThemeToggle)
+     - ✅ 使用统计 (Usage Dashboard)
+     - ✅ 扩展 (Extensions)
+     - ✅ 设置 (Settings)
+
+     隐藏的菜单项:
+     - ❌ CLAUDE.md 按钮 (注释掉 lines 163-172)
+     - ❌ MCP 管理器按钮 (注释掉 lines 174-183)
+     - ❌ 查看会话按钮 (注释掉 lines 203-223)
+
+     2️⃣ 设置面板简化
+
+     文件: src/components/Settings.tsx
+
+     保留的标签页:
+     - ✅ 常规 (只保留语言选项)
+     - ✅ 环境变量 (完整保留)
+     - ✅ 代理商 (完整保留)
+
+     隐藏的标签页:
+     - ❌ 权限 (注释掉 TabsTrigger 和 TabsContent)
+     - ❌ 钩子 (注释掉 TabsTrigger 和 TabsContent)
+     - ❌ 命令 (注释掉 TabsTrigger 和 TabsContent)
+     - ❌ 翻译 (注释掉 TabsTrigger 和 TabsContent)
+     - ❌ 提示词API (注释掉 TabsTrigger 和 TabsContent)
+     - ❌ 存储 (注释掉 TabsTrigger 和 TabsContent)
+
+     常规标签页内简化:
+     - ✅ 保留: 语言选择器
+     - ❌ 删除: 
+     主题选择器、显示系统初始化信息、隐藏Warmup消息、包含Co-authored 
+     By、详细输出、聊天记录保留天数、自定义Claude路径
+
+     修改要点:
+     - 将 grid-cols-9 改为 grid-cols-3
+     - 注释掉不需要的设置项（而非删除代码）
+     - 移除相关事件监听器（如 'switch-to-prompt-api-tab'）
+
+     实施步骤
+
+     1. 修改 Topbar.tsx
+       - 注释掉 3 个按钮组件
+       - 保持所有导入和状态逻辑完整
+     2. 修改 Settings.tsx
+       - 注释掉 6 个 TabsTrigger
+       - 注释掉 6 个 TabsContent
+       - 修改 grid 列数
+       - 注释掉常规标签页中除语言外的所有设置项
+       - 移除 'switch-to-prompt-api-tab' 事件监听器
+     3. 测试验证
+       - 确认界面只显示必要的菜单和设置
+       - 验证保留的功能正常工作
+       - 检查是否有UI错误或布局问题
+
+     预期结果
+
+     - 顶部栏: 4 个按钮 (主题、使用统计、扩展、设置)
+     - 设置面板: 3 个标签页 (常规[仅语言]、环境变量、代理商)
+     - 代码结构: 保持完整，方便后续恢复或扩展
+     - 用户体验: 简洁明了，适合计算机小白使用
+
+● Read(src\components\Topbar.tsx)
+  ⎿  Error reading file
+
+● Let me search for the correct file path:
+
+● Search(pattern: "**/Topbar.tsx")
+  ⎿  Found 1 file (ctrl+o to expand)
+
+● Read(claude-workbench\src\components\Topbar.tsx)
+  ⎿  Read 244 lines
+
+● Now I'll modify the Topbar to hide the unnecessary buttons:
+
+● Update(claude-workbench\src\components\Topbar.tsx)
+  ⎿  Updated claude-workbench\src\components\Topbar.tsx with 6 additions an
+      4 removals
+       160              {t('navigation.usage')}
+       161            </Button>
+       162    
+       163 -          <Button
+       163 +          {/* Hidden for simplified UI - CLAUDE.md button */}
+       164 +          {/* <Button
+       165              variant="ghost"
+       166              size="sm"
+       167              onClick={onClaudeClick}
+     ...
+       169            >
+       170              <FileText className="h-3.5 w-3.5" strokeWidth={2}
+              aria-hidden="true" />
+       171              CLAUDE.md
+       172 -          </Button>
+       172 +          </Button> */}
+       173    
+       174 -          <Button
+       174 +          {/* Hidden for simplified UI - MCP Manager button 
+           + */}
+       175 +          {/* <Button
+       176              variant="ghost"
+       177              size="sm"
+       178              onClick={onMCPClick}
+     ...
+       180            >
+       181              <Network className="h-3.5 w-3.5" strokeWidth={2} 
+             aria-hidden="true" />
+       182              {t('navigation.mcpManager')}
+       183 -          </Button>
+       183 +          </Button> */}
+       184    
+       185            {/* 扩展管理器 */}
+       186            {onExtensionsClick && (
+
+● Update(claude-workbench\src\components\Topbar.tsx)
+  ⎿  Updated claude-workbench\src\components\Topbar.tsx with 4 additions an
+      8 removals
+       198              </Button>
+       199            )}
+       200    
+       201 -          {/* 分隔线 */}
+       202 -          <div className="h-5 w-px bg-border/50 mx-0.5" 
+           - role="separator" aria-orientation="vertical" />
+       203 -  
+       204 -          {/* 会话状态指示器 */}
+       205 -          {onTabsClick && (
+       201 +          {/* Hidden for simplified UI - View Sessions button
+           +  */}
+       202 +          {/* {onTabsClick && (
+       203              <>
+       204 +              <div className="h-5 w-px bg-border/50 mx-0.5" 
+           + role="separator" aria-orientation="vertical" />
+       205                <Button
+       206                  variant="ghost"
+       207                  size="sm"
+     ...
+       219                    </span>
+       220                  )}
+       221                </Button>
+       222 -  
+       223 -              {/* 分隔线 */}
+       222                <div className="h-5 w-px bg-border/50 mx-0.5" 
+             role="separator" aria-orientation="vertical" />
+       223              </>
+       224 -          )}
+       224 +          )} */}
+       225    
+       226            {/* Update Badge */}
+       227            {onUpdateClick && (
+
+● Perfect! Now let me update the todo and move to modifying Settings.tsx:
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 100 lines
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 100 lines
+
+● Let me continue reading to find all the settings:
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 150 lines
+
+● Now let me modify the Settings.tsx file. I'll start with the TabsList
+  section:
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 9 additions 
+     and 9 removals
+       71      const [error, setError] = useState<string | null>(null);
+       72      const [activeTab, setActiveTab] = useState("general");
+       73    
+       74 -    // ⚡ 监听切换到提示词API标签的事件（内部事件）
+       75 -    useEffect(() => {
+       76 -      const handleSwitchTab = () => {
+       77 -        console.log('[Settings] Switching to prompt-api tab');
+       78 -        setActiveTab("prompt-api");
+       79 -      };
+       74 +    // Hidden for simplified UI - Event listener for switching
+          +  to prompt-api tab
+       75 +    // useEffect(() => {
+       76 +    //   const handleSwitchTab = () => {
+       77 +    //     
+          +  console.log('[Settings] Switching to prompt-api tab');
+       78 +    //     setActiveTab("prompt-api");
+       79 +    //   };
+       80    
+       81 -      window.addEventListener('switch-to-prompt-api-tab', 
+          -  handleSwitchTab);
+       82 -      return () => 
+          -  window.removeEventListener('switch-to-prompt-api-tab', 
+          -  handleSwitchTab);
+       83 -    }, []);
+       81 +    //   window.addEventListener('switch-to-prompt-api-tab', 
+          +  handleSwitchTab);
+       82 +    //   return () => 
+          +  window.removeEventListener('switch-to-prompt-api-tab', 
+          +  handleSwitchTab);
+       83 +    // }, []);
+       84      const [toast, setToast] = useState<{ message: string; 
+            type: 'success' | 'error' } | null>(null);
+       85      
+       86      // Custom Claude path state
+
+● Now let me modify the TabsList to change from 9 columns to 3:
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 10 additions
+     and 7 removals
+
+       423          ) : (
+       424            <div className="flex-1 overflow-y-auto p-4">
+       425              <Tabs value={activeTab} 
+             onValueChange={setActiveTab} className="w-full">
+       426 -              <TabsList className="grid grid-cols-9 w-full">
+       426 +              <TabsList className="grid grid-cols-3 w-full">
+       427                  <TabsTrigger 
+             value="general">{t('settings.general')}</TabsTrigger>
+       428 -                <TabsTrigger 
+           - value="permissions">权限</TabsTrigger>
+       428 +                {/* Hidden for simplified UI */}
+       429 +                {/* <TabsTrigger 
+           + value="permissions">权限</TabsTrigger> */}
+       430                  <TabsTrigger 
+             value="environment">环境</TabsTrigger>
+       431 -                <TabsTrigger value="hooks">钩子</TabsTrigger>
+       432 -                <TabsTrigger value="commands">命令
+           -  </TabsTrigger>
+       433 -                <TabsTrigger value="translation">翻译
+           -  </TabsTrigger>
+       434 -                <TabsTrigger value="prompt-api">提示词API
+           -  </TabsTrigger>
+       431 +                {/* Hidden for simplified UI */}
+       432 +                {/* <TabsTrigger value="hooks">钩子
+           +  </TabsTrigger> */}
+       433 +                {/* <TabsTrigger value="commands">命令
+           +  </TabsTrigger> */}
+       434 +                {/* <TabsTrigger value="translation">翻译
+           +  </TabsTrigger> */}
+       435 +                {/* <TabsTrigger 
+           + value="prompt-api">提示词API</TabsTrigger> */}
+       436                  <TabsTrigger 
+             value="provider">代理商</TabsTrigger>
+       437 -                <TabsTrigger 
+           - value="storage">{t('settings.storage')}</TabsTrigger>
+       437 +                {/* Hidden for simplified UI */}
+       438 +                {/* <TabsTrigger 
+           + value="storage">{t('settings.storage')}</TabsTrigger> */}
+       439                </TabsList>
+       440                
+       441                {/* General Settings */}
+
+● Now let me simplify the General tab to only show the Language selector:
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Error editing file
+
+● Let me re-read the current file to see the exact content:
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 50 lines
+
+● Now I can see the exact content. Let me make edits in smaller chunks:
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 2 additions 
+     and 3 removals
+       448                        {/* Language Selector */}
+       449                        <LanguageSelector />
+       450    
+       451 -  
+       452 -                      {/* Theme Selector */}
+       453 -                      <div className="flex items-center 
+           - justify-between">
+       451 +                      {/* Hidden for simplified UI - Theme 
+           + Selector (already in topbar) */}
+       452 +                      {/* <div className="flex items-center 
+           + justify-between">
+       453                          <div className="space-y-0.5 flex-1">
+       454                            <Label 
+             htmlFor="theme">{t('settings.theme')}</Label>
+       455                            <p className="text-xs 
+             text-muted-foreground">
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 3 removals
+       472                              {t('settings.themeDark')}
+       473                            </Button>
+       474                          </div>
+       475 -                      </div>
+       475 +                      </div> */}
+       476    
+       477 -                      {/* Show System Initialization Info */}
+       478 -                      
+           -  <div className="flex items-center justify-between">
+       477 +                      {/* Hidden for simplified UI - 
+           +  Show System Initialization Info */}
+       478 +                      {/* 
+           +  <div className="flex items-center justify-between">
+       479                          <div className="space-y-0.5 flex-1">
+       480                            <Label 
+             htmlFor="showSystemInit">显示系统初始化信息</Label>
+       481                            <p className="text-xs 
+             text-muted-foreground">
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 3 removals
+       487                            
+             checked={settings?.showSystemInitialization !== false}
+       488                            onCheckedChange={(checked) => 
+             updateSetting("showSystemInitialization", checked)}
+       489                          />
+       490 -                      </div>
+       490 +                      </div> */}
+       491    
+       492 -                      {/* Hide Warmup Messages */}
+       493 -                      
+           -  <div className="flex items-center justify-between">
+       492 +                      {/* Hidden for simplified UI - 
+           +  Hide Warmup Messages */}
+       493 +                      {/* 
+           +  <div className="flex items-center justify-between">
+       494                          <div className="space-y-0.5 flex-1">
+       495                            <Label htmlFor="hideWarmup">隐藏 
+             Warmup 消息</Label>
+       496                            <p className="text-xs 
+             text-muted-foreground">
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 3 removals
+       502                            
+             checked={settings?.hideWarmupMessages === true}
+       503                            onCheckedChange={(checked) => 
+             updateSetting("hideWarmupMessages", checked)}
+       504                          />
+       505 -                      </div>
+       505 +                      </div> */}
+       506    
+       507 -                      {/* Include Co-authored By */}
+       508 -                      
+           -  <div className="flex items-center justify-between">
+       507 +                      {/* Hidden for simplified UI - 
+           +  Include Co-authored By */}
+       508 +                      {/* 
+           +  <div className="flex items-center justify-between">
+       509                          <div className="space-y-0.5 flex-1">
+       510                            <Label htmlFor="coauthored">包含 
+             "Co-authored by Claude"</Label>
+       511                            <p className="text-xs 
+             text-muted-foreground">
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Error editing file
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 30 lines
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 4 additions 
+     and 4 removals
+       517                            
+             checked={settings?.includeCoAuthoredBy !== false}
+       518                            onCheckedChange={(checked) => 
+             updateSetting("includeCoAuthoredBy", checked)}
+       519                          />
+       520 -                      </div>
+       521 -                      
+       522 -                      {/* Verbose Output */}
+       523 -                      
+           -  <div className="flex items-center justify-between">
+       520 +                      </div> */}
+       521 +  
+       522 +                      {/* Hidden for simplified UI - 
+           +  Verbose Output */}
+       523 +                      {/* 
+           +  <div className="flex items-center justify-between">
+       524                          <div className="space-y-0.5 flex-1">
+       525                            <Label 
+             htmlFor="verbose">详细输出</Label>
+       526                            <p className="text-xs 
+             text-muted-foreground">
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 4 additions 
+     and 4 removals
+       532                            checked={settings?.verbose === 
+             true}
+       533                            onCheckedChange={(checked) => 
+             updateSetting("verbose", checked)}
+       534                          />
+       535 -                      </div>
+       536 -                      
+       537 -                      {/* Cleanup Period */}
+       538 -                      <div className="space-y-2">
+       535 +                      </div> */}
+       536 +  
+       537 +                      {/* Hidden for simplified UI - 
+           +  Cleanup Period */}
+       538 +                      {/* <div className="space-y-2">
+       539                          <Label 
+             htmlFor="cleanup">聊天记录保留天数</Label>
+       540                          <Input
+       541                            id="cleanup"
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 4 removals
+       551                          <p className="text-xs 
+             text-muted-foreground">
+       552                            
+             本地保留聊天记录的时长（默认：30天）
+       553                          </p>
+       554 -                      </div>
+       555 -                      
+       554 +                      </div> */}
+       555    
+       556 -                      {/* 
+           -  Custom Claude Path Configuration */}
+       557 -                      <div className="space-y-4">
+       556 +                      {/* Hidden for simplified UI - 
+           +  Custom Claude Path Configuration */}
+       557 +                      {/* <div className="space-y-4">
+       558                          <div className="border-t pt-4">
+       559                            <div className="flex items-center 
+             justify-between mb-3">
+       560                              <div>
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 1 addition  
+     and 1 removal
+       633                              )}
+       634                            </AnimatePresence>
+       635                          </div>
+       636 -                      </div>
+       636 +                      </div> */}
+       637                      </div>
+       638                    </div>
+       639                  </Card>
+
+● Good! Now let me hide the tab contents for the tabs we're removing. Let me
+   read to find them:
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 50 lines
+
+● Let me find where the Permissions TabsContent ends and comment it out:
+
+● Search(pattern: "TabsContent value="permissions"", path:
+        "claude-workbench\src\components\Settings.tsx", output_mode: "content")
+  ⎿  Found 1 line (ctrl+o to expand)
+
+● Search(pattern: "TabsContent value="environment"", path:
+        "claude-workbench\src\components\Settings.tsx", output_mode: "content")
+  ⎿  Found 1 line (ctrl+o to expand)
+
+● Now I need to comment out lines 642-765 (the permissions tab). Let me read
+   that section first:
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 10 lines
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 3 removals
+       638                    </div>
+       639                  </Card>
+       640                </TabsContent>
+       641 -              
+       642 -              {/* Permissions Settings */}
+       643 -              
+           -  <TabsContent value="permissions" className="space-y-6">
+       641 +  
+       642 +              {/* Hidden for simplified UI - 
+           +  Permissions Settings */}
+       643 +              {/* 
+           +  <TabsContent value="permissions" className="space-y-6">
+       644                  <Card className="p-6">
+       645                    <div className="space-y-6">
+       646                      <div>
+
+● Now I need to find where the permissions TabsContent ends (line 765):
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 20 lines
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 3 removals
+       760                      </div>
+       761                    </div>
+       762                  </Card>
+       763 -              </TabsContent>
+       764 -              
+       765 -              {/* Environment Variables */}
+       763 +              </TabsContent> */}
+       764 +  
+       765 +              {/* Environment Variables - Keep this tab */}
+       766                <TabsContent value="environment" 
+             className="space-y-6">
+       767                  <Card className="p-6">
+       768                    <div className="space-y-6">
+
+● Good! Now let me find the other tabs to comment out. Let me search for all
+   TabsContent:
+
+● Search(pattern: "TabsContent value=", path:
+        "claude-workbench\src\components\Settings.tsx", output_mode: "content")
+  ⎿  Found 9 lines (ctrl+o to expand)
+
+● Now let me read and hide the other tabs. First, let me find where the
+  environment tab ends:
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 20 lines
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 3 additions 
+     and 3 removals
+       854                    </div>
+       855                  </Card>
+       856                </TabsContent>
+       857 -              
+       858 -              {/* Hooks Settings */}
+       859 -              
+           -  <TabsContent value="hooks" className="space-y-6">
+       857 +  
+       858 +              {/* Hidden for simplified UI - 
+           +  Hooks Settings */}
+       859 +              {/* 
+           +  <TabsContent value="hooks" className="space-y-6">
+       860                  <Card className="p-6">
+       861                    <div className="space-y-4">
+       862                      <div>
+  ⎿  API Error: 402 {"error":"Insufficient credits"}
+
+> 继续 
+
+● 继续完成Settings.tsx的修改。让我找到hooks标签页的结束位置：
+
+● Read(claude-workbench\src\components\Settings.tsx)
+  ⎿  Read 30 lines
+
+● 完美！现在让我注释掉hooks标签页的结束部分，并注释掉其他不需要的标签页：
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 15 additions
+     and 15 removals
+
+       879                      />
+       880                    </div>
+       881                  </Card>
+       882 -              </TabsContent>
+       883 -              
+       884 -              {/* Commands Tab */}
+       885 -              <TabsContent value="commands">
+       882 +              </TabsContent> */}
+       883 +  
+       884 +              {/* Hidden for simplified UI - Commands Tab */}
+       885 +              {/* <TabsContent value="commands">
+       886                  <Card className="p-6">
+       887                    <SlashCommandsManager className="p-0" />
+       888                  </Card>
+       889 -              </TabsContent>
+       890 -              
+       891 -              {/* Translation Tab */}
+       892 -              <TabsContent value="translation">
+       889 +              </TabsContent> */}
+       890 +  
+       891 +              {/* Hidden for simplified UI - 
+           +  Translation Tab */}
+       892 +              {/* <TabsContent value="translation">
+       893                  <TranslationSettings />
+       894 -              </TabsContent>
+       895 -              
+       896 -              {/* Prompt Enhancement API Tab */}
+       897 -              <TabsContent value="prompt-api">
+       894 +              </TabsContent> */}
+       895 +  
+       896 +              {/* Hidden for simplified UI - 
+           +  Prompt Enhancement API Tab */}
+       897 +              {/* <TabsContent value="prompt-api">
+       898                  <PromptEnhancementSettings />
+       899 -              </TabsContent>
+       900 -              
+       901 -              {/* Provider Tab */}
+       899 +              </TabsContent> */}
+       900 +  
+       901 +              {/* Provider Tab - Keep this tab */}
+       902                <TabsContent value="provider">
+       903                  <ProviderManager onBack={() => {}} />
+       904                </TabsContent>
+
+● 现在让我注释掉storage标签页：
+
+● Update(claude-workbench\src\components\Settings.tsx)
+  ⎿  Updated claude-workbench\src\components\Settings.tsx with 4 additions 
+     and 4 removals
+       902                <TabsContent value="provider">
+       903                  <ProviderManager onBack={() => {}} />
+       904                </TabsContent>
+       905 -              
+       906 -              {/* Storage Tab */}
+       907 -              <TabsContent value="storage">
+       905 +  
+       906 +              {/* Hidden for simplified UI - Storage Tab */}
+       907 +              {/* <TabsContent value="storage">
+       908                  <StorageTab />
+       909 -              </TabsContent>
+       909 +              </TabsContent> */}
+       910                
+       911              </Tabs>
+       912            </div>
+
+● 完美！现在让我更新todo列表并总结完成的修改：
+
+● 太好了！我已经完成了所有的界面简化修改。让我总结一下完成的工作：
+
+  ✅ 完成的修改
+
+  1. Topbar.tsx (顶部菜单栏)
+
+  已隐藏以下按钮：
+  - ❌ CLAUDE.md 按钮
+  - ❌ MCP 管理器按钮
+  - ❌ 查看会话按钮
+
+  保留的按钮：
+  - ✅ 主题切换
+  - ✅ 使用统计
+  - ✅ 扩展
+  - ✅ 设置
+
+  2. Settings.tsx (设置面板)
+
+  已隐藏的标签页：
+  - ❌ 权限 (permissions)
+  - ❌ 钩子 (hooks)
+  - ❌ 命令 (commands)
+  - ❌ 翻译 (translation)
+  - ❌ 提示词API (prompt-api)
+  - ❌ 存储 (storage)
+
+  保留的标签页：
+  - ✅ 常规 - 只保留语言选择器（已隐藏主题选择器、系统初始化信息、Warmup消息
+  、Co-authored By、详细输出、聊天记录保留天数、自定义Claude路径）
+  - ✅ 环境变量 - 完整保留
+  - ✅ 代理商 - 完整保留
+
+  标签栏从9列改为3列，界面更简洁。
+
+  🧪 测试建议
+
+  现在您可以运行应用程序来测试简化后的界面：
+
+  cd "E:\Python_Doc\AI Learning\claude-workbench\claude-workbench"
+  npm run dev
+
+  或者如果是Electron应用：
+  npm start
+
+  检查以下内容：
+  1. 顶部栏是否只显示4个按钮（主题、使用统计、扩展、设置）
+  2. 点击设置后，是否只显示3个标签页（常规、环境、代理商）
+  3. 常规标签页中是否只显示语言选择器
+  4. 所有保留的功能是否正常工作
+
+  📝 注意事项
+
+  所有被隐藏的功能代码都保留在文件中（只是被注释掉了），如果将来需要恢复某些
+  功能，只需取消相应的注释即可。这种方式既简化了界面，又保持了代码的完整性，
+  便于后续维护和扩展。
+
+  您想现在测试一下应用程序吗？
+
+
+
