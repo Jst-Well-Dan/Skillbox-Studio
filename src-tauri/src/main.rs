@@ -65,7 +65,8 @@ use commands::enhanced_hooks::{
     execute_pre_commit_review, test_hook_condition, trigger_hook_event,
 };
 use commands::extensions::{
-    list_agent_skills, list_plugins, list_subagents, open_agents_directory, open_plugins_directory,
+    get_project_plugins_summary, list_agent_skills, list_plugins, list_subagents,
+    list_workspace_projects, open_agents_directory, open_plugins_directory,
     open_skills_directory, read_skill, read_subagent,
 };
 use commands::project_plugins::{
@@ -297,6 +298,8 @@ fn main() {
             open_plugins_directory,
             open_agents_directory,
             open_skills_directory,
+            get_project_plugins_summary,
+            list_workspace_projects,
             // Project-Level Plugin Management
             list_plugin_marketplaces,
             list_marketplace_plugins,

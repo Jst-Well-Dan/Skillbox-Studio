@@ -1019,3 +1019,143 @@ pub async fn open_plugins_directory(project_path: Option<String>) -> Result<Stri
 
     Ok(plugins_dir.to_string_lossy().to_string())
 }
+
+/// Workspace project information
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceProject {
+    /// Project name (directory name)
+    pub name: String,
+    /// Full project path
+    pub path: String,
+    /// Whether project has .claude directory
+    pub has_claude_config: bool,
+    /// Last modified time
+    pub last_modified: Option<String>,
+}
+
+/// Get project plugins summary (lightweight API for displaying in project list)
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectPluginsSummary {
+    /// Project-level plugin IDs
+    pub project_plugins: Vec<String>,
+    /// System-level plugin IDs
+    pub system_plugins: Vec<String>,
+}
+
+#[tauri::command]
+pub async fn get_project_plugins_summary(
+    project_path: String,
+) -> Result<ProjectPluginsSummary, String> {
+    info!("Getting plugins summary for project: {}", project_path);
+
+    // 1. Read system-level plugins
+    let system_plugins = if let Ok(claude_dir) = get_claude_dir() {
+        let system_settings = claude_dir.join("settings.json");
+        if system_settings.exists() {
+            load_enabled_plugins_simple(&system_settings)
+        } else {
+            Vec::new()
+        }
+    } else {
+        Vec::new()
+    };
+
+    // 2. Read project-level plugins
+    let project_settings = Path::new(&project_path).join(".claude").join("settings.json");
+    let project_plugins = if project_settings.exists() {
+        load_enabled_plugins_simple(&project_settings)
+    } else {
+        Vec::new()
+    };
+
+    info!(
+        "Project '{}' has {} project plugins, {} system plugins",
+        project_path,
+        project_plugins.len(),
+        system_plugins.len()
+    );
+
+    Ok(ProjectPluginsSummary {
+        project_plugins,
+        system_plugins,
+    })
+}
+
+/// List all workspace projects
+/// Scans a directory for projects that have .claude configuration
+#[tauri::command]
+pub async fn list_workspace_projects(
+    workspace_path: Option<String>,
+) -> Result<Vec<WorkspaceProject>, String> {
+    // Default workspace path: ~/Documents/Claude-Workspaces
+    let workspace_dir = if let Some(path) = workspace_path {
+        PathBuf::from(path)
+    } else {
+        dirs::document_dir()
+            .ok_or("Could not find Documents directory")?
+            .join("Claude-Workspaces")
+    };
+
+    info!("Scanning workspace directory: {:?}", workspace_dir);
+
+    if !workspace_dir.exists() {
+        info!("Workspace directory does not exist, creating it");
+        fs::create_dir_all(&workspace_dir)
+            .map_err(|e| format!("Failed to create workspace directory: {}", e))?;
+        return Ok(Vec::new());
+    }
+
+    let mut projects = Vec::new();
+
+    // Scan for project directories
+    let entries = fs::read_dir(&workspace_dir)
+        .map_err(|e| format!("Failed to read workspace directory: {}", e))?;
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+
+        if !path.is_dir() {
+            continue;
+        }
+
+        let name = path
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("unknown")
+            .to_string();
+
+        // Check if project has .claude directory
+        let claude_dir = path.join(".claude");
+        let has_claude_config = claude_dir.exists();
+
+        // Get last modified time
+        let last_modified = path
+            .metadata()
+            .ok()
+            .and_then(|meta| meta.modified().ok())
+            .and_then(|time| {
+                let datetime: chrono::DateTime<chrono::Utc> = time.into();
+                Some(datetime.format("%Y-%m-%d %H:%M:%S").to_string())
+            });
+
+        projects.push(WorkspaceProject {
+            name,
+            path: path.to_string_lossy().to_string(),
+            has_claude_config,
+            last_modified,
+        });
+    }
+
+    // Sort by last modified (most recent first)
+    projects.sort_by(|a, b| {
+        b.last_modified
+            .as_ref()
+            .cmp(&a.last_modified.as_ref())
+    });
+
+    info!("Found {} projects in workspace", projects.len());
+
+    Ok(projects)
+}

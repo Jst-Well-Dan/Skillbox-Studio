@@ -566,6 +566,30 @@ export interface PluginMetadata {
 }
 
 /**
+ * Workspace project information
+ */
+export interface WorkspaceProject {
+  /** Project name (directory name) */
+  name: string;
+  /** Full project path */
+  path: string;
+  /** Whether project has .claude directory */
+  hasClaudeConfig: boolean;
+  /** Last modified time */
+  lastModified?: string;
+}
+
+/**
+ * Project plugins summary (lightweight)
+ */
+export interface ProjectPluginsSummary {
+  /** Project-level plugin IDs */
+  projectPlugins: string[];
+  /** System-level plugin IDs */
+  systemPlugins: string[];
+}
+
+/**
  * Plugin components statistics
  */
 export interface PluginComponents {
@@ -3095,6 +3119,34 @@ export const api = {
       await invoke("diagnostic_test_event");
     } catch (error) {
       console.error("Failed to run diagnostic test event:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get project plugins summary (lightweight API for project list display)
+   * @param projectPath - The project path
+   * @returns Promise resolving to project plugins summary
+   */
+  async getProjectPluginsSummary(projectPath: string): Promise<ProjectPluginsSummary> {
+    try {
+      return await invoke<ProjectPluginsSummary>("get_project_plugins_summary", { projectPath });
+    } catch (error) {
+      console.error("Failed to get project plugins summary:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * List all workspace projects
+   * @param workspacePath - Optional workspace path (defaults to ~/Documents/Claude-Workspaces)
+   * @returns Promise resolving to array of workspace projects
+   */
+  async listWorkspaceProjects(workspacePath?: string): Promise<WorkspaceProject[]> {
+    try {
+      return await invoke<WorkspaceProject[]>("list_workspace_projects", { workspacePath });
+    } catch (error) {
+      console.error("Failed to list workspace projects:", error);
       throw error;
     }
   },
