@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api, type WorkspaceProject, type ProjectPluginsSummary } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,8 +20,17 @@ interface ProjectWithPlugins extends WorkspaceProject {
   pluginsSummary?: ProjectPluginsSummary;
 }
 
-export const ProjectsPage: React.FC = () => {
-  const navigate = useNavigate();
+interface ProjectsPageProps {
+  onBack: () => void;
+  onStartConversation: (projectPath: string) => void;
+  onCreateProject?: () => void;
+}
+
+export const ProjectsPage: React.FC<ProjectsPageProps> = ({
+  onBack,
+  onStartConversation,
+  onCreateProject,
+}) => {
   const [projects, setProjects] = useState<ProjectWithPlugins[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
@@ -66,7 +74,7 @@ export const ProjectsPage: React.FC = () => {
 
   // Handle start conversation
   const handleStartConversation = (projectPath: string) => {
-    navigate(`/chat?project=${encodeURIComponent(projectPath)}`);
+    onStartConversation(projectPath);
   };
 
   // Handle configure plugins
@@ -84,12 +92,19 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
+  // Handle create project
+  const handleCreateProject = () => {
+    if (onCreateProject) {
+      onCreateProject();
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={onBack}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             返回首页
           </Button>
@@ -103,7 +118,7 @@ export const ProjectsPage: React.FC = () => {
             <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             刷新
           </Button>
-          <Button variant="default" size="sm">
+          <Button variant="default" size="sm" onClick={handleCreateProject}>
             <Plus className="w-4 h-4 mr-2" />
             新建项目
           </Button>

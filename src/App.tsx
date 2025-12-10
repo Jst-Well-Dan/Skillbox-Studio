@@ -31,12 +31,14 @@ import { Breadcrumbs, BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { ProjectCardSkeleton, SessionListItemSkeleton } from '@/components/ui/skeleton';
 import { WelcomeHome } from '@/components/WelcomeHome';
 import { PluginLibrary } from '@/components/PluginLibrary';
+import { ProjectsPage } from '@/components/ProjectsPage';
 import * as SessionHelpers from '@/lib/sessionHelpers';
 
 type View =
   | "welcome"
   | "agents"
   | "projects"
+  | "projects-workspace"
   | "editor"
   | "claude-code-session"
   | "claude-tab-manager"
@@ -599,7 +601,7 @@ function AppContent() {
               if (target === 'agents') {
                 handleViewChange('agents');
               } else if (target === 'projects') {
-                handleViewChange('projects');
+                handleViewChange('projects-workspace');
               }
             }}
           />
@@ -651,7 +653,25 @@ function AppContent() {
             <Settings onBack={handleSmartBack} />
           </div>
         );
-      
+
+      case "projects-workspace":
+        return (
+          <ProjectsPage
+            onBack={() => handleViewChange('welcome')}
+            onStartConversation={(projectPath) => {
+              // Set the new session project path
+              setNewSessionProjectPath(projectPath);
+              setSelectedSession(null);
+              setTabManagerSource('plugin-library');
+              handleViewChange('claude-tab-manager');
+            }}
+            onCreateProject={() => {
+              // Navigate to traditional projects view to create project
+              handleViewChange('projects');
+            }}
+          />
+        );
+
       case "projects":
         return (
           <div className="flex-1 overflow-y-auto">
