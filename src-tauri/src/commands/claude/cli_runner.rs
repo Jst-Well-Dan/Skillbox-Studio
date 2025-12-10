@@ -1102,3 +1102,65 @@ async fn spawn_claude_process(
     Ok(())
 }
 
+/// Execute a plugin management command (e.g., /plugin install, /plugin uninstall)
+/// This is a simple non-streaming execution that waits for completion
+#[tauri::command]
+pub async fn execute_plugin_command(
+    app: AppHandle,
+    plugin_command: String, // e.g., "install agent-sdk-dev" or "uninstall some-plugin"
+) -> Result<String, String> {
+    log::info!("Executing plugin command: /plugin {}", plugin_command);
+
+    let claude_path = crate::claude_binary::find_claude_binary(&app)?;
+
+    // Get Claude directory to run command in a temporary session
+    let claude_dir = super::get_claude_dir().map_err(|e| e.to_string())?;
+
+    // Split command string into arguments to avoid passing the entire command as a single arg
+    let plugin_args: Vec<String> = plugin_command
+        .split_whitespace()
+        .filter(|part| !part.is_empty())
+        .map(|part| part.to_string())
+        .collect();
+
+    if plugin_args.is_empty() {
+        return Err("Plugin command cannot be empty".to_string());
+    }
+
+    // Create a simple command execution
+    let mut cmd = Command::new(&claude_path);
+    cmd.arg("/plugin");
+    cmd.args(&plugin_args);
+    cmd.current_dir(&claude_dir);
+
+    // Capture stdout and stderr
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
+
+    log::info!(
+        "Executing: {:?} with args: /plugin {:?}",
+        claude_path,
+        plugin_args
+    );
+
+    // Spawn and wait for completion
+    let output = cmd.output().await.map_err(|e| {
+        log::error!("Failed to execute plugin command: {}", e);
+        format!("Failed to execute plugin command: {}", e)
+    })?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+
+    log::info!("Plugin command stdout: {}", stdout);
+    if !stderr.is_empty() {
+        log::warn!("Plugin command stderr: {}", stderr);
+    }
+
+    if output.status.success() {
+        Ok(stdout)
+    } else {
+        Err(format!("Plugin command failed: {}\n{}", stdout, stderr))
+    }
+}
+

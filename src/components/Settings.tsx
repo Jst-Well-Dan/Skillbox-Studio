@@ -25,6 +25,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import ProviderManager from "./ProviderManager";
 import { TranslationSettings } from "./TranslationSettings";
 import { DiagnosticPanel } from "./DiagnosticPanel";
+import RouterSetupWizard from "./RouterSetupWizard";
+import RouterSettings from "./RouterSettings";
 
 interface SettingsProps {
   /**
@@ -91,11 +93,23 @@ export const Settings: React.FC<SettingsProps> = ({
   // Hooks state
   const [userHooksChanged, setUserHooksChanged] = useState(false);
   const getUserHooks = React.useRef<(() => any) | null>(null);
-  
+
+  // Router setup state
+  const [routerSetupComplete, setRouterSetupComplete] = useState(false);
+
   // 挂载时加载设置
   // Load settings on mount
   useEffect(() => {
     loadSettings();
+  }, []);
+
+  // Check Router dependencies on mount
+  useEffect(() => {
+    api.checkRouterDependencies().then(status => {
+      setRouterSetupComplete(status.node_installed && status.ccr_installed);
+    }).catch(() => {
+      setRouterSetupComplete(false);
+    });
   }, []);
 
 
@@ -364,6 +378,12 @@ export const Settings: React.FC<SettingsProps> = ({
                   代理商
                 </TabsTrigger>
                 <TabsTrigger
+                  value="router"
+                  className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
+                >
+                  API Router
+                </TabsTrigger>
+                <TabsTrigger
                   value="diagnostic"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
@@ -576,6 +596,15 @@ export const Settings: React.FC<SettingsProps> = ({
             {/* Provider Tab - Keep this tab */}
             <TabsContent value="provider">
               <ProviderManager onBack={() => {}} />
+            </TabsContent>
+
+            {/* Router Tab */}
+            <TabsContent value="router">
+              {routerSetupComplete ? (
+                <RouterSettings />
+              ) : (
+                <RouterSetupWizard onSetupComplete={() => setRouterSetupComplete(true)} />
+              )}
             </TabsContent>
 
             {/* Diagnostic Tab */}

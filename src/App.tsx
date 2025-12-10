@@ -31,6 +31,7 @@ import { Breadcrumbs, BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { ProjectCardSkeleton, SessionListItemSkeleton } from '@/components/ui/skeleton';
 import { WelcomeHome } from '@/components/WelcomeHome';
 import { PluginLibrary } from '@/components/PluginLibrary';
+import * as SessionHelpers from '@/lib/sessionHelpers';
 
 type View =
   | "welcome"
@@ -85,6 +86,7 @@ function AppContent() {
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
   const [projectSearchQuery, setProjectSearchQuery] = useState("");
+  const [tabManagerSource, setTabManagerSource] = useState<'session-list' | 'plugin-library' | null>(null);
 
   // 🔧 NEW: Navigation history stack for smart back functionality
   const [navigationHistory, setNavigationHistory] = useState<View[]>(["welcome"]);
@@ -295,9 +297,54 @@ function AppContent() {
    * Opens a new project session from home page (requires project path selection)
    */
     const handleNewProject = async () => {
-      setSelectedSession(null);
-      setNewSessionProjectPath(NEW_PROJECT_SENTINEL); // 使用特殊标记表示"新建项目"
-      handleViewChange("claude-tab-manager");
+      try {
+        // 1. 打开目录选择器
+        const selected = await SessionHelpers.selectProjectPath();
+
+        if (!selected) {
+          return; // 用户取消选择
+        }
+
+        // 2. 检查项目是否已存在
+        const existingProjects = await api.listProjects();
+        const existingProject = existingProjects.find(p => p.path === selected);
+
+        if (existingProject) {
+          // 已存在的项目，直接导航到其 SessionList
+          await handleProjectClick(existingProject);
+          return;
+        }
+
+        // 3. 创建新项目对象（使用路径作为初始 ID）
+        const mockProject: Project = {
+          id: selected,
+          path: selected,
+          created_at: Math.floor(Date.now() / 1000),
+          sessions_count: 0
+        };
+
+        // 4. 加载会话列表（新项目将为空数组）
+        // 注意：getProjectSessions 会自动在 ~/.claude/projects/ 中创建项目目录结构
+        const sessionList = await api.getProjectSessions(mockProject.id);
+        setSessions(sessionList);
+        setSelectedProject(mockProject);
+
+        // 5. 刷新项目列表以包含新项目
+        await loadProjects();
+
+        // 6. 显示成功消息
+        const projectName = selected.split(/[\\/]/).pop() || selected;
+        setToast({
+          message: `项目 "${projectName}" 已创建`,
+          type: "success"
+        });
+      } catch (err) {
+        console.error("Failed to create new project:", err);
+        setToast({
+          message: `创建项目失败: ${err instanceof Error ? err.message : String(err)}`,
+          type: "error"
+        });
+      }
     };
 
   /**
@@ -565,6 +612,7 @@ function AppContent() {
             onStartSession={(workspacePath) => {
               setSelectedSession(null);
               setNewSessionProjectPath(workspacePath);
+              setTabManagerSource('plugin-library');
               handleViewChange('claude-tab-manager');
             }}
           />
@@ -704,6 +752,7 @@ function AppContent() {
                           // 打开会话并自动切换到该标签页
                           const result = openSessionInBackground(session);
                           switchToTab(result.tabId);
+                          setTabManagerSource('session-list');
                           handleViewChange("claude-tab-manager");
                           if (result.isNew) {
                             setToast({
@@ -720,6 +769,7 @@ function AppContent() {
                         onNewSession={(projectPath) => {
                           setSelectedSession(null); // Clear any existing session
                           setNewSessionProjectPath(projectPath); // Store the project path for new session
+                          setTabManagerSource('session-list');
                           handleViewChange("claude-tab-manager");
                         }}
                       />
@@ -785,8 +835,19 @@ function AppContent() {
             initialProjectPath={newSessionProjectPath}
             onBack={() => {
               setSelectedSession(null);
-              setNewSessionProjectPath(""); // Clear the project path
-              handleViewChange("projects");
+              setNewSessionProjectPath("");
+
+              // 智能返回：如果从 SessionList 进入，则返回 SessionList
+              if (tabManagerSource === 'session-list' && selectedProject) {
+                setTabManagerSource(null);
+                // 保持 selectedProject，视图切换到 "projects" 会显示 SessionList
+                handleViewChange("projects");
+              } else {
+                // 默认：返回项目列表
+                setSelectedProject(null);
+                setTabManagerSource(null);
+                handleViewChange("projects");
+              }
             }}
           />
         );

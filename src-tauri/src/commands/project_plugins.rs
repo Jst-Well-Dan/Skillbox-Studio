@@ -19,7 +19,7 @@ pub struct MarketplaceInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketplaceOwner {
     pub name: String,
-    pub email: String,
+    pub email: Option<String>,
 }
 
 /// marketplace.json 文件的灵活结构，用于兼容 metadata 包装
@@ -247,13 +247,16 @@ pub async fn list_marketplace_plugins(marketplace_name: String) -> Result<Vec<Pl
         .ok_or_else(|| format!("Marketplace not found in known_marketplaces.json: {}", marketplace_name))?;
 
     let marketplace_path = PathBuf::from(&marketplace_config.install_location);
+    info!("[list_marketplace_plugins] Marketplace '{}' path: {:?}", marketplace_name, marketplace_path);
 
     if !marketplace_path.exists() {
         return Err(format!("Marketplace install location does not exist: {:?}", marketplace_path));
     }
 
     let marketplace_file = marketplace_path.join(".claude-plugin").join("marketplace.json");
+    info!("[list_marketplace_plugins] Reading marketplace.json from: {:?}", marketplace_file);
     let marketplace_info = read_marketplace_info(&marketplace_file)?;
+    info!("[list_marketplace_plugins] Marketplace '{}' contains {} plugins", marketplace_info.name, marketplace_info.plugins.len());
 
     let mut plugins = Vec::new();
 
@@ -414,7 +417,7 @@ fn count_plugin_components(plugin_path: &Path) -> PluginComponents {
     components
 }
 
-/// 安装插件到项目级目录
+/// 安装插件到项目级目录（通过编辑 settings.json 而不是复制文件）
 #[tauri::command]
 pub async fn install_plugin_to_project(
     project_path: String,
@@ -434,13 +437,13 @@ pub async fn install_plugin_to_project(
     let marketplace_file = marketplace_path.join(".claude-plugin").join("marketplace.json");
     let marketplace_info = read_marketplace_info(&marketplace_file)?;
 
-    // 找到对应的插件
+    // 找到对应的插件，验证其存在
     let marketplace_plugin = marketplace_info.plugins
         .iter()
         .find(|p| p.name == plugin_name)
         .ok_or_else(|| format!("Plugin not found: {}", plugin_name))?;
 
-    // 解析插件源路径
+    // 解析插件源路径并验证存在
     let plugin_source = if marketplace_plugin.source.starts_with("./") {
         marketplace_path.join(marketplace_plugin.source.trim_start_matches("./"))
     } else {
@@ -451,246 +454,24 @@ pub async fn install_plugin_to_project(
         return Err(format!("Plugin source not found: {:?}", plugin_source));
     }
 
-    // 目标目录
+    // 构建插件标识符：plugin-name@marketplace-name
+    let plugin_id = format!("{}@{}", plugin_name, marketplace_name);
+
+    // 获取项目级 settings.json 路径
     let project_claude_dir = PathBuf::from(&project_path).join(".claude");
     fs::create_dir_all(&project_claude_dir)
         .map_err(|e| format!("Failed to create .claude directory: {}", e))?;
 
-    // 如果是 skills 集合插件
-    if !marketplace_plugin.skills.is_empty() {
-        install_skills_collection(&marketplace_path, &marketplace_plugin.skills, &project_claude_dir, &plugin_name)?;
-    } else {
-        // 标准插件，安装各个组件
-        install_plugin_components(&plugin_source, &project_claude_dir, &plugin_name)?;
-    }
+    let settings_path = project_claude_dir.join("settings.json");
 
-    // 记录已安装的插件
-    let metadata = build_plugin_metadata(&plugin_source, marketplace_plugin, &marketplace_name, &marketplace_info.version)?;
-    record_installed_plugin(&project_path, &metadata)?;
+    // 更新 settings.json 的 enabledPlugins 字段
+    update_enabled_plugins(&settings_path, &plugin_id, true)?;
 
-    info!("Successfully installed plugin: {}", plugin_name);
+    info!("Successfully installed plugin: {} (added to settings.json)", plugin_name);
     Ok(format!("Successfully installed plugin: {}", plugin_name))
 }
 
-/// 安装 skills 集合
-fn install_skills_collection(
-    marketplace_path: &Path,
-    skills: &[String],
-    project_claude_dir: &Path,
-    plugin_name: &str,
-) -> Result<(), String> {
-    let dst_skills = project_claude_dir.join("skills").join(plugin_name);
-    fs::create_dir_all(&dst_skills)
-        .map_err(|e| format!("Failed to create skills directory: {}", e))?;
-
-    for skill_path_str in skills {
-        let skill_path = if skill_path_str.starts_with("./") {
-            marketplace_path.join(skill_path_str.trim_start_matches("./"))
-        } else {
-            marketplace_path.join(skill_path_str)
-        };
-
-        if skill_path.exists() {
-            // 复制整个 skill 目录
-            let skill_name = skill_path.file_name()
-                .and_then(|s| s.to_str())
-                .unwrap_or("unknown");
-
-            let dst_skill = dst_skills.join(skill_name);
-            copy_dir_recursive(&skill_path, &dst_skill)?;
-            debug!("Installed skill: {}", skill_name);
-        } else {
-            warn!("Skill path not found: {:?}", skill_path);
-        }
-    }
-
-    Ok(())
-}
-
-/// 安装标准插件组件
-fn install_plugin_components(
-    plugin_source: &Path,
-    project_claude_dir: &Path,
-    plugin_name: &str,
-) -> Result<(), String> {
-    // 安装 commands
-    let src_commands = plugin_source.join("commands");
-    if src_commands.exists() {
-        let dst_commands = project_claude_dir.join("commands").join(plugin_name);
-        copy_dir_recursive(&src_commands, &dst_commands)?;
-        info!("Installed commands for plugin: {}", plugin_name);
-    }
-
-    // 安装 agents
-    let src_agents = plugin_source.join("agents");
-    if src_agents.exists() {
-        let dst_agents = project_claude_dir.join("agents").join(plugin_name);
-        copy_dir_recursive(&src_agents, &dst_agents)?;
-        info!("Installed agents for plugin: {}", plugin_name);
-    }
-
-    // 安装 skills
-    let src_skills = plugin_source.join("skills");
-    if src_skills.exists() {
-        let dst_skills = project_claude_dir.join("skills").join(plugin_name);
-        copy_dir_recursive(&src_skills, &dst_skills)?;
-        info!("Installed skills for plugin: {}", plugin_name);
-    }
-
-    // 安装 hooks（需要合并）
-    let src_hooks = plugin_source.join("hooks").join("hooks.json");
-    if src_hooks.exists() {
-        let dst_hooks_dir = project_claude_dir.join("hooks");
-        fs::create_dir_all(&dst_hooks_dir)
-            .map_err(|e| format!("Failed to create hooks directory: {}", e))?;
-
-        merge_hooks_json(&src_hooks, &dst_hooks_dir.join("hooks.json"), plugin_name)?;
-        info!("Installed hooks for plugin: {}", plugin_name);
-    }
-
-    // 安装 MCP 配置（需要合并）
-    let src_mcp = plugin_source.join(".mcp.json");
-    if src_mcp.exists() {
-        merge_mcp_json(&src_mcp, &project_claude_dir.join(".mcp.json"), plugin_name)?;
-        info!("Installed MCP config for plugin: {}", plugin_name);
-    }
-
-    Ok(())
-}
-
-/// 递归复制目录
-fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), String> {
-    fs::create_dir_all(dst)
-        .map_err(|e| format!("Failed to create directory {:?}: {}", dst, e))?;
-
-    for entry in fs::read_dir(src)
-        .map_err(|e| format!("Failed to read directory {:?}: {}", src, e))?
-    {
-        let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
-        let path = entry.path();
-        let file_name = path.file_name().unwrap();
-        let dst_path = dst.join(file_name);
-
-        if path.is_dir() {
-            copy_dir_recursive(&path, &dst_path)?;
-        } else {
-            fs::copy(&path, &dst_path)
-                .map_err(|e| format!("Failed to copy file {:?}: {}", path, e))?;
-        }
-    }
-
-    Ok(())
-}
-
-/// 合并 hooks.json
-fn merge_hooks_json(src: &Path, dst: &Path, plugin_name: &str) -> Result<(), String> {
-    let src_content = fs::read_to_string(src)
-        .map_err(|e| format!("Failed to read source hooks: {}", e))?;
-    let src_hooks: serde_json::Value = serde_json::from_str(&src_content)
-        .map_err(|e| format!("Failed to parse source hooks: {}", e))?;
-
-    let mut dst_hooks = if dst.exists() {
-        let dst_content = fs::read_to_string(dst)
-            .map_err(|e| format!("Failed to read destination hooks: {}", e))?;
-        serde_json::from_str(&dst_content)
-            .map_err(|e| format!("Failed to parse destination hooks: {}", e))?
-    } else {
-        serde_json::json!({})
-    };
-
-    // 合并逻辑：为每个 hook 添加 plugin 前缀，避免冲突
-    if let (Some(dst_obj), Some(src_obj)) = (dst_hooks.as_object_mut(), src_hooks.as_object()) {
-        for (key, value) in src_obj {
-            // 为 hook 名称添加插件前缀
-            let prefixed_key = format!("{}:{}", plugin_name, key);
-            dst_obj.insert(prefixed_key, value.clone());
-        }
-    }
-
-    let json_string = serde_json::to_string_pretty(&dst_hooks)
-        .map_err(|e| format!("Failed to serialize hooks: {}", e))?;
-
-    fs::write(dst, json_string)
-        .map_err(|e| format!("Failed to write hooks: {}", e))?;
-
-    Ok(())
-}
-
-/// 合并 .mcp.json
-fn merge_mcp_json(src: &Path, dst: &Path, plugin_name: &str) -> Result<(), String> {
-    let src_content = fs::read_to_string(src)
-        .map_err(|e| format!("Failed to read source MCP: {}", e))?;
-    let src_mcp: serde_json::Value = serde_json::from_str(&src_content)
-        .map_err(|e| format!("Failed to parse source MCP: {}", e))?;
-
-    let mut dst_mcp = if dst.exists() {
-        let dst_content = fs::read_to_string(dst)
-            .map_err(|e| format!("Failed to read destination MCP: {}", e))?;
-        serde_json::from_str(&dst_content)
-            .map_err(|e| format!("Failed to parse destination MCP: {}", e))?
-    } else {
-        serde_json::json!({ "mcpServers": {} })
-    };
-
-    // 合并 MCP 服务器配置
-    if let (Some(dst_servers), Some(src_servers)) = (
-        dst_mcp.get_mut("mcpServers").and_then(|v| v.as_object_mut()),
-        src_mcp.get("mcpServers").and_then(|v| v.as_object())
-    ) {
-        for (server_name, server_config) in src_servers {
-            // 为服务器名称添加插件前缀
-            let prefixed_name = format!("{}:{}", plugin_name, server_name);
-            dst_servers.insert(prefixed_name, server_config.clone());
-        }
-    }
-
-    let json_string = serde_json::to_string_pretty(&dst_mcp)
-        .map_err(|e| format!("Failed to serialize MCP: {}", e))?;
-
-    fs::write(dst, json_string)
-        .map_err(|e| format!("Failed to write MCP: {}", e))?;
-
-    Ok(())
-}
-
-/// 记录已安装的插件
-fn record_installed_plugin(project_path: &str, metadata: &PluginMetadata) -> Result<(), String> {
-    let record_file = PathBuf::from(project_path)
-        .join(".claude")
-        .join("installed_plugins.json");
-
-    let mut installed = if record_file.exists() {
-        let content = fs::read_to_string(&record_file)
-            .map_err(|e| format!("Failed to read installed plugins: {}", e))?;
-        serde_json::from_str::<serde_json::Value>(&content)
-            .map_err(|e| format!("Failed to parse installed plugins: {}", e))?
-    } else {
-        serde_json::json!({
-            "version": 1,
-            "plugins": {}
-        })
-    };
-
-    if let Some(plugins_obj) = installed.get_mut("plugins").and_then(|v| v.as_object_mut()) {
-        // 使用 marketplace:plugin-name 作为 key
-        let plugin_key = format!("{}:{}", metadata.marketplace, metadata.name);
-        plugins_obj.insert(
-            plugin_key,
-            serde_json::to_value(metadata)
-                .map_err(|e| format!("Failed to serialize metadata: {}", e))?,
-        );
-    }
-
-    let json_string = serde_json::to_string_pretty(&installed)
-        .map_err(|e| format!("Failed to serialize installed plugins: {}", e))?;
-
-    fs::write(&record_file, json_string)
-        .map_err(|e| format!("Failed to write installed plugins: {}", e))?;
-
-    Ok(())
-}
-
-/// 卸载项目级插件
+/// 卸载项目级插件（通过从 settings.json 移除而不是删除文件）
 #[tauri::command]
 pub async fn uninstall_plugin_from_project(
     project_path: String,
@@ -699,45 +480,17 @@ pub async fn uninstall_plugin_from_project(
 ) -> Result<String, String> {
     info!("Uninstalling plugin {} from project {}", plugin_name, project_path);
 
+    // 构建插件标识符：plugin-name@marketplace-name
+    let plugin_id = format!("{}@{}", plugin_name, marketplace_name);
+
+    // 获取项目级 settings.json 路径
     let project_claude_dir = PathBuf::from(&project_path).join(".claude");
+    let settings_path = project_claude_dir.join("settings.json");
 
-    // 删除各个组件目录
-    let components = [
-        project_claude_dir.join("commands").join(&plugin_name),
-        project_claude_dir.join("agents").join(&plugin_name),
-        project_claude_dir.join("skills").join(&plugin_name),
-    ];
+    // 从 settings.json 的 enabledPlugins 字段移除插件
+    update_enabled_plugins(&settings_path, &plugin_id, false)?;
 
-    for component_path in &components {
-        if component_path.exists() {
-            fs::remove_dir_all(component_path)
-                .map_err(|e| format!("Failed to remove directory {:?}: {}", component_path, e))?;
-            debug!("Removed directory: {:?}", component_path);
-        }
-    }
-
-    // TODO: 清理 hooks.json 和 .mcp.json 中的条目（需要实现反向操作）
-
-    // 更新 installed_plugins.json
-    let record_file = project_claude_dir.join("installed_plugins.json");
-    if record_file.exists() {
-        let content = fs::read_to_string(&record_file)
-            .map_err(|e| format!("Failed to read installed plugins: {}", e))?;
-        let mut installed: serde_json::Value = serde_json::from_str(&content)
-            .map_err(|e| format!("Failed to parse installed plugins: {}", e))?;
-
-        if let Some(plugins_obj) = installed.get_mut("plugins").and_then(|v| v.as_object_mut()) {
-            let plugin_key = format!("{}:{}", marketplace_name, plugin_name);
-            plugins_obj.remove(&plugin_key);
-        }
-
-        let json_string = serde_json::to_string_pretty(&installed)
-            .map_err(|e| format!("Failed to serialize installed plugins: {}", e))?;
-
-        fs::write(&record_file, json_string)
-            .map_err(|e| format!("Failed to write installed plugins: {}", e))?;
-    }
-
+    info!("Successfully uninstalled plugin: {} (removed from settings.json)", plugin_name);
     Ok(format!("Successfully uninstalled plugin: {}", plugin_name))
 }
 
@@ -1479,6 +1232,64 @@ fn truncate_with_ellipsis(text: &str, max_chars: usize) -> String {
     let mut truncated: String = text.chars().take(take_chars).collect();
     truncated.push_str(ELLIPSIS);
     truncated
+}
+
+/// 确保 settings.json 文件存在，如果不存在则创建默认结构
+fn ensure_settings_file(settings_path: &Path) -> Result<(), String> {
+    if !settings_path.exists() {
+        if let Some(parent) = settings_path.parent() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create directory: {}", e))?;
+        }
+
+        let default_settings = serde_json::json!({
+            "enabledPlugins": {}
+        });
+
+        let json_string = serde_json::to_string_pretty(&default_settings)
+            .map_err(|e| format!("Failed to serialize default settings: {}", e))?;
+
+        fs::write(settings_path, json_string)
+            .map_err(|e| format!("Failed to write settings.json: {}", e))?;
+    }
+    Ok(())
+}
+
+/// 更新 settings.json 中的 enabledPlugins 字段
+fn update_enabled_plugins(
+    settings_path: &Path,
+    plugin_id: &str,
+    enabled: bool,
+) -> Result<(), String> {
+    ensure_settings_file(settings_path)?;
+
+    let content = fs::read_to_string(settings_path)
+        .map_err(|e| format!("Failed to read settings.json: {}", e))?;
+
+    let mut settings: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse settings.json: {}", e))?;
+
+    // 确保 enabledPlugins 字段存在
+    if settings.get("enabledPlugins").is_none() {
+        settings["enabledPlugins"] = serde_json::json!({});
+    }
+
+    let plugins = settings["enabledPlugins"].as_object_mut()
+        .ok_or("enabledPlugins is not an object")?;
+
+    if enabled {
+        plugins.insert(plugin_id.to_string(), serde_json::Value::Bool(true));
+    } else {
+        plugins.remove(plugin_id);
+    }
+
+    let json_string = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("Failed to serialize settings.json: {}", e))?;
+
+    fs::write(settings_path, json_string)
+        .map_err(|e| format!("Failed to write settings.json: {}", e))?;
+
+    Ok(())
 }
 
 #[cfg(test)]

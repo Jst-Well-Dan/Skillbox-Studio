@@ -267,6 +267,48 @@ export interface CurrentProviderConfig {
 }
 
 /**
+ * Router dependency status
+ */
+export interface DependencyStatus {
+  node_installed: boolean;
+  node_version?: string;
+  node_path?: string;
+  ccr_installed: boolean;
+  ccr_version?: string;
+  install_instructions: string;
+}
+
+/**
+ * Router running status
+ */
+export interface RouterStatus {
+  running: boolean;
+  port: number;
+  session_id: string;
+  health: boolean;
+}
+
+/**
+ * Router route configuration
+ */
+export interface RouterRoute {
+  provider: string;
+  base_url: string;
+  api_key_env: string;
+  model_mapping: Record<string, string>;
+  transformers: string[];
+}
+
+/**
+ * Router complete configuration
+ */
+export interface RouterConfig {
+  port: number;
+  host: string;
+  routes: Record<string, RouterRoute>;
+}
+
+/**
  * Represents an MCP server configuration
  */
 export interface MCPServer {
@@ -482,7 +524,7 @@ export interface MarketplaceInfo {
   description: string;
   owner: {
     name: string;
-    email: string;
+    email?: string;
   };
   plugins: MarketplacePlugin[];
 }
@@ -867,11 +909,38 @@ export const api = {
     try {
       const result = await invoke("execute_claude_code", { projectPath, prompt, model, planMode, maxThinkingTokens });
       console.log('[API] ✅ invoke("execute_claude_code") returned successfully:', result);
-      return result;
+      return;
     } catch (error) {
       console.error('[API] ❌ invoke("execute_claude_code") failed:', error);
       throw error;
     }
+  },
+
+  /**
+   * Execute a plugin command (e.g., install, uninstall)
+   * Runs the command using Claude CLI's /plugin command
+   */
+  async executePluginCommand(pluginCommand: string): Promise<string> {
+    try {
+      return await invoke<string>("execute_plugin_command", { pluginCommand });
+    } catch (error) {
+      console.error("Failed to execute plugin command:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Install a plugin globally using Claude CLI
+   */
+  async installPluginGlobally(pluginName: string): Promise<string> {
+    return await this.executePluginCommand(`install ${pluginName}`);
+  },
+
+  /**
+   * Uninstall a plugin globally using Claude CLI
+   */
+  async uninstallPluginGlobally(pluginName: string): Promise<string> {
+    return await this.executePluginCommand(`uninstall ${pluginName}`);
   },
 
   /**
@@ -890,7 +959,7 @@ export const api = {
     try {
       const result = await invoke("continue_claude_code", { projectPath, prompt, model, planMode, maxThinkingTokens });
       console.log('[API] ✅ invoke("continue_claude_code") returned successfully:', result);
-      return result;
+      return;
     } catch (error) {
       console.error('[API] ❌ invoke("continue_claude_code") failed:', error);
       throw error;
@@ -914,7 +983,7 @@ export const api = {
     try {
       const result = await invoke("resume_claude_code", { projectPath, sessionId, prompt, model, planMode, maxThinkingTokens });
       console.log('[API] ✅ invoke("resume_claude_code") returned successfully:', result);
-      return result;
+      return;
     } catch (error) {
       console.error('[API] ❌ invoke("resume_claude_code") failed:', error);
       throw error;
@@ -1754,6 +1823,114 @@ export const api = {
       return await invoke<ProviderConfig>("get_provider_config", { id });
     } catch (error) {
       console.error("Failed to get provider config:", error);
+      throw error;
+    }
+  },
+
+  // Router Management API methods
+
+  /**
+   * Checks the installation status of Router dependencies (Node.js and ccr)
+   * @returns Promise resolving to dependency status with installation instructions
+   */
+  async checkRouterDependencies(): Promise<DependencyStatus> {
+    try {
+      return await invoke<DependencyStatus>("check_router_dependencies");
+    } catch (error) {
+      console.error("Failed to check router dependencies:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Generates a Router configuration file
+   * @param provider - Provider name (e.g., "openai", "gemini")
+   * @param baseUrl - API base URL
+   * @param apiKey - API key
+   * @param model - Model name
+   * @returns Promise resolving to configuration file path
+   */
+  async generateRouterConfig(
+    provider: string,
+    baseUrl: string,
+    apiKey: string,
+    model: string
+  ): Promise<string> {
+    try {
+      return await invoke<string>("generate_router_config", {
+        provider,
+        baseUrl,
+        apiKey,
+        model,
+      });
+    } catch (error) {
+      console.error("Failed to generate router config:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Saves Router configuration
+   * @param config - The router configuration to save
+   * @returns Promise resolving to configuration file path
+   */
+  async saveRouterConfig(config: RouterConfig): Promise<string> {
+    try {
+      return await invoke<string>("save_router_config", { config });
+    } catch (error) {
+      console.error("Failed to save router config:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Loads Router configuration
+   * @returns Promise resolving to router configuration
+   */
+  async loadRouterConfig(): Promise<RouterConfig> {
+    try {
+      return await invoke<RouterConfig>("load_router_config");
+    } catch (error) {
+      console.error("Failed to load router config:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Starts the Router service
+   * @returns Promise resolving to router status
+   */
+  async startRouter(): Promise<RouterStatus> {
+    try {
+      return await invoke<RouterStatus>("start_router");
+    } catch (error) {
+      console.error("Failed to start router:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Stops the Router service
+   * @returns Promise resolving when router is stopped
+   */
+  async stopRouter(): Promise<void> {
+    try {
+      await invoke<void>("stop_router");
+    } catch (error) {
+      console.error("Failed to stop router:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets the current status of the Router service
+   * @returns Promise resolving to router status
+   */
+  async getRouterStatus(): Promise<RouterStatus> {
+    try {
+      return await invoke<RouterStatus>("get_router_status");
+    } catch (error) {
+      console.error("Failed to get router status:", error);
       throw error;
     }
   },

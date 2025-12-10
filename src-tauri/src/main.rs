@@ -15,7 +15,7 @@ use commands::acemcp::{
 use commands::claude::{
     cancel_claude_execution, check_claude_version, clear_custom_claude_path, continue_claude_code,
     delete_project, delete_project_permanently, delete_session, delete_sessions_batch,
-    execute_claude_code, find_claude_md_files,
+    execute_claude_code, execute_plugin_command, find_claude_md_files,
     get_available_tools, get_claude_execution_config, get_claude_path, get_claude_permission_config,
     get_claude_session_output, get_claude_settings, get_hooks_config, get_permission_presets,
     get_project_sessions, get_system_prompt, list_directory_contents, list_hidden_projects,
@@ -42,6 +42,10 @@ use commands::provider::{
     add_provider_config, clear_provider_config, delete_provider_config,
     get_current_provider_config, get_provider_config, get_provider_presets, switch_provider_config,
     test_provider_connection, update_provider_config,
+};
+use commands::router::{
+    check_router_dependencies, generate_router_config, get_router_status, load_router_config,
+    save_router_config, start_router, stop_router, RouterManagerState,
 };
 use commands::simple_git::check_and_init_git;
 use commands::storage::{
@@ -110,6 +114,9 @@ fn main() {
             // Initialize Claude process state
             app.manage(ClaudeProcessState::default());
 
+            // Initialize Router manager state
+            app.manage(RouterManagerState::default());
+
             // Initialize auto-compact manager for context management
             let auto_compact_manager =
                 Arc::new(commands::context_manager::AutoCompactManager::new());
@@ -162,6 +169,7 @@ fn main() {
             continue_claude_code,
             resume_claude_code,
             cancel_claude_execution,
+            execute_plugin_command,
             list_running_claude_sessions,
             get_claude_session_output,
             respond_to_question,  // ⭐ AskUserQuestion support
@@ -242,6 +250,14 @@ fn main() {
             update_provider_config,
             delete_provider_config,
             get_provider_config,
+            // Router Management (Claude Code Router Integration)
+            check_router_dependencies,
+            generate_router_config,
+            save_router_config,
+            load_router_config,
+            start_router,
+            stop_router,
+            get_router_status,
             // Translation
             translate,
             translate_batch,

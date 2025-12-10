@@ -1,8 +1,9 @@
 use anyhow::Result;
-use log::{debug, info};
+use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 use super::claude::get_claude_dir;
@@ -25,6 +26,8 @@ pub struct PluginInfo {
     pub path: String,
     /// Whether plugin is enabled
     pub enabled: bool,
+    /// Plugin scope: "project" or "user"
+    pub scope: String,
     /// Components count
     pub components: PluginComponents,
 }
@@ -69,6 +72,197 @@ pub struct AgentSkillFile {
     pub description: Option<String>,
     /// File content
     pub content: String,
+}
+
+fn load_enabled_plugins(settings_path: &Path) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut seen = HashSet::new();
+
+    // 允许传入文件或目录；如果是文件，则以父目录为根
+    let base_dir = if settings_path.is_dir() {
+        settings_path.to_path_buf()
+    } else {
+        settings_path
+            .parent()
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| settings_path.to_path_buf())
+    };
+
+    // 收集根目录下的所有 settings.json / settings.local.json（含 commands 子目录等）
+    let mut candidate_files = Vec::new();
+    if settings_path.is_file() {
+        candidate_files.push(settings_path.to_path_buf());
+    }
+
+    for entry in WalkDir::new(&base_dir).max_depth(3).into_iter().flatten() {
+        if !entry.path().is_file() {
+            continue;
+        }
+        if let Some(name) = entry.file_name().to_str() {
+            if name == "settings.json" || name == "settings.local.json" {
+                candidate_files.push(entry.path().to_path_buf());
+            }
+        }
+    }
+
+    let mut read_and_merge = |path: &Path, label: &str| {
+        if !path.exists() {
+            return;
+        }
+
+        let content = match fs::read_to_string(path) {
+            Ok(value) => value,
+            Err(err) => {
+                warn!("Failed to read {} at {:?}: {}", label, path, err);
+                return;
+            }
+        };
+
+        let settings: serde_json::Value = match serde_json::from_str(&content) {
+            Ok(value) => value,
+            Err(err) => {
+                warn!("Failed to parse {} at {:?}: {}", label, path, err);
+                return;
+            }
+        };
+
+        if let Some(enabled_value) = settings.get("enabledPlugins") {
+            extract_enabled_plugin_ids(enabled_value, &mut result, &mut seen);
+        }
+    };
+
+    for file in candidate_files {
+        let label = file
+            .strip_prefix(&base_dir)
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_else(|_| file.to_string_lossy().to_string());
+        read_and_merge(&file, &label);
+    }
+
+    result
+}
+
+/// Load enabled plugins from a single settings.json file (non-recursive, for project-level plugins)
+fn load_enabled_plugins_simple(settings_path: &Path) -> Vec<String> {
+    let mut result = Vec::new();
+
+    if !settings_path.exists() {
+        return result;
+    }
+
+    let content = match fs::read_to_string(settings_path) {
+        Ok(value) => value,
+        Err(err) => {
+            warn!("Failed to read settings at {:?}: {}", settings_path, err);
+            return result;
+        }
+    };
+
+    let settings: serde_json::Value = match serde_json::from_str(&content) {
+        Ok(value) => value,
+        Err(err) => {
+            warn!("Failed to parse settings at {:?}: {}", settings_path, err);
+            return result;
+        }
+    };
+
+    if let Some(enabled_obj) = settings.get("enabledPlugins").and_then(|v| v.as_object()) {
+        for (plugin_id, enabled) in enabled_obj {
+            if enabled.as_bool().unwrap_or(false) {
+                result.push(plugin_id.clone());
+            }
+        }
+    }
+
+    result
+}
+
+fn extract_enabled_plugin_ids(
+    value: &serde_json::Value,
+    result: &mut Vec<String>,
+    seen: &mut HashSet<String>,
+) {
+    match value {
+        serde_json::Value::Array(items) => {
+            for item in items {
+                if let Some(id) = parse_enabled_plugin_entry(item) {
+                    append_unique_plugin_id(id, result, seen);
+                }
+            }
+        }
+        serde_json::Value::Object(map) => {
+            for (key, entry) in map {
+                let mut include_key = true;
+                if let Some(enabled) = entry.get("enabled").and_then(|v| v.as_bool()) {
+                    include_key = enabled;
+                } else if let Some(enabled) = entry.as_bool() {
+                    include_key = enabled;
+                }
+
+                if include_key {
+                    append_unique_plugin_id(key.as_str(), result, seen);
+                }
+
+                if let Some(id) = parse_enabled_plugin_entry(entry) {
+                    append_unique_plugin_id(id, result, seen);
+                }
+            }
+        }
+        serde_json::Value::String(id) => append_unique_plugin_id(id, result, seen),
+        _ => {}
+    }
+}
+
+fn append_unique_plugin_id(id: &str, result: &mut Vec<String>, seen: &mut HashSet<String>) {
+    let normalized = id.trim();
+    if normalized.is_empty() {
+        return;
+    }
+
+    if seen.insert(normalized.to_string()) {
+        result.push(normalized.to_string());
+    }
+}
+
+fn parse_enabled_plugin_entry(entry: &serde_json::Value) -> Option<&str> {
+    if let Some(id) = entry.as_str() {
+        let trimmed = id.trim();
+        if trimmed.is_empty() {
+            return None;
+        }
+        return Some(trimmed);
+    }
+
+    if let Some(obj) = entry.as_object() {
+        let candidate_keys = [
+            "id",
+            "pluginId",
+            "name",
+            "plugin",
+            "identifier",
+            "packageName",
+        ];
+
+        for key in candidate_keys {
+            if let Some(value) = obj.get(key).and_then(|v| v.as_str()) {
+                let trimmed = value.trim();
+                if !trimmed.is_empty() {
+                    return Some(trimmed);
+                }
+            }
+        }
+
+        if let Some(package) = obj.get("package").and_then(|v| v.as_object()) {
+            if let Some(name) = package.get("name").and_then(|v| v.as_str()) {
+                let trimmed = name.trim();
+                if !trimmed.is_empty() {
+                    return Some(trimmed);
+                }
+            }
+        }
+    }
+
+    None
 }
 
 /// Parse YAML frontmatter if present
@@ -298,119 +492,240 @@ pub async fn open_skills_directory(project_path: Option<String>) -> Result<Strin
 /// List all installed plugins
 #[tauri::command]
 pub async fn list_plugins(project_path: Option<String>) -> Result<Vec<PluginInfo>, String> {
-    info!("Listing installed plugins");
+    info!("Listing installed plugins with project_path: {:?}", project_path);
     let mut plugins = Vec::new();
 
-    // User-level plugins (~/.claude/plugins/)
+    // Load system-level enabled plugins from ~/.claude/settings.json
+    let system_enabled_plugins: HashSet<String> = if let Ok(claude_dir) = get_claude_dir() {
+        let system_settings = claude_dir.join("settings.json");
+        info!("Loading system-level enabled plugins from: {:?}", system_settings);
+        if system_settings.exists() {
+            load_enabled_plugins_simple(&system_settings).into_iter().collect()
+        } else {
+            info!("System settings.json does not exist");
+            HashSet::new()
+        }
+    } else {
+        info!("Could not get Claude directory");
+        HashSet::new()
+    };
+    info!("System-level enabled plugins: {:?}", system_enabled_plugins);
+
+    // Load project-level enabled plugins from .claude/settings.json
+    let project_enabled_plugins: HashSet<String> = if let Some(ref proj_path) = project_path {
+        let project_settings = Path::new(proj_path).join(".claude").join("settings.json");
+        info!("Loading project-level enabled plugins from: {:?}", project_settings);
+        if project_settings.exists() {
+            load_enabled_plugins_simple(&project_settings).into_iter().collect()
+        } else {
+            info!("Project settings.json does not exist");
+            HashSet::new()
+        }
+    } else {
+        HashSet::new()
+    };
+    info!("Project-level enabled plugins: {:?}", project_enabled_plugins);
+
+    // Collect all enabled plugin IDs (system + project)
+    let all_enabled_plugins: Vec<String> = system_enabled_plugins
+        .iter()
+        .chain(project_enabled_plugins.iter())
+        .cloned()
+        .collect();
+
+    // Scan plugins from ~/.claude/plugins/ and determine scope based on which settings.json they're in
     if let Ok(claude_dir) = get_claude_dir() {
-        let user_plugins_dir = claude_dir.join("plugins");
-        if user_plugins_dir.exists() {
-            plugins.extend(scan_plugins_directory(&user_plugins_dir)?);
-        }
-    }
+        let plugins_dir = claude_dir.join("plugins");
+        if plugins_dir.exists() {
+            info!("Scanning plugins from: {:?}", plugins_dir);
 
-    // Project-level plugins (.claude/plugins/)
-    if let Some(proj_path) = project_path {
-        let project_plugins_dir = Path::new(&proj_path).join(".claude").join("plugins");
-        if project_plugins_dir.exists() {
-            plugins.extend(scan_plugins_directory(&project_plugins_dir)?);
-        }
-    }
+            for plugin_id in &all_enabled_plugins {
+                // Determine scope: if in project_enabled_plugins, it's "project", otherwise "system"
+                let scope = if project_enabled_plugins.contains(plugin_id) {
+                    info!("Plugin '{}' is project-level", plugin_id);
+                    "project"
+                } else if system_enabled_plugins.contains(plugin_id) {
+                    info!("Plugin '{}' is system-level", plugin_id);
+                    "user" // Backend uses "user" for system-level plugins
+                } else {
+                    "user"
+                };
 
-    Ok(plugins)
-}
-
-/// Scan plugins directory
-fn scan_plugins_directory(dir: &Path) -> Result<Vec<PluginInfo>, String> {
-    let mut plugins = Vec::new();
-
-    // First, try to read installed_plugins.json (official Claude CLI format)
-    // Format: { "version": 1, "plugins": { "plugin-name": { "installPath": "...", ... } } }
-    let installed_plugins_path = dir.join("installed_plugins.json");
-    let mut installed_plugins_map: std::collections::HashMap<String, serde_json::Value> = std::collections::HashMap::new();
-
-    if installed_plugins_path.exists() {
-        if let Ok(content) = fs::read_to_string(&installed_plugins_path) {
-            if let Ok(json_root) = serde_json::from_str::<serde_json::Value>(&content) {
-                // Extract the "plugins" object from the root
-                if let Some(plugins_obj) = json_root.get("plugins").and_then(|v| v.as_object()) {
-                    for (plugin_name, plugin_entry) in plugins_obj {
-                        installed_plugins_map.insert(plugin_name.clone(), plugin_entry.clone());
+                // Try to find the plugin in the plugins directory
+                let plugin_path = resolve_plugin_path(&plugins_dir, plugin_id);
+                if let Some(path) = plugin_path {
+                    if let Some(mut plugin_info) = build_plugin_info(plugin_id, &path, None, None) {
+                        plugin_info.scope = scope.to_string();
+                        plugin_info.enabled = true;
+                        plugins.push(plugin_info);
                     }
-                    info!("Loaded {} plugins from installed_plugins.json", installed_plugins_map.len());
+                } else {
+                    warn!("Could not find plugin '{}' in plugins directory", plugin_id);
                 }
             }
         }
     }
 
-    // Process plugins from installed_plugins.json first (they may be in subdirectories)
-    for (plugin_name, plugin_entry) in &installed_plugins_map {
-        // Get the install path from the plugin entry
-        if let Some(install_path_str) = plugin_entry.get("installPath").and_then(|v| v.as_str()) {
-            let install_path = Path::new(install_path_str);
+    info!("Total plugins found: {}", plugins.len());
+    Ok(plugins)
+}
 
-            if install_path.exists() {
-                let plugin_json_path = install_path.join(".claude-plugin").join("plugin.json");
-
-                let (name, description, version, author) = if plugin_json_path.exists() {
-                    // Read plugin.json for detailed info
-                    if let Ok(content) = fs::read_to_string(&plugin_json_path) {
-                        if let Ok(manifest) = serde_json::from_str::<serde_json::Value>(&content) {
-                            let name = manifest
-                                .get("name")
-                                .and_then(|v| v.as_str())
-                                .unwrap_or(plugin_name)
-                                .to_string();
-
-                            let description = manifest
-                                .get("description")
-                                .and_then(|v| v.as_str())
-                                .map(|s| s.to_string());
-
-                            let version = manifest
-                                .get("version")
-                                .and_then(|v| v.as_str())
-                                .or_else(|| plugin_entry.get("version").and_then(|v| v.as_str()))
-                                .unwrap_or("unknown")
-                                .to_string();
-
-                            let author = manifest
-                                .get("author")
-                                .and_then(|v| v.get("name"))
-                                .and_then(|v| v.as_str())
-                                .or_else(|| manifest.get("author").and_then(|v| v.as_str()))
-                                .map(|s| s.to_string());
-
-                            (name, description, version, author)
-                        } else {
-                            (plugin_name.clone(), None, plugin_entry.get("version").and_then(|v| v.as_str()).unwrap_or("unknown").to_string(), None)
+/// Resolve plugin path in the plugins directory
+fn resolve_plugin_path(plugins_dir: &Path, plugin_id: &str) -> Option<PathBuf> {
+    // Try to read from installed_plugins.json first
+    let installed_json = plugins_dir.join("installed_plugins.json");
+    if installed_json.exists() {
+        if let Ok(content) = fs::read_to_string(&installed_json) {
+            if let Ok(data) = serde_json::from_str::<serde_json::Value>(&content) {
+                if let Some(plugins_obj) = data.get("plugins").and_then(|v| v.as_object()) {
+                    if let Some(plugin_entry) = plugins_obj.get(plugin_id) {
+                        if let Some(install_path) = plugin_entry.get("installPath").and_then(|v| v.as_str()) {
+                            let path = PathBuf::from(install_path);
+                            if path.exists() {
+                                info!("Found plugin '{}' in installed_plugins.json at: {:?}", plugin_id, path);
+                                return Some(path);
+                            }
                         }
-                    } else {
-                        (plugin_name.clone(), None, plugin_entry.get("version").and_then(|v| v.as_str()).unwrap_or("unknown").to_string(), None)
                     }
-                } else {
-                    // No plugin.json, use info from installed_plugins.json
-                    (
-                        plugin_name.clone(),
-                        None,
-                        plugin_entry.get("version").and_then(|v| v.as_str()).unwrap_or("unknown").to_string(),
-                        None,
-                    )
-                };
+                }
+            }
+        }
+    }
 
-                // Count components
-                let components = count_plugin_components(install_path);
+    // Parse plugin_id format: plugin-name@marketplace-name
+    if let Some(at_pos) = plugin_id.rfind('@') {
+        let plugin_name = &plugin_id[..at_pos];
+        let marketplace_name = &plugin_id[at_pos + 1..];
 
-                plugins.push(PluginInfo {
-                    name,
-                    description,
-                    version,
-                    author,
-                    marketplace: Some(plugin_name.clone()),
-                    path: install_path.to_string_lossy().to_string(),
-                    enabled: true,
-                    components,
-                });
+        // Try to find in cache directory structure: cache/marketplace-name/plugin-name/
+        let cache_dir = plugins_dir.join("cache").join(marketplace_name).join(plugin_name);
+        if cache_dir.exists() {
+            info!("Found plugin '{}' in cache at: {:?}", plugin_id, cache_dir);
+
+            // Try to find the latest version directory
+            if let Ok(entries) = fs::read_dir(&cache_dir) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.is_dir() {
+                        info!("Using version directory: {:?}", path);
+                        return Some(path);
+                    }
+                }
+            }
+
+            // If no version subdirectory, use the cache directory itself
+            return Some(cache_dir);
+        }
+    }
+
+    // Fallback: try direct subdirectory
+    let direct_path = plugins_dir.join(plugin_id);
+    if direct_path.exists() {
+        info!("Found plugin '{}' at direct path: {:?}", plugin_id, direct_path);
+        return Some(direct_path);
+    }
+
+    warn!("Could not resolve path for plugin '{}'", plugin_id);
+    None
+}
+
+/// Scan plugins directory
+fn scan_plugins_directory(
+    dir: &Path,
+    enabled_filter: &[String],
+    project_path: Option<&str>,
+    fallback_installed_map: Option<&HashMap<String, serde_json::Value>>,
+    project_enabled_plugins: &HashSet<String>,
+) -> Result<Vec<PluginInfo>, String> {
+    let mut plugins = Vec::new();
+    let installed_plugins_map = read_installed_plugins_map(dir, project_path);
+
+    if !enabled_filter.is_empty() {
+        for plugin_id in enabled_filter {
+            let plugin_entry = installed_plugins_map
+                .get(plugin_id)
+                .or_else(|| fallback_installed_map.and_then(|m| m.get(plugin_id)));
+
+            let install_path = plugin_entry
+                .and_then(|entry| entry.get("installPath").and_then(|v| v.as_str()))
+                .map(PathBuf::from)
+                .unwrap_or_else(|| dir.join(plugin_id));
+
+            // Determine scope based on whether it's in project enabled plugins
+            let scope = if project_enabled_plugins.contains(plugin_id) {
+                info!("Plugin '{}' found in project enabled plugins, marking as 'project'", plugin_id);
+                "project".to_string()
+            } else {
+                info!("Plugin '{}' NOT found in project enabled plugins, marking as 'user'", plugin_id);
+                "user".to_string()
+            };
+
+            if let Some(mut info) = build_plugin_info(
+                plugin_id,
+                &install_path,
+                plugin_entry,
+                Some(plugin_id.clone()),
+            ) {
+                info.scope = scope;
+                plugins.push(info);
+            } else {
+                warn!(
+                    "Enabled plugin '{}' not found at {:?}",
+                    plugin_id, install_path
+                );
+            }
+        }
+
+        return Ok(plugins);
+    }
+
+    // Process plugins from installed_plugins map first (they may be in subdirectories)
+    for (plugin_name, plugin_entry) in &installed_plugins_map {
+        if let Some(install_path_str) = plugin_entry.get("installPath").and_then(|v| v.as_str()) {
+            let install_path = PathBuf::from(install_path_str);
+
+            // Determine scope
+            let scope = if project_enabled_plugins.contains(plugin_name) {
+                "project".to_string()
+            } else {
+                "user".to_string()
+            };
+
+            if let Some(mut info) = build_plugin_info(
+                plugin_name,
+                &install_path,
+                Some(plugin_entry),
+                Some(plugin_name.clone()),
+            ) {
+                info.scope = scope;
+                plugins.push(info);
+                continue;
+            }
+        }
+
+        // If no installPath, try fallback map
+        if let Some(fallback) = fallback_installed_map {
+            if let Some(entry) = fallback.get(plugin_name) {
+                if let Some(install_path_str) = entry.get("installPath").and_then(|v| v.as_str()) {
+                    let install_path = PathBuf::from(install_path_str);
+
+                    // Determine scope
+                    let scope = if project_enabled_plugins.contains(plugin_name) {
+                        "project".to_string()
+                    } else {
+                        "user".to_string()
+                    };
+
+                    if let Some(mut info) = build_plugin_info(
+                        plugin_name,
+                        &install_path,
+                        Some(entry),
+                        Some(plugin_name.clone()),
+                    ) {
+                        info.scope = scope;
+                        plugins.push(info);
+                    }
+                }
             }
         }
     }
@@ -428,68 +743,201 @@ fn scan_plugins_directory(dir: &Path) -> Result<Vec<PluginInfo>, String> {
         }
 
         // Skip if already processed from installed_plugins.json
-        let already_processed = plugins.iter().any(|p| {
-            Path::new(&p.path) == path
-        });
+        let already_processed = plugins.iter().any(|p| Path::new(&p.path) == path);
 
         if already_processed {
             continue;
         }
 
-        let dir_name = path.file_name()
+        let dir_name = path
+            .file_name()
             .and_then(|s| s.to_str())
             .unwrap_or("unknown")
             .to_string();
 
-        // Look for .claude-plugin/plugin.json
-        let plugin_json_path = path.join(".claude-plugin").join("plugin.json");
+        // Determine scope
+        let scope = if project_enabled_plugins.contains(&dir_name) {
+            "project".to_string()
+        } else {
+            "user".to_string()
+        };
 
-        if plugin_json_path.exists() {
-            if let Ok(content) = fs::read_to_string(&plugin_json_path) {
-                if let Ok(manifest) = serde_json::from_str::<serde_json::Value>(&content) {
-                    let name = manifest
-                        .get("name")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or(&dir_name)
-                        .to_string();
+        if let Some(mut info) = build_plugin_info(&dir_name, &path, None, None) {
+            info.scope = scope;
+            plugins.push(info);
+        }
+    }
 
-                    let description = manifest
-                        .get("description")
-                        .and_then(|v| v.as_str())
-                        .map(|s| s.to_string());
+    Ok(plugins)
+}
 
-                    let version = manifest
-                        .get("version")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("0.0.0")
-                        .to_string();
+fn read_installed_plugins_map(
+    dir: &Path,
+    project_path: Option<&str>,
+) -> HashMap<String, serde_json::Value> {
+    let installed_plugins_path = dir.join("installed_plugins.json");
+    let installed_plugins_v2_path = dir.join("installed_plugins_v2.json");
+    let mut map = HashMap::new();
 
-                    let author = manifest
-                        .get("author")
-                        .and_then(|v| v.get("name"))
-                        .and_then(|v| v.as_str())
-                        .or_else(|| manifest.get("author").and_then(|v| v.as_str()))
-                        .map(|s| s.to_string());
-
-                    // Count components
-                    let components = count_plugin_components(&path);
-
-                    plugins.push(PluginInfo {
-                        name,
-                        description,
-                        version,
-                        author,
-                        marketplace: None,
-                        path: path.to_string_lossy().to_string(),
-                        enabled: true,
-                        components,
-                    });
+    if installed_plugins_path.exists() {
+        if let Ok(content) = fs::read_to_string(&installed_plugins_path) {
+            if let Ok(json_root) = serde_json::from_str::<serde_json::Value>(&content) {
+                if let Some(plugins_obj) = json_root.get("plugins").and_then(|v| v.as_object()) {
+                    for (plugin_name, plugin_entry) in plugins_obj {
+                        map.insert(plugin_name.clone(), plugin_entry.clone());
+                    }
+                    info!(
+                        "Loaded {} plugins from installed_plugins.json",
+                        map.len()
+                    );
                 }
             }
         }
     }
 
-    Ok(plugins)
+    if installed_plugins_v2_path.exists() {
+        if let Ok(content) = fs::read_to_string(&installed_plugins_v2_path) {
+            if let Ok(json_root) = serde_json::from_str::<serde_json::Value>(&content) {
+                if let Some(plugins_obj) = json_root.get("plugins").and_then(|v| v.as_object()) {
+                    for (plugin_name, entries) in plugins_obj {
+                        let chosen_entry = if let Some(arr) = entries.as_array() {
+                            if arr.is_empty() {
+                                None
+                            } else if let Some(target) = project_path {
+                                arr.iter().find(|e| {
+                                    e.get("projectPath")
+                                        .and_then(|v| v.as_str())
+                                        .map(|p| p.eq_ignore_ascii_case(target))
+                                        .unwrap_or(false)
+                                }).or_else(|| {
+                                    arr.iter().find(|e| {
+                                        e.get("scope")
+                                            .and_then(|v| v.as_str())
+                                            .map(|s| s == "user")
+                                            .unwrap_or(false)
+                                    })
+                                }).or_else(|| arr.first())
+                            } else {
+                                arr.iter().find(|e| {
+                                    e.get("scope")
+                                        .and_then(|v| v.as_str())
+                                        .map(|s| s == "user")
+                                        .unwrap_or(false)
+                                }).or_else(|| arr.first())
+                            }
+                        } else {
+                            None
+                        };
+
+                        if let Some(entry) = chosen_entry {
+                            if let Some(obj) = entry.as_object() {
+                                map.insert(plugin_name.clone(), serde_json::Value::Object(obj.clone()));
+                            }
+                        }
+                    }
+                    info!(
+                        "Loaded {} plugins from installed_plugins_v2.json",
+                        plugins_obj.len()
+                    );
+                }
+            }
+        }
+    }
+
+    map
+}
+
+fn build_plugin_info(
+    plugin_identifier: &str,
+    install_path: &Path,
+    plugin_entry: Option<&serde_json::Value>,
+    marketplace: Option<String>,
+) -> Option<PluginInfo> {
+    if !install_path.exists() {
+        return None;
+    }
+
+    let plugin_json_path = install_path.join(".claude-plugin").join("plugin.json");
+
+    let (name, description, version, author) = if plugin_json_path.exists() {
+        if let Ok(content) = fs::read_to_string(&plugin_json_path) {
+            if let Ok(manifest) = serde_json::from_str::<serde_json::Value>(&content) {
+                let name = manifest
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or(plugin_identifier)
+                    .to_string();
+
+                let description = manifest
+                    .get("description")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
+
+                let version = manifest
+                    .get("version")
+                    .and_then(|v| v.as_str())
+                    .or_else(|| {
+                        plugin_entry
+                            .and_then(|entry| entry.get("version").and_then(|v| v.as_str()))
+                    })
+                    .unwrap_or("unknown")
+                    .to_string();
+
+                let author = manifest
+                    .get("author")
+                    .and_then(|v| v.get("name"))
+                    .and_then(|v| v.as_str())
+                    .or_else(|| manifest.get("author").and_then(|v| v.as_str()))
+                    .map(|s| s.to_string());
+
+                (name, description, version, author)
+            } else {
+                (
+                    plugin_identifier.to_string(),
+                    None,
+                    plugin_entry
+                        .and_then(|entry| entry.get("version").and_then(|v| v.as_str()))
+                        .unwrap_or("unknown")
+                        .to_string(),
+                    None,
+                )
+            }
+        } else {
+            (
+                plugin_identifier.to_string(),
+                None,
+                plugin_entry
+                    .and_then(|entry| entry.get("version").and_then(|v| v.as_str()))
+                    .unwrap_or("unknown")
+                    .to_string(),
+                None,
+            )
+        }
+    } else {
+        (
+            plugin_identifier.to_string(),
+            None,
+            plugin_entry
+                .and_then(|entry| entry.get("version").and_then(|v| v.as_str()))
+                .unwrap_or("unknown")
+                .to_string(),
+            None,
+        )
+    };
+
+    let components = count_plugin_components(install_path);
+
+    Some(PluginInfo {
+        name,
+        description,
+        version,
+        author,
+        marketplace,
+        path: install_path.to_string_lossy().to_string(),
+        enabled: true,
+        scope: "user".to_string(), // Default scope, will be overwritten by caller
+        components,
+    })
 }
 
 /// Count plugin components

@@ -13,6 +13,7 @@ pub mod permission_config;
 pub mod project_plugins;
 pub mod prompt_tracker;
 pub mod provider;
+pub mod router;  // Claude Code Router 集成
 pub mod simple_git;
 pub mod slash_commands;
 pub mod storage;

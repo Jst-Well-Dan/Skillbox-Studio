@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '@/lib/api';
-import type { MarketplaceInfo, PluginMetadata, CommandInfo, SkillInfo, AgentInfo } from '@/lib/api';
+import type { MarketplaceDetail, PluginMetadata, CommandInfo, SkillInfo, AgentInfo } from '@/lib/api';
 import {
   Dialog,
   DialogContent,
@@ -29,15 +29,37 @@ interface ProjectPluginManagerProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type InstalledScope = 'project' | 'system';
+
+type InstalledPlugin = PluginMetadata & { scope: InstalledScope };
+
+type PluginInfoLike = {
+  name: string;
+  description?: string | null;
+  version?: string;
+  author?: string;
+  marketplace?: string | null;
+  path?: string;
+  components?: {
+    commands?: number;
+    agents?: number;
+    skills?: number;
+    hooks?: number | boolean;
+    mcp?: boolean;
+    mcpServers?: number;
+    mcp_servers?: number;
+  };
+};
+
 export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
   projectPath,
   open,
   onOpenChange,
 }) => {
-  const [marketplaces, setMarketplaces] = useState<MarketplaceInfo[]>([]);
+  const [marketplaces, setMarketplaces] = useState<MarketplaceDetail[]>([]);
   const [selectedMarketplace, setSelectedMarketplace] = useState<string>('');
   const [availablePlugins, setAvailablePlugins] = useState<PluginMetadata[]>([]);
-  const [installedPlugins, setInstalledPlugins] = useState<PluginMetadata[]>([]);
+  const [installedPlugins, setInstalledPlugins] = useState<InstalledPlugin[]>([]);
   const [installing, setInstalling] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +73,38 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(false);
   const hasMarketplaces = marketplaces.length > 0;
+  const normalizedProjectPath = useMemo(
+    () => projectPath.replace(/\\/g, '/').toLowerCase(),
+    [projectPath]
+  );
+
+  const getPluginKey = (plugin: { name: string; marketplace?: string }) =>
+    `${plugin.marketplace || 'local'}:${plugin.name}`;
+
+  const detectScopeFromPath = (path?: string): InstalledScope => {
+    if (!path) return 'system';
+    const normalizedPath = path.replace(/\\/g, '/').toLowerCase();
+    return normalizedPath.includes(normalizedProjectPath) ? 'project' : 'system';
+  };
+
+  const normalizePluginInfo = (plugin: PluginInfoLike, scope: InstalledScope): InstalledPlugin => ({
+    name: plugin.name,
+    displayName: plugin.name,
+    version: plugin.version || 'unknown',
+    description: plugin.description || '已安装的插件',
+    author: plugin.author ? { name: plugin.author } : undefined,
+    category: 'general',
+    marketplace: plugin.marketplace || (plugin.name.includes('@') ? plugin.name.split('@').slice(1).join('@') : 'local'),
+    sourcePath: plugin.path || '',
+    components: {
+      commands: plugin.components?.commands ?? 0,
+      agents: plugin.components?.agents ?? 0,
+      skills: plugin.components?.skills ?? 0,
+      hooks: Boolean(plugin.components?.hooks),
+      mcp: Boolean(plugin.components?.mcp || plugin.components?.mcpServers || plugin.components?.mcp_servers),
+    },
+    scope,
+  });
 
   // 语言切换状态
   const [language, setLanguage] = useState<'en' | 'zh'>(() => {
@@ -59,7 +113,8 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
   });
   const [translating, setTranslating] = useState(false);
   const [originalAvailablePlugins, setOriginalAvailablePlugins] = useState<PluginMetadata[]>([]);
-  const [originalInstalledPlugins, setOriginalInstalledPlugins] = useState<PluginMetadata[]>([]);
+  const [originalInstalledPlugins, setOriginalInstalledPlugins] = useState<InstalledPlugin[]>([]);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   // 首次使用引导状态
   const [showWelcome, setShowWelcome] = useState(false);
@@ -97,7 +152,12 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
           translatePlugins(originalInstalledPlugins)
         ]);
         setAvailablePlugins(translatedAvailable);
-        setInstalledPlugins(translatedInstalled);
+        setInstalledPlugins(
+          translatedInstalled.map((plugin, idx) => ({
+            ...plugin,
+            scope: originalInstalledPlugins[idx]?.scope || 'project'
+          }))
+        );
       } catch (error) {
         console.error('[Translation] Translation failed:', error);
       } finally {
@@ -163,6 +223,7 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
   // Load marketplaces on mount
   useEffect(() => {
     if (open) {
+      setActionMessage(null);
       loadMarketplaces();
       loadInstalledPlugins();
       loadCommands();
@@ -188,7 +249,7 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
   const loadMarketplaces = async () => {
     try {
       setLoading(true);
-      const markets = await api.listPluginMarketplaces();
+      const markets = await api.listKnownMarketplaces();
       setMarketplaces(markets);
 
       // Select first marketplace by default
@@ -224,15 +285,28 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
 
   const loadInstalledPlugins = async () => {
     try {
-      const plugins = await api.listProjectInstalledPlugins(projectPath);
+      // Only use listPlugins API - it now handles both system and project level plugins
+      const scopedPlugins = await api.listPlugins(projectPath);
+
+      // Backend returns "project" or "user", map "user" to "system"
+      const normalizedPlugins = scopedPlugins.map((plugin: PluginInfoLike & { scope?: string }) => {
+        const scope = plugin.scope === 'project' ? 'project' : 'system';
+        return normalizePluginInfo(plugin, scope as InstalledScope);
+      });
+
       // 保存原始数据
-      setOriginalInstalledPlugins(plugins);
+      setOriginalInstalledPlugins(normalizedPlugins);
       // 如果当前是中文模式，立即翻译
       if (language === 'zh') {
-        const translatedPlugins = await translatePlugins(plugins);
-        setInstalledPlugins(translatedPlugins);
+        const translatedPlugins = await translatePlugins(normalizedPlugins);
+        setInstalledPlugins(
+          translatedPlugins.map((plugin, idx) => ({
+            ...plugin,
+            scope: normalizedPlugins[idx]?.scope || 'system',
+          }))
+        );
       } else {
-        setInstalledPlugins(plugins);
+        setInstalledPlugins(normalizedPlugins);
       }
     } catch (error) {
       console.error('Failed to load installed plugins:', error);
@@ -246,8 +320,11 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
     try {
       await api.installPluginToProject(projectPath, plugin.marketplace, plugin.name);
       await loadInstalledPlugins(); // Refresh installed plugins
+      setActiveTab('installed');
+      setActionMessage({ type: 'success', text: `插件 "${plugin.displayName}" 安装完成` });
     } catch (error) {
       console.error('Failed to install plugin:', error);
+      setActionMessage({ type: 'error', text: `安装失败: ${error}` });
       alert(`安装失败: ${error}`);
     } finally {
       setInstalling(prev => {
@@ -269,8 +346,10 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
     try {
       await api.uninstallPluginFromProject(projectPath, plugin.marketplace, plugin.name);
       await loadInstalledPlugins(); // Refresh installed plugins
+      setActionMessage({ type: 'success', text: `已卸载插件 "${plugin.displayName}"` });
     } catch (error) {
       console.error('Failed to uninstall plugin:', error);
+      setActionMessage({ type: 'error', text: `卸载失败: ${error}` });
       alert(`卸载失败: ${error}`);
     } finally {
       setInstalling(prev => {
@@ -281,12 +360,18 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
     }
   };
 
-  // Check if plugin is installed
-  const isInstalled = (plugin: PluginMetadata) => {
-    return installedPlugins.some(
-      p => p.name === plugin.name && p.marketplace === plugin.marketplace
+  // Check if plugin is installed and return scope
+  const getInstalledScope = (plugin: PluginMetadata): InstalledScope | null => {
+    const key = getPluginKey(plugin);
+    const match = installedPlugins.find(
+      p =>
+        getPluginKey(p) === key ||
+        (p.name === plugin.name && p.marketplace === plugin.marketplace)
     );
+    return match?.scope || null;
   };
+
+  const isInstalled = (plugin: PluginMetadata) => Boolean(getInstalledScope(plugin));
 
   const isInstalling = (plugin: PluginMetadata) => {
     const pluginKey = `${plugin.marketplace}:${plugin.name}`;
@@ -298,6 +383,16 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
     const cats = new Set(availablePlugins.map(p => p.category));
     return ['all', ...Array.from(cats).sort()];
   }, [availablePlugins]);
+
+  const installedBreakdown = useMemo(() => {
+    const projectCount = installedPlugins.filter(p => p.scope === 'project').length;
+    const systemCount = installedPlugins.filter(p => p.scope === 'system').length;
+    return {
+      total: projectCount + systemCount,
+      project: projectCount,
+      system: systemCount,
+    };
+  }, [installedPlugins]);
 
   // Filter plugins
   const filteredPlugins = useMemo(() => {
@@ -397,6 +492,20 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
             </DialogDescription>
           </DialogHeader>
 
+        {actionMessage && (
+          <div
+            className={`mb-3 rounded-md border px-3 py-2 text-sm ${
+              actionMessage.type === 'success'
+                ? 'border-green-200 bg-green-50 text-green-800'
+                : actionMessage.type === 'error'
+                ? 'border-red-200 bg-red-50 text-red-800'
+                : 'border-blue-200 bg-blue-50 text-blue-800'
+            }`}
+          >
+            {actionMessage.text}
+          </div>
+        )}
+
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
@@ -405,7 +514,7 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="marketplace">插件市场</TabsTrigger>
             <TabsTrigger value="installed">
-              已安装 ({installedPlugins.length})
+              已安装 ({installedBreakdown.total})
             </TabsTrigger>
             <TabsTrigger value="capabilities">能力总览</TabsTrigger>
           </TabsList>
@@ -477,8 +586,10 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-1">
                   {filteredPlugins.map(plugin => {
-                    const installed = isInstalled(plugin);
+                    const installedScope = getInstalledScope(plugin);
+                    const installed = Boolean(installedScope);
                     const installing = isInstalling(plugin);
+                    const disableAction = installing || installedScope === 'system';
 
                     return (
                       <div
@@ -488,23 +599,36 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg">{plugin.displayName}</h3>
-                            <Badge variant="secondary" className="mt-1">
-                              {plugin.category}
-                            </Badge>
+                            <div className="flex gap-2 mt-1">
+                              <Badge variant="secondary">{plugin.category}</Badge>
+                              {installedScope && (
+                                <Badge variant={installedScope === 'project' ? 'default' : 'outline'} className="text-xs">
+                                  {installedScope === 'project' ? '项目级' : '系统级'}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                           <Button
                             size="sm"
-                            variant={installed ? 'destructive' : 'default'}
-                            onClick={() => installed ? handleUninstall(plugin) : handleInstall(plugin)}
-                            disabled={installing}
+                            variant={installed && installedScope === 'project' ? 'destructive' : 'default'}
+                            onClick={() => {
+                              if (installedScope === 'project') {
+                                handleUninstall(plugin);
+                              } else if (!installed) {
+                                handleInstall(plugin);
+                              }
+                            }}
+                            disabled={disableAction}
                           >
                             {installing ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : installed ? (
+                            ) : installedScope === 'project' ? (
                               <>
                                 <Trash2 className="w-4 h-4 mr-1" />
                                 卸载
                               </>
+                            ) : installedScope === 'system' ? (
+                              '系统已安装'
                             ) : (
                               <>
                                 <Download className="w-4 h-4 mr-1" />
@@ -558,6 +682,10 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
 
           {/* Installed Tab */}
           <TabsContent value="installed" className="flex-1 flex flex-col min-h-0">
+            <div className="flex items-center justify-between text-xs text-muted-foreground px-1 py-2">
+              <span>项目级: {installedBreakdown.project}</span>
+              <span>系统级: {installedBreakdown.system}</span>
+            </div>
             <ScrollArea className="flex-1 min-h-0">
               {installedPlugins.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -580,24 +708,29 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
                             <div className="flex gap-2 mt-1">
                               <Badge variant="secondary">{plugin.category}</Badge>
                               <Badge variant="outline">{plugin.marketplace}</Badge>
+                              <Badge variant={plugin.scope === 'project' ? 'default' : 'outline'} className="text-xs">
+                                {plugin.scope === 'project' ? '项目级' : '系统级'}
+                              </Badge>
                             </div>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUninstall(plugin)}
-                            disabled={installing}
-                            className="text-red-600 hover:text-red-700 hover:border-red-300"
-                          >
-                            {installing ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <>
-                                <Trash2 className="w-4 h-4 mr-1" />
-                                卸载
-                              </>
-                            )}
-                          </Button>
+                          {plugin.scope === 'project' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUninstall(plugin)}
+                              disabled={installing}
+                              className="text-red-600 hover:text-red-700 hover:border-red-300"
+                            >
+                              {installing ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                  卸载
+                                </>
+                              )}
+                            </Button>
+                          ) : null}
                         </div>
 
                         <p className="text-sm text-gray-600 mb-3">{plugin.description}</p>

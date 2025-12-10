@@ -142,7 +142,7 @@ export function initializeToolRegistry(): void {
         ''
     );
 
-    const status =
+    const status: 'error' | 'success' | 'pending' | undefined =
       renderProps.result == null
         ? 'pending'
         : renderProps.result.is_error

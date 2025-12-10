@@ -10,6 +10,7 @@ use tokio::process::Child;
 pub enum ProcessType {
     AgentRun { agent_id: i64, agent_name: String },
     ClaudeSession { session_id: String },
+    RouterService { port: u16 },  // Claude Code Router 服务
 }
 
 /// Information about a running agent process

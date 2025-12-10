@@ -14,6 +14,7 @@ pub use self::cli_runner::{
     cancel_claude_execution,
     continue_claude_code,
     execute_claude_code,
+    execute_plugin_command,
     get_claude_session_output,
     list_running_claude_sessions,
     respond_to_question,  // ⭐ AskUserQuestion support
