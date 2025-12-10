@@ -3,7 +3,6 @@ import { api, type WorkspaceProject, type ProjectPluginsSummary } from '@/lib/ap
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft,
   FolderOpen,

@@ -73,19 +73,9 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [agentsLoading, setAgentsLoading] = useState(false);
   const hasMarketplaces = marketplaces.length > 0;
-  const normalizedProjectPath = useMemo(
-    () => projectPath.replace(/\\/g, '/').toLowerCase(),
-    [projectPath]
-  );
 
   const getPluginKey = (plugin: { name: string; marketplace?: string }) =>
     `${plugin.marketplace || 'local'}:${plugin.name}`;
-
-  const detectScopeFromPath = (path?: string): InstalledScope => {
-    if (!path) return 'system';
-    const normalizedPath = path.replace(/\\/g, '/').toLowerCase();
-    return normalizedPath.includes(normalizedProjectPath) ? 'project' : 'system';
-  };
 
   const normalizePluginInfo = (plugin: PluginInfoLike, scope: InstalledScope): InstalledPlugin => ({
     name: plugin.name,
@@ -370,8 +360,6 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
     );
     return match?.scope || null;
   };
-
-  const isInstalled = (plugin: PluginMetadata) => Boolean(getInstalledScope(plugin));
 
   const isInstalling = (plugin: PluginMetadata) => {
     const pluginKey = `${plugin.marketplace}:${plugin.name}`;

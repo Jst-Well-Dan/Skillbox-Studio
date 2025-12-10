@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Plus, Search, X } from "lucide-react";
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { api, type Project, type Session } from "@/lib/api";
-import { NEW_PROJECT_SENTINEL } from "@/lib/constants";
 import { OutputCacheProvider } from "@/lib/outputCache";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -321,8 +320,8 @@ function AppContent() {
         const mockProject: Project = {
           id: selected,
           path: selected,
-          created_at: Math.floor(Date.now() / 1000),
-          sessions_count: 0
+          sessions: [],
+          created_at: Math.floor(Date.now() / 1000)
         };
 
         // 4. 加载会话列表（新项目将为空数组）
@@ -611,12 +610,6 @@ function AppContent() {
         return (
           <PluginLibrary
             onBack={() => handleViewChange('welcome')}
-            onStartSession={(workspacePath) => {
-              setSelectedSession(null);
-              setNewSessionProjectPath(workspacePath);
-              setTabManagerSource('plugin-library');
-              handleViewChange('claude-tab-manager');
-            }}
           />
         );
 
