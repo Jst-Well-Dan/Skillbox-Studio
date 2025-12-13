@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bot, FolderOpen, ArrowRight, Sparkles } from 'lucide-react';
+import { Bot, FolderOpen, ArrowRight, Sparkles, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface WelcomeHomeProps {
@@ -41,18 +41,19 @@ export const WelcomeHome: React.FC<WelcomeHomeProps> = ({ onNavigateTo }) => {
             transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
             className="text-5xl md:text-6xl font-bold tracking-tight text-foreground"
           >
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400" style={{ textShadow: '0 0 1px rgba(0,0,0,0.1)' }}>智能助手</span>，随时待命
+            一键加载技能，<span style={{ color: 'var(--color-primary)' }}>突破能力象限</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light"
+            className="text-lg max-w-2xl mx-auto leading-relaxed"
+            style={{ color: '#666666' }}
           >
-            一站式 AI 工作平台，解决工作与学习中的各类挑战
+            聊出来的只是灵感，装进 <span className="font-bold text-black dark:text-white bg-muted px-1.5 py-0.5 rounded">Skillbox</span> 的才是生产力。
             <br className="hidden sm:block" />
-            海量社区技能，让 AI 助手精通各个领域
+            无需编程基础，你构想法即刻落地。
           </motion.p>
         </div>
 
@@ -71,19 +72,19 @@ export const WelcomeHome: React.FC<WelcomeHomeProps> = ({ onNavigateTo }) => {
             
             <div className="relative z-10 flex flex-col h-full justify-between gap-8">
               <div className="flex items-start justify-between">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                  <Bot size={32} strokeWidth={1.5} />
+                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors duration-300">
+                  <Bot size={32} strokeWidth={1.5} style={{ color: 'var(--color-primary)' }} />
                 </div>
                 <ArrowRight className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
               </div>
 
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                  技能市场
-                  <Sparkles size={16} className="text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  全域技能库
+                  <Sparkles size={16} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  探索海量社区技能和专业插件，让 AI 成为各领域专家
+                  产选实战技能，按需一键加载，即刻拓宽 AI 能力边界。
                 </p>
               </div>
             </div>
@@ -97,19 +98,20 @@ export const WelcomeHome: React.FC<WelcomeHomeProps> = ({ onNavigateTo }) => {
             onClick={() => onNavigateTo('projects')}
             className="group relative overflow-hidden rounded-2xl bg-card border border-border p-8 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             <div className="relative z-10 flex flex-col h-full justify-between gap-8">
               <div className="flex items-start justify-between">
-                <div className="p-3 rounded-xl bg-secondary text-foreground group-hover:bg-foreground group-hover:text-background transition-colors duration-300">
-                  <FolderOpen size={32} strokeWidth={1.5} />
+                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors duration-300">
+                  <FolderOpen size={32} strokeWidth={1.5} style={{ color: 'var(--color-primary)' }} />
                 </div>
-                <ArrowRight className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" />
+                <ArrowRight className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-foreground">
-                  我的项目
+                <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                  智能工作台
+                  <Zap size={16} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   管理工作项目，跟踪对话历史，随时调用 AI 助手处理任务
