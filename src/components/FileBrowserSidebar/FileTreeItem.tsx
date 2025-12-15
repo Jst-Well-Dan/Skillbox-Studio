@@ -36,6 +36,10 @@ interface FileTreeItemProps {
    * Callback to open folder in explorer
    */
   onOpenFolder?: (path: string) => void;
+  /**
+   * Project root path for calculating relative paths
+   */
+  projectPath: string;
 }
 
 /**
@@ -82,6 +86,7 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
   onToggle,
   onCopyPath,
   onOpenFolder,
+  projectPath,
 }) => {
   const handleClick = () => {
     if (entry.is_directory) {
@@ -89,6 +94,26 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
     } else {
       onCopyPath(entry.path);
     }
+  };
+
+  // Handle drag start - calculate relative path and set drag data
+  const handleDragStart = (e: React.DragEvent) => {
+    // Calculate relative path from project root
+    const relativePath = entry.path
+      .replace(projectPath, '')
+      .replace(/^[/\\]+/, '');
+
+    // Normalize path separators to forward slashes
+    const normalizedPath = relativePath.replace(/\\/g, '/');
+
+    // Add trailing slash for directories
+    const pathWithSuffix = entry.is_directory
+      ? `${normalizedPath}/`
+      : normalizedPath;
+
+    // Set drag data as plain text
+    e.dataTransfer.setData('text/plain', pathWithSuffix);
+    e.dataTransfer.effectAllowed = 'copy';
   };
 
   // Icon selection
@@ -107,6 +132,8 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
     <div
       role="button"
       tabIndex={0}
+      draggable="true"
+      onDragStart={handleDragStart}
       onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -115,7 +142,7 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
         }
       }}
       className={cn(
-        "group flex items-center gap-2 py-1.5 cursor-pointer select-none",
+        "group flex items-center gap-2 py-1.5 cursor-grab active:cursor-grabbing select-none",
         "hover:bg-accent transition-colors rounded-sm",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
       )}

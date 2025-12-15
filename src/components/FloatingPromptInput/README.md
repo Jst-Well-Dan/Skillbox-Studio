@@ -22,7 +22,6 @@
    - ✅ `hooks/useImageHandling.ts` - 图片上传、预览、拖拽逻辑
    - ✅ `hooks/useFileSelection.ts` - 文件选择器状态管理
    - ✅ `hooks/useSlashCommands.ts` - 斜杠命令逻辑
-   - ✅ `hooks/usePromptEnhancement.ts` - 提示词增强逻辑
 
 5. **主组件重构**
    - ✅ `index.tsx` - 整合所有子组件的主入口 (~530行)
@@ -42,7 +41,7 @@
 ### 重构后（实际）
 - **主文件**: ~530 行 (减少 62%)
 - **子组件**: 4个组件，每个 <100 行
-- **Hooks**: 4个自定义hooks，每个 100-250 行
+- **Hooks**: 3个自定义hooks，每个 100-250 行
 - **类型文件**: ~80 行独立类型定义
 - **总体**: **代码更模块化、易维护、可测试、可重用**
 
@@ -67,8 +66,7 @@ FloatingPromptInput/
 └── hooks/
     ├── useImageHandling.ts     # 图片处理 (~265行) ✅
     ├── useFileSelection.ts     # 文件选择 (~125行) ✅
-    ├── useSlashCommands.ts     # 斜杠命令 (~140行) ✅
-    └── usePromptEnhancement.ts # 提示词增强 (~120行) ✅
+    └── useSlashCommands.ts     # 斜杠命令 (~140行) ✅
 ```
 
 ## 📝 使用方法

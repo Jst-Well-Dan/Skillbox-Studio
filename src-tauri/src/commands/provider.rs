@@ -464,3 +464,52 @@ pub fn test_provider_connection(base_url: String) -> Result<String, String> {
     // 目前返回一个简单的成功消息
     Ok(format!("连接测试完成：{}", test_url))
 }
+
+/// 获取 Claude 配置目录路径
+#[command]
+pub fn get_claude_config_dir() -> Result<String, String> {
+    let home_dir = dirs::home_dir().ok_or_else(|| "无法获取用户主目录".to_string())?;
+    let claude_dir = home_dir.join(".claude");
+
+    // 如果目录不存在，创建它
+    if !claude_dir.exists() {
+        fs::create_dir_all(&claude_dir)
+            .map_err(|e| format!("创建配置目录失败: {}", e))?;
+    }
+
+    Ok(claude_dir.to_string_lossy().to_string())
+}
+
+/// 打开 Claude 配置目录
+#[command]
+pub fn open_claude_config_dir() -> Result<(), String> {
+    let config_dir = get_claude_config_dir()?;
+
+    log::info!("打开 Claude 配置目录: {}", config_dir);
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&config_dir)
+            .spawn()
+            .map_err(|e| format!("打开目录失败: {}", e))?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&config_dir)
+            .spawn()
+            .map_err(|e| format!("打开目录失败: {}", e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&config_dir)
+            .spawn()
+            .map_err(|e| format!("打开目录失败: {}", e))?;
+    }
+
+    Ok(())
+}

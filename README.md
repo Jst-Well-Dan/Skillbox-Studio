@@ -1,248 +1,238 @@
 # Xiya Claude Studio
 
-> AI 赋能工作学习空间 - 让智能助手解决各类问题
+<div align="center">
 
-[![Release](https://img.shields.io/github/v/release/anyme123/claude-workbench)](https://github.com/anyme123/claude-workbench/releases)
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/anyme123/claude-workbench)
+**一键加载技能，突破能力象限**
 
----
+让 AI 拥有解决问题的“手”与“眼”
 
-## ✨ 核心特性
+无需编程基础，你的想法即刻落地。
 
-### 🎯 会话管理
-- **可视化项目管理**: 直观的 Claude 项目和会话管理界面
-- **会话历史记录**: 完整的对话历史，支持恢复和撤回
-- **实时流式输出**: 流畅的 Claude 响应显示
-- **提示词撤回**: 撤回到任意消息，恢复代码状态
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-000000?style=flat&logo=apple&logoColor=white)
+![Tauri](https://img.shields.io/badge/Tauri-FFC131?style=flat&logo=tauri&logoColor=black)
 
-### 📦 Claude 扩展管理器 (v4.0.1 新增)
-- **Plugins 查看器**: 查看已安装的插件及其组件
-- **Subagents 管理**: 浏览和编辑子代理
-- **Agent Skills 查看**: 查看和管理 AI 技能
-- **一键打开文件**: 点击卡片直接编辑 .md 文件
 
-### 💰 智能成本追踪
-- **准确计费**: 支持多模型定价（Opus 4.1、Sonnet 4.5、Sonnet 3.5）
-- **详细统计**: Token 分类、会话时长、API 执行时间
-- **悬停查看**: 鼠标悬停即可查看完整成本分析
-- **实时更新**: 会话成本实时计算和显示
-
-### 🔧 开发者工具
-- **代理商管理**: 一键切换 API 提供商，静默切换无打扰
-- **MCP 集成**: 完整的 Model Context Protocol 服务器管理
-- **Hooks 系统**: 自定义钩子和事件处理
-- **Slash Commands**: 自定义命令管理器
-
-### 🎨 现代化 UI
-- **主题切换**: 顶栏快速切换明暗主题（默认浅色）
-- **紧凑设计**: 优化的空间利用，清晰的视觉层次
-- **响应式布局**: 适配不同屏幕尺寸
-- **流畅动画**: Framer Motion 驱动的交互效果
 
 ---
 
-## 🚀 快速开始
+## 项目简介
 
-### 系统要求
+**Xiya Claude Studio** 是一款专为**计算机小白**设计的 AI 智能助手桌面应用。它为 Claude Code 提供了简洁直观的可视化界面，让你无需掌握命令行操作，就能轻松使用强大的 AI 编程助手。
 
-- **操作系统**: Windows 10/11、macOS、Linux
-- **Node.js**: 18.0+ (推荐 LTS 版本)
-- **Claude Code**: 需要安装 [Claude Code CLI](https://docs.claude.com/en/docs/claude-code/overview)
+### 核心特点
 
-### 安装方式
+- **零门槛上手**：图形化界面，告别命令行恐惧
+- **一键环境配置**：自动安装 Node.js、Claude Code 等依赖
+- **精选技能库**：内置 40+ 实用技能，一键加载即可使用
+- **省钱方案**：支持免费的第三方API，降低使用成本
 
-#### 预构建版本（推荐）
+---
 
-从 [Releases](https://github.com/anyme123/claude-workbench/releases) 下载对应平台的安装包：
+## 界面预览
 
-**Windows**:
-- MSI 安装包
-- NSIS 安装包
+### 欢迎首页
+![欢迎首页](UX界面/1.png)
 
-**macOS**:
-- DMG 安装包 (ARM + Intel)
-- APP 应用包
+应用启动后的主界面，提供两个核心入口：
+- **全域技能库**：浏览和安装 AI 技能
+- **智能工作台**：管理项目和对话
 
-> **⚠️ macOS 安装注意事项**
->
-> 如果安装后提示"应用已损坏，无法打开"，这是因为应用未经过 Apple 公证。请在终端执行以下命令解决：
->
-> ```bash
-> # 方法 1：移除隔离属性（推荐，最简单）
-> sudo xattr -r -d com.apple.quarantine /Applications/Xiya\ Claude\ Studio.app
->
-> # 方法 2：清除所有扩展属性
-> xattr -cr /Applications/Xiya\ Claude\ Studio.app
->
-> # 方法 3：重新签名应用
-> sudo codesign --force --deep --sign - /Applications/Xiya\ Claude\ Studio.app
-> ```
->
-> **原因说明**：macOS Gatekeeper 默认会阻止未公证的应用运行。执行上述命令后即可正常使用。
+### 系统插件库
+![系统插件库](UX界面/2.png)
 
-**Linux**:
-- AppImage
-- DEB 包
+一键安装 Skill-Box 精选技能，支持按分类筛选和搜索。
 
-#### 源码构建
+### 项目工作台
+![项目工作台](UX界面/3.png)
+
+管理你的工作项目，快速访问历史项目，跟踪对话会话数量。
+
+### 系统扩展管理器
+![系统扩展管理器](UX界面/4.png)
+
+管理已安装的技能、子代理（Subagents）和 MCP 服务器。
+
+### 设置页面
+![设置页面](UX界面/5.png)
+
+配置应用偏好，包括翻译服务、API 配置、CCR 服务等。
+
+---
+
+## 核心功能
+
+### 1. 全域技能库
+
+内置 **Skill-Box** 精选技能集，让 AI 助手从通用助手进化为专业专家。
+
+| 分类 | 技能示例 | 说明 |
+|------|---------|------|
+| **办公自动化** | PDF、Word、Excel、PPT | 处理各类办公文档，填写表单，生成报告 |
+| **零代码构建** | 前端设计、Git 推送、测试修复 | 辅助编程开发，自动提交代码 |
+| **内容流水线** | 网页抓取、下载视频、内容研究写作 | 采集网页内容，下载视频、辅助写作 |
+| **视觉与创意** | 图像设计、多媒体创作 | 辅助视觉设计，生成艺术图像，处理多媒体素材 |
+| **商业分析师** | CSV 数据分析、可视化 | 分析数据，生成图表 |
+| **沉浸式研读** | 深度阅读分析、笔记整理 | 辅助学习和研究 |
+| **视觉与创意** | 域名头脑风暴、竞品广告分析 | 辅助商业决策 |
+
+### 2. 智能工作台
+
+- **项目管理**：一键打开文件夹，快速切换项目
+- **会话历史**：自动保存对话记录，随时回顾
+- **快速访问**：常用项目置顶，提高效率
+
+### 3. 一键环境配置
+
+首次使用时，应用会自动检测你的电脑环境：
+
+- **Node.js**：如未安装，点击按钮即可自动下载安装
+- **Claude Code**：Claude 官方命令行工具
+- **CCR 服务**：可选安装，用于配置第三方 API
+
+### 4. CCR 服务（省钱方案）
+
+**CCR**（Claude Code Router）可以让你使用免费的**魔搭社区**等第三方 API 来运行 Claude Code，大幅降低使用成本。
+
+---
+
+## 快速开始
+
+### 环境要求
+
+- **操作系统**：Windows 10/11 或 macOS 10.15+
+- **存储空间**：至少 500MB 可用空间
+- **网络**：需要联网下载依赖和使用 AI 服务
+
+### 安装步骤
+
+1. **下载安装包**
+   - 从发布页面下载适合你系统的安装包
+
+2. **运行安装程序**
+   - Windows：双击 `.msi` 或 `.exe` 文件
+   - macOS：双击 `.dmg` 文件，拖入应用程序文件夹
+
+3. **首次启动**
+   - 应用会自动检测环境
+   - 如果提示缺少 Node.js，点击"一键安装"按钮
+
+4. **开始使用**
+   - 选择"全域技能库"安装你需要的技能
+   - 选择"智能工作台"打开你的项目文件夹
+   - 在对话框中输入你的需求，开始与 AI 对话
+
+### 首次使用示例
+
+假设你想让 AI 帮你处理一个 Excel 文件：
+
+1. 打开"全域技能库"，找到 **xlsx** 技能，点击安装
+2. 打开"智能工作台"，选择 Excel 文件所在的文件夹
+3. 在对话框输入：`帮我分析这个 Excel 文件的销售数据`
+4. AI 会自动读取文件并给出分析结果
+
+---
+
+## CCR 服务配置（可选）
+
+如果你想使用免费的魔搭社区 API 来降低成本，可以配置 CCR 服务。
+
+### 什么是 CCR？
+
+CCR（Claude Code Router）是一个 API 代理服务，可以将 Claude Code 的请求转发到其他 AI 模型（如 ModelScope），从而使用免费额度。
+
+### 配置步骤
+
+1. 进入"设置" → "CCR 服务"
+2. 如果 Node.js 未安装，点击"前往环境检测"先安装
+3. 点击"安装/更新 CCR"
+4. 点击"配置 (ccr ui)"打开配置界面
+5. 在配置界面中添加你的 API Provider（如 ModelScope）
+6. 保存配置后，点击"启动 CCR"
+
+### 省钱提示
+
+使用 CCR + ModelScope API，你可以：
+- 享受魔搭社区提供的免费 API 额度
+- 大幅降低 AI 使用成本
+- 在免费额度内完成日常任务
+
+---
+
+## 常见问题
+
+### Node.js 安装失败怎么办？
+
+1. 确保你的电脑已连接网络
+2. 尝试以管理员身份运行应用
+3. 如果仍然失败，可以手动从 [Node.js 官网](https://nodejs.org/) 下载安装
+
+### 如何更新 Skill-Box 技能？
+
+1. 进入"系统扩展管理器"
+2. 找到 Skill-Box 源，点击刷新按钮
+3. 回到"系统插件库"查看新技能
+
+### CCR 服务启动失败？
+
+1. 确保 Node.js 已正确安装
+2. 检查是否已完成 CCR 配置
+3. 查看端口 3456 是否被其他程序占用
+
+### 如何查看对话历史？
+
+1. 在"智能工作台"中选择你的项目
+2. 进入项目后可以看到所有历史会话
+3. 点击任意会话即可查看完整对话内容
+
+---
+
+## 开发者信息
+
+如果你是开发者，想要参与项目开发或自行编译，请参考以下信息：
+
+### 技术栈
+
+- **后端**：Tauri 2 (Rust)
+- **前端**：React 18 + TypeScript + Vite
+- **UI**：Tailwind CSS + Radix UI
+
+### 开发命令
 
 ```bash
-# 克隆仓库
-git clone https://github.com/anyme123/claude-workbench.git
-cd claude-workbench
-
 # 安装依赖
 npm install
 
-# 开发模式
-npm run tauri dev
+# 启动开发服务器（仅前端）
+npm run dev
 
-# 构建应用
-npm run tauri build
+# 启动完整应用（推荐）
+npm run tauri:dev
+
+# 构建生产版本
+npm run tauri:build
 ```
 
 ---
 
-## 📖 主要功能
+## 致谢
 
-### 扩展管理器
-
-点击顶栏"扩展"按钮，查看和管理：
-- **Plugins**: 已安装插件及组件统计
-- **Subagents**: 专用子代理列表
-- **Agent Skills**: AI 技能配置
-
-**官方资源**:
-- [Plugins 文档](https://docs.claude.com/en/docs/claude-code/plugins)
-- [Anthropic Skills 仓库](https://github.com/anthropics/skills) (13.7k ⭐)
-
-### 成本追踪
-
-**基础显示**: 输入框底部显示会话总成本  
-**详细统计**: 鼠标悬停查看：
-- 总成本和 Token 统计
-- Token 分类（输入/输出/Cache 读写）
-- 会话时长和 API 时长
-
-**多模型支持**: 自动识别并使用正确的定价：
-- Opus 4.1: $15/$75 (input/output)
-- Sonnet 4.5: $3/$15
-- Sonnet 3.5: $3/$15
-
-### 撤回功能
-
-- 点击用户消息右侧的圆形撤回按钮
-- 删除该消息及之后的所有对话
-- 代码自动回滚到发送前状态
-- 提示词恢复到输入框可修改
-
-### Plan Mode
-
-按 `Shift+Tab` 切换 Plan Mode：
-- 只读分析和规划
-- 不能修改文件或执行命令
-- 适合代码探索和方案设计
+- [Claude Code](https://claude.ai/code) - Anthropic 官方 CLI 工具
+- [Skill-Box](https://github.com/Jst-Well-Dan/claude-skills-vault) - 精选技能集贡献者
+- [Tauri](https://tauri.app/) - 跨平台桌面应用框架
+- 所有开源社区贡献者
 
 ---
 
-## 🔧 技术架构
+## 许可证
 
-### 前端技术栈
-- **React 18** + **TypeScript** - 类型安全的现代前端
-- **Tailwind CSS 4** - 实用优先的样式框架
-- **Framer Motion** - 流畅的动画系统
-- **i18next** - 完整的国际化支持
-
-### 后端技术栈
-- **Tauri 2** - 安全高效的桌面应用框架
-- **Rust** - 高性能系统编程语言
-- **SQLite** - 嵌入式数据库
-- **跨平台支持** - Windows、macOS、Linux
-
-### 核心架构
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React 前端    │◄──►│   Tauri 桥接    │◄──►│   Rust 后端     │
-│                 │    │                 │    │                 │
-│ • UI 组件       │    │ • IPC 通信      │    │ • Claude Code   │
-│ • 状态管理      │    │ • 安全调用      │    │ • 进程管理      │
-│ • 国际化        │    │ • 类型安全      │    │ • Git 集成      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+本项目遵循 MIT 许可证。
 
 ---
 
-## 🌟 v4.0.1 更新亮点
+<div align="center">
 
-### 🆕 新功能
-- ✅ Claude 扩展管理器（Plugins/Subagents/Skills）
-- ✅ 多模型成本计算（准确定价）
-- ✅ 成本详情悬停显示
-- ✅ Git 代码变更统计 API
-- ✅ 点击打开 .md 文件
+**让 AI 成为你的生产力伙伴**
 
-### 🎨 UI 改进
-- ✅ 默认浅色主题
-- ✅ 顶栏紧凑设计（图标文字 0px 间距）
-- ✅ 按钮阴影和边框
-- ✅ 文件预览优化（.md 10K 字符）
+如有问题或建议，欢迎提交 Issue
 
-### ⚡ 性能优化
-- ✅ 会话历史加载速度提升
-- ✅ 翻译检查优化
-- ✅ Plan Mode 对齐官方规范
-
----
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-### 开发环境
-
-```bash
-# 克隆仓库
-git clone https://github.com/anyme123/claude-workbench.git
-cd claude-workbench
-
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run tauri dev
-```
-
-### 代码规范
-- 遵循 TypeScript 和 Rust 最佳实践
-- 使用清晰的提交信息
-- 添加必要的注释和文档
-
----
-
-## 📄 许可证
-
-本项目基于 [AGPL-3.0](LICENSE) 开源协议发布。
-
----
-
-## 🔗 相关资源
-
-- [Claude Code 官方文档](https://docs.claude.com/en/docs/claude-code/overview)
-- [Tauri 框架](https://tauri.app/)
-- [React 文档](https://react.dev/)
-- [Rust 官网](https://rust-lang.org/)
-
----
-
-## 💬 社区
-
-- **Issues**: [GitHub Issues](https://github.com/anyme123/claude-workbench/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/anyme123/claude-workbench/discussions)
-
----
-
-**如果这个项目对您有帮助，请给我们一个 ⭐ Star！**
-
-🔗 **项目地址**: https://github.com/anyme123/claude-workbench

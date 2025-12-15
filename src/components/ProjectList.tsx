@@ -57,7 +57,7 @@ interface ProjectListProps {
   className?: string;
 }
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 5;
 
 /**
  * Extracts the project name from the full path
@@ -135,10 +135,17 @@ export const ProjectList: React.FC<ProjectListProps> = ({
     setProjectToDelete(null);
   };
   
-  const ProjectGrid = () => (
+  const ProjectListView = () => (
     <div className="space-y-4">
+      {/* 所有项目标题 */}
+      <h2 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <FolderOpen className="w-4 h-4" />
+        所有项目 ({projects.length})
+      </h2>
+
+      {/* 列表视图 */}
       <div
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
+        className="border border-border/60 rounded-lg divide-y divide-border/40 bg-card overflow-hidden"
         role="list"
         aria-label="项目列表"
       >
@@ -158,94 +165,88 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   onProjectClick(project);
                 }
               }}
-              className="w-full text-left px-5 py-4 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group cursor-pointer relative"
+              className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 transition-colors group cursor-pointer"
               aria-label={`项目 ${projectName}，包含 ${sessionCount} 个会话`}
             >
-              {/* 主要信息区：项目图标 + 项目名称 */}
-              <div className="flex items-start gap-3 mb-3">
-                <div className="p-2.5 rounded-lg bg-primary/5 text-primary shrink-0 transition-colors group-hover:bg-primary/10">
-                  <FolderOpen className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1 min-w-0 pr-20">
-                  <h3 className="font-medium text-base truncate text-foreground group-hover:text-primary transition-colors tracking-tight">
-                    {projectName}
-                  </h3>
-                </div>
+              {/* 项目图标 */}
+              <div className="p-2 rounded-lg bg-primary/5 text-primary shrink-0 transition-colors group-hover:bg-primary/10">
+                <FolderOpen className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
               </div>
 
-              {/* 路径信息：左右对齐到卡片边缘，显示最完整路径 */}
-              <p
-                className="text-xs text-muted-foreground truncate font-mono opacity-70"
-                aria-label={`路径: ${project.path}`}
-                title={project.path}
-              >
-                {project.path}
-              </p>
+              {/* 项目名称和路径 */}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-sm truncate text-foreground group-hover:text-primary transition-colors">
+                  {projectName}
+                </h3>
+                <p
+                  className="text-xs text-muted-foreground truncate font-mono opacity-70"
+                  title={project.path}
+                >
+                  {project.path}
+                </p>
+              </div>
 
-              {/* 右上角：会话数徽章 + 操作菜单 */}
-              <div className="absolute top-4 right-4 flex items-center gap-2">
-                {/* 会话数徽章 */}
-                {sessionCount > 0 && (
-                  <div
-                    className="flex items-center gap-1.5 px-2 py-0.5 bg-secondary text-secondary-foreground border border-border/50 rounded-md shadow-sm"
-                    aria-label={`${sessionCount} 个会话`}
-                  >
-                    <FileText className="h-3 w-3 opacity-70" aria-hidden="true" strokeWidth={1.5} />
-                    <span className="text-xs font-medium">{sessionCount}</span>
-                  </div>
-                )}
+              {/* 会话数 */}
+              {sessionCount > 0 && (
+                <div
+                  className="flex items-center gap-1.5 px-2 py-0.5 bg-secondary text-secondary-foreground border border-border/50 rounded-md shrink-0"
+                  aria-label={`${sessionCount} 个会话`}
+                >
+                  <FileText className="h-3 w-3 opacity-70" aria-hidden="true" strokeWidth={1.5} />
+                  <span className="text-xs font-medium">{sessionCount}</span>
+                </div>
+              )}
 
-                {/* 操作菜单 */}
-                {(onProjectSettings || onProjectDelete) && (
-                  <div className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="h-8 w-8 hover:bg-muted data-[state=open]:opacity-100"
-                          aria-label={`${projectName} 项目操作菜单`}
+              {/* 操作菜单 */}
+              {(onProjectSettings || onProjectDelete) && (
+                <div className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity shrink-0">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="h-8 w-8 hover:bg-muted data-[state=open]:opacity-100"
+                        aria-label={`${projectName} 项目操作菜单`}
+                      >
+                        <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {onProjectSettings && (
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onProjectSettings(project);
+                          }}
                         >
-                          <MoreVertical className="h-4 w-4" aria-hidden="true" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {onProjectSettings && (
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onProjectSettings(project);
-                            }}
-                          >
-                            <Zap className="h-4 w-4 mr-2 text-primary" aria-hidden="true" />
-                            项目能力管理
-                          </DropdownMenuItem>
-                        )}
-                        {onProjectSettings && onProjectDelete && (
-                          <DropdownMenuSeparator />
-                        )}
-                        {onProjectDelete && (
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteProject(project);
-                            }}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
-                            删除项目
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
-              </div>
+                          <Zap className="h-4 w-4 mr-2 text-primary" aria-hidden="true" />
+                          项目能力管理
+                        </DropdownMenuItem>
+                      )}
+                      {onProjectSettings && onProjectDelete && (
+                        <DropdownMenuSeparator />
+                      )}
+                      {onProjectDelete && (
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteProject(project);
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                          删除项目
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
-      
+
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -256,7 +257,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <ProjectGrid />
+      <ProjectListView />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

@@ -417,7 +417,7 @@ fn count_plugin_components(plugin_path: &Path) -> PluginComponents {
     components
 }
 
-/// 安装插件到项目级目录（通过编辑 settings.json 而不是复制文件）
+/// 安装插件到项目级或系统级（通过修改 settings.json）
 #[tauri::command]
 pub async fn install_plugin_to_project(
     project_path: String,
@@ -426,43 +426,24 @@ pub async fn install_plugin_to_project(
 ) -> Result<String, String> {
     info!("Installing plugin {} from {} to project {}", plugin_name, marketplace_name, project_path);
 
-    // 从 known_marketplaces.json 获取市场路径
-    let known_marketplaces = read_known_marketplaces()?;
-    let marketplace_config = known_marketplaces.get(&marketplace_name)
-        .ok_or_else(|| format!("Marketplace not found: {}", marketplace_name))?;
-
-    let marketplace_path = PathBuf::from(&marketplace_config.install_location);
-
-    // 读取 marketplace 信息
-    let marketplace_file = marketplace_path.join(".claude-plugin").join("marketplace.json");
-    let marketplace_info = read_marketplace_info(&marketplace_file)?;
-
-    // 找到对应的插件，验证其存在
-    let marketplace_plugin = marketplace_info.plugins
-        .iter()
-        .find(|p| p.name == plugin_name)
-        .ok_or_else(|| format!("Plugin not found: {}", plugin_name))?;
-
-    // 解析插件源路径并验证存在
-    let plugin_source = if marketplace_plugin.source.starts_with("./") {
-        marketplace_path.join(marketplace_plugin.source.trim_start_matches("./"))
-    } else {
-        marketplace_path.join(&marketplace_plugin.source)
-    };
-
-    if !plugin_source.exists() {
-        return Err(format!("Plugin source not found: {:?}", plugin_source));
-    }
-
     // 构建插件标识符：plugin-name@marketplace-name
     let plugin_id = format!("{}@{}", plugin_name, marketplace_name);
 
-    // 获取项目级 settings.json 路径
-    let project_claude_dir = PathBuf::from(&project_path).join(".claude");
-    fs::create_dir_all(&project_claude_dir)
-        .map_err(|e| format!("Failed to create .claude directory: {}", e))?;
+    // 获取 settings.json 路径
+    let settings_path = if project_path.is_empty() {
+        // 系统级：~/.claude/settings.json
+        let claude_dir = super::claude::get_claude_dir()
+            .map_err(|e| format!("Failed to get Claude directory: {}", e))?;
+        claude_dir.join("settings.json")
+    } else {
+        // 项目级：<project>/.claude/settings.json
+        let project_claude_dir = PathBuf::from(&project_path).join(".claude");
+        fs::create_dir_all(&project_claude_dir)
+            .map_err(|e| format!("Failed to create .claude directory: {}", e))?;
+        project_claude_dir.join("settings.json")
+    };
 
-    let settings_path = project_claude_dir.join("settings.json");
+    info!("Settings path: {:?}", settings_path);
 
     // 更新 settings.json 的 enabledPlugins 字段
     update_enabled_plugins(&settings_path, &plugin_id, true)?;
@@ -471,7 +452,7 @@ pub async fn install_plugin_to_project(
     Ok(format!("Successfully installed plugin: {}", plugin_name))
 }
 
-/// 卸载项目级插件（通过从 settings.json 移除而不是删除文件）
+/// 卸载项目级或系统级插件（通过修改 settings.json）
 #[tauri::command]
 pub async fn uninstall_plugin_from_project(
     project_path: String,
@@ -483,9 +464,19 @@ pub async fn uninstall_plugin_from_project(
     // 构建插件标识符：plugin-name@marketplace-name
     let plugin_id = format!("{}@{}", plugin_name, marketplace_name);
 
-    // 获取项目级 settings.json 路径
-    let project_claude_dir = PathBuf::from(&project_path).join(".claude");
-    let settings_path = project_claude_dir.join("settings.json");
+    // 获取 settings.json 路径
+    let settings_path = if project_path.is_empty() {
+        // 系统级：~/.claude/settings.json
+        let claude_dir = super::claude::get_claude_dir()
+            .map_err(|e| format!("Failed to get Claude directory: {}", e))?;
+        claude_dir.join("settings.json")
+    } else {
+        // 项目级：<project>/.claude/settings.json
+        let project_claude_dir = PathBuf::from(&project_path).join(".claude");
+        project_claude_dir.join("settings.json")
+    };
+
+    info!("Settings path: {:?}", settings_path);
 
     // 从 settings.json 的 enabledPlugins 字段移除插件
     update_enabled_plugins(&settings_path, &plugin_id, false)?;

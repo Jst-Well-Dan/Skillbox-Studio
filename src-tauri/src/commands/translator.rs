@@ -35,7 +35,7 @@ impl Default for TranslationConfig {
             api_key: String::new(), // 🔧 修复：要求用户自定义输入API密钥
             model: "GLM-4-Flash".to_string(), // 🎯 使用 GLM-4-Flash 模型
             timeout_seconds: 30,
-            cache_ttl_seconds: 86400, // 24小时缓存（按计划要求）
+            cache_ttl_seconds: u64::MAX, // 🎯 永久缓存（除非用户手动清空）
         }
     }
 }
@@ -49,7 +49,7 @@ struct PersistentCacheEntry {
 }
 
 impl PersistentCacheEntry {
-    fn new(translated_text: String, ttl_seconds: u64) -> Self {
+    fn new(translated_text: String, _ttl_seconds: u64) -> Self {
         let created_timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -58,17 +58,13 @@ impl PersistentCacheEntry {
         Self {
             translated_text,
             created_timestamp,
-            ttl_seconds,
+            ttl_seconds: u64::MAX, // 🎯 永久缓存
         }
     }
 
     fn is_expired(&self) -> bool {
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-
-        now - self.created_timestamp > self.ttl_seconds
+        // 🎯 永久缓存，永不过期（除非用户手动清空）
+        false
     }
 }
 
@@ -76,21 +72,21 @@ impl PersistentCacheEntry {
 #[derive(Debug, Clone)]
 struct CacheEntry {
     translated_text: String,
+    #[allow(dead_code)]
     created_at: Instant,
-    ttl: Duration,
 }
 
 impl CacheEntry {
-    fn new(translated_text: String, ttl: Duration) -> Self {
+    fn new(translated_text: String, _ttl: Duration) -> Self {
         Self {
             translated_text,
             created_at: Instant::now(),
-            ttl,
         }
     }
 
     fn is_expired(&self) -> bool {
-        self.created_at.elapsed() > self.ttl
+        // 🎯 永久缓存，永不过期（除非用户手动清空）
+        false
     }
 }
 

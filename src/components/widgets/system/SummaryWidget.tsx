@@ -80,7 +80,7 @@ export const SummaryWidget: React.FC<SummaryWidgetProps> = ({
           </div>
         </div>
         <div className="flex-1 space-y-1">
-          <div className="text-xs font-medium text-blue-600 dark:text-blue-400">AI 总结</div>
+          <div className="text-xs font-medium text-blue-600 dark:text-blue-400">历史会话摘要</div>
           <p className="text-sm text-foreground">{displaySummary}</p>
 
           {/* Token 使用展示 */}

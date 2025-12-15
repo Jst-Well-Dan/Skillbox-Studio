@@ -233,10 +233,10 @@ export const SessionList: React.FC<SessionListProps> = ({
         <div className="flex items-center gap-2">
           {/* 插件管理按钮 */}
           <Button
-            variant="outline"
+            variant="default"
             size="default"
             onClick={() => setPluginManagerOpen(true)}
-            className="h-10 px-4 flex-shrink-0"
+            className="px-4 flex-shrink-0 bg-[#d97757] hover:bg-[#FE6F00]/90 text-white"
           >
             <Package className="h-4 w-4 mr-2" />
             <span>项目能力</span>

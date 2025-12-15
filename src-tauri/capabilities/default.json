@@ -5,6 +5,7 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:window:allow-show",
     "dialog:allow-open",
     "dialog:allow-save",
     "dialog:allow-message",
@@ -14,6 +15,8 @@
     "shell:allow-open",
     "fs:allow-write-text-file",
     "fs:allow-read-text-file",
+    "updater:default",
+    "clipboard-manager:allow-write-text",
     {
       "identifier": "http:default",
       "allow": [

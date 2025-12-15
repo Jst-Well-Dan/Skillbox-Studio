@@ -119,7 +119,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </Button>
           <Button variant="default" size="sm" onClick={handleCreateProject}>
             <Plus className="w-4 h-4 mr-2" />
-            新建项目
+            打开文件夹
           </Button>
         </div>
       </div>
@@ -134,7 +134,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
             <FolderOpen className="w-16 h-16 mb-4 opacity-50" />
             <p className="text-lg mb-2">暂无项目</p>
-            <p className="text-sm">点击"新建项目"开始创建你的第一个项目</p>
+            <p className="text-sm">点击"打开文件夹"开始创建你的第一个项目</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

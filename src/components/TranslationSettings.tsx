@@ -143,13 +143,20 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Languages className="h-6 w-6" />
-          <h2 className="text-2xl font-bold">智能翻译设置</h2>
+          <h2 className="text-2xl font-bold">智能翻译</h2>
         </div>
         {onClose && (
           <Button variant="outline" onClick={onClose}>
             关闭
           </Button>
         )}
+      </div>
+
+      {/* 简洁功能说明 */}
+      <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800/50 mt-3">
+        <p className="text-xs text-amber-800 dark:text-amber-200">
+          🌐 <span className="font-medium">自动翻译界面英文内容</span> — 插件描述、技能说明等英文内容自动显示为中文
+        </p>
       </div>
 
       {error && (
@@ -170,10 +177,10 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Settings className="h-5 w-5" />
-            <span>基本设置</span>
+            <span>翻译服务配置</span>
           </CardTitle>
           <CardDescription>
-            配置智能翻译中间件，实现中英文透明翻译
+            使用智谱 AI 免费翻译 API（GLM-4-Flash）
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -220,18 +227,6 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
                 max="300"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cache-ttl">缓存有效期（秒）</Label>
-              <Input
-                id="cache-ttl"
-                type="number"
-                value={config.cache_ttl_seconds}
-                onChange={(e) => handleConfigChange('cache_ttl_seconds', parseInt(e.target.value) || 3600)}
-                min="300"
-                max="86400"
-              />
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -249,19 +244,9 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
               placeholder="请输入您的智谱 AI API 密钥"
               className={!config.api_key ? "border-red-300" : ""}
             />
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">
-                用于访问智谱 AI GLM-4-Flash 翻译API的密钥
-              </p>
-              <p className="text-xs text-blue-600">
-                💡 获取API密钥：访问 <a href="https://open.bigmodel.cn" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-800">https://open.bigmodel.cn</a> 注册账号并获取API密钥
-              </p>
-              {!config.api_key && (
-                <p className="text-xs text-red-600">
-                  ⚠️ 未配置API密钥时翻译功能将无法工作
-                </p>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              免费获取：<a href="https://open.bigmodel.cn" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">open.bigmodel.cn</a> 注册后即可获得 API 密钥
+            </p>
           </div>
 
           <div className="flex space-x-2 pt-4">
@@ -282,23 +267,6 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
               测试连接
             </Button>
           </div>
-          
-          {!config.api_key.trim() && (
-            <Alert className="mt-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>需要配置API密钥：</strong>
-                <br />
-                1. 访问 <a href="https://open.bigmodel.cn" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">智谱 AI 开放平台</a> 注册账号
-                <br />
-                2. 在控制台创建API密钥
-                <br />
-                3. 将密钥填写到上方输入框中
-                <br />
-                4. 保存配置并测试连接
-              </AlertDescription>
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
@@ -307,46 +275,33 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Database className="h-5 w-5" />
-            <span>缓存管理</span>
+            <span>翻译缓存</span>
           </CardTitle>
           <CardDescription>
-            管理翻译结果缓存，提高响应速度
+            已翻译内容永久缓存，加速响应
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {cacheStats ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
+              <div className="flex items-center justify-center gap-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary">
                     {cacheStats.total_entries}
                   </div>
-                  <div className="text-sm text-muted-foreground">总缓存条目</div>
-                </div>
-                
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
-                    {cacheStats.active_entries}
-                  </div>
-                  <div className="text-sm text-muted-foreground">有效缓存</div>
-                </div>
-                
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {cacheStats.expired_entries}
-                  </div>
-                  <div className="text-sm text-muted-foreground">过期缓存</div>
+                  <div className="text-sm text-muted-foreground">已缓存条目</div>
                 </div>
               </div>
             ) : (
               <div className="text-center text-muted-foreground">
-                无法获取缓存统计信息
+                无法获取缓存统计
               </div>
             )}
 
-            <div className="flex space-x-2">
+            <div className="flex justify-center space-x-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={loadData}
                 disabled={loading}
               >
@@ -355,11 +310,12 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
                 ) : (
                   <RefreshCw className="mr-2 h-4 w-4" />
                 )}
-                刷新统计
+                刷新
               </Button>
-              
+
               <Button
                 variant="destructive"
+                size="sm"
                 onClick={handleClearCache}
                 disabled={clearingCache}
               >
@@ -371,49 +327,13 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
         </CardContent>
       </Card>
 
-      {/* 使用说明 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>使用说明</CardTitle>
-          <CardDescription>
-            了解智能翻译中间件的工作原理
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium text-sm mb-2">功能特点</h4>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li><strong>透明翻译</strong>: 用户体验与直接中文对话一致</li>
-                <li><strong>智能检测</strong>: 自动识别中英文语言</li>
-                <li><strong>双向翻译</strong>: 中文输入→英文发送，英文响应→中文显示</li>
-                <li><strong>缓存优化</strong>: 相同翻译结果本地缓存，提高响应速度</li>
-                <li><strong>降级保护</strong>: 翻译失败时自动使用原文，确保功能可用</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-medium text-sm mb-2">工作流程</h4>
-              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                <li>用户输入中文提示词</li>
-                <li>中间件检测到中文，自动翻译为英文</li>
-                <li>将英文发送给Claude API</li>
-                <li>Claude返回英文响应</li>
-                <li>中间件将英文响应翻译为中文</li>
-                <li>用户看到中文响应</li>
-              </ol>
-            </div>
-
-            <div className="flex items-center space-x-2 pt-2">
-              <Badge variant="secondary">版本: 1.0.0</Badge>
-              <Badge variant="outline">模型: {config.model || 'GLM-4-Flash'}</Badge>
-              <Badge variant={config.enabled ? "default" : "secondary"}>
-                状态: {config.enabled ? "已启用" : "已禁用"}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* 状态指示 */}
+      <div className="flex items-center justify-center space-x-3 text-xs text-muted-foreground">
+        <Badge variant="outline">模型: {config.model || 'GLM-4-Flash'}</Badge>
+        <Badge variant={config.enabled ? "default" : "secondary"}>
+          {config.enabled ? "✓ 已启用" : "未启用"}
+        </Badge>
+      </div>
     </div>
   );
 };

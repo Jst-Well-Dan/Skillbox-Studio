@@ -353,6 +353,7 @@ export const AutoCompactSettings: React.FC<AutoCompactSettingsProps> = ({
                 <div className="space-y-3">
                   <Label className="text-base">策略类型</Label>
                   <Select
+                    defaultValue="Smart"
                     value={typeof config.compaction_strategy === 'string' ? config.compaction_strategy : 'Custom'}
                     onValueChange={(value) => {
                       if (value === 'Custom') {

@@ -38,9 +38,9 @@
   },
   "plugins": {
     "updater": {
-      "active": true,
+      "active": false,
       "endpoints": [
-        "https://github.com/anyme123/claude-workbench/releases/latest/download/latest.json"
+        "https://github.com/Jst-Well-Dan/Xiya-Claude-Studio/releases/latest/download/latest.json"
       ],
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY0MjRBOENBQTI1MEM1NDEKUldSSQnhWQ2l5cWdrOU1FZWROVlJzQWpoTE9VRGxCT0Rkc2VTcFpFM3dzYnV5aXVFVkRwbkhzMm4K"
@@ -60,7 +60,16 @@
       "icons/icon.ico",
       "icons/icon.png"
     ],
-    "resources": [],
+    "resources": {
+      "../Skill-Box/.claude-plugin/": "bundled-plugins/Skill-Box/.claude-plugin/",
+      "../Skill-Box/brand-marketing/": "bundled-plugins/Skill-Box/brand-marketing/",
+      "../Skill-Box/business-analyst/": "bundled-plugins/Skill-Box/business-analyst/",
+      "../Skill-Box/content-pipeline/": "bundled-plugins/Skill-Box/content-pipeline/",
+      "../Skill-Box/immersive-reading/": "bundled-plugins/Skill-Box/immersive-reading/",
+      "../Skill-Box/no-code-builder/": "bundled-plugins/Skill-Box/no-code-builder/",
+      "../Skill-Box/office-automation/": "bundled-plugins/Skill-Box/office-automation/",
+      "../Skill-Box/visual-creative/": "bundled-plugins/Skill-Box/visual-creative/"
+    },
     "copyright": "",
     "category": "Productivity",
     "shortDescription": "AI-powered workspace for work and learning",

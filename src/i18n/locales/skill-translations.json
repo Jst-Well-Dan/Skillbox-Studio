@@ -1,0 +1,184 @@
+{
+  "categories": {
+    "no-code-builder": "零代码构建",
+    "office-automation": "办公自动化",
+    "content-pipeline": "内容流水线",
+    "immersive-reading": "沉浸式研读",
+    "visual-creative": "视觉与创意",
+    "brand-marketing": "品牌与营销",
+    "business-analyst": "商业分析师",
+    "business-marketing": "品牌与营销",
+    "code-development": "零代码构建",
+    "content-creation": "内容流水线",
+    "creative-media": "视觉与创意",
+    "data-analysis": "商业分析师",
+    "learning-research": "沉浸式研读",
+    "office-documents": "办公自动化"
+  },
+  "skills": {
+    "advanced-video-downloader": {
+      "displayName": "高级视频下载器",
+      "description": "使用 yt-dlp 从 YouTube、B站、TikTok 等 1000+ 平台下载视频。当用户请求下载视频、提供视频链接、提及保存/下载视频或需要批量下载时使用。支持画质选择、音频提取、播放列表下载和基于 Cookie 的认证。"
+    },
+    "algorithmic-art": {
+      "displayName": "算法艺术生成器",
+      "description": "使用 p5.js 创建算法艺术，支持种子随机性和交互式参数探索。当用户请求使用代码创作艺术、生成艺术、算法艺术、流场或粒子系统时使用。创作原创算法艺术，避免复制现有艺术家的作品以规避版权问题。"
+    },
+    "Anthropic-brand-guidelines": {
+      "displayName": "Anthropic 品牌指南",
+      "description": "将 Anthropic 官方品牌色彩和排版应用于任何可能受益于 Anthropic 风格的作品。适用于需要品牌色彩或风格指南、视觉格式化或公司设计标准的场景。"
+    },
+    "artifacts-builder": {
+      "displayName": "组件构建器",
+      "description": "一套使用现代前端技术（React、Tailwind CSS、shadcn/ui）创建复杂多组件 claude.ai HTML 组件的工具。适用于需要状态管理、路由或 shadcn/ui 组件的复杂组件，不适用于简单的单文件 HTML/JSX 组件。"
+    },
+    "brand-guidelines": {
+      "displayName": "品牌指南应用",
+      "description": "将 Anthropic 官方品牌色彩和排版应用于任何可能受益于 Anthropic 风格的作品。适用于需要品牌色彩或风格指南、视觉格式化或公司设计标准的场景。"
+    },
+    "canvas-design": {
+      "displayName": "画布设计",
+      "description": "使用设计理念创建精美的 .png 和 .pdf 格式视觉艺术作品。当用户要求创建海报、艺术作品、设计或其他静态作品时使用。创作原创视觉设计，避免复制现有艺术家的作品以规避版权问题。"
+    },
+    "changelog-generator": {
+      "displayName": "更新日志生成器",
+      "description": "通过分析提交历史、分类变更并将技术性提交转换为清晰易懂的发布说明，自动从 git 提交创建面向用户的更新日志。将数小时的手动更新日志编写工作缩短为几分钟的自动化生成。"
+    },
+    "competitive-ads-extractor": {
+      "displayName": "竞品广告分析",
+      "description": "从广告库（Facebook、LinkedIn 等）中提取和分析竞争对手的广告，了解哪些消息传递、问题定位和创意方法有效。帮助启发和改进您自己的广告活动。"
+    },
+    "content-research-writer": {
+      "displayName": "内容研究写作助手",
+      "description": "通过进行研究、添加引用、改进开头、迭代大纲并对每个部分提供实时反馈来协助撰写高质量内容。将您的写作过程从单打独斗转变为协作伙伴关系。"
+    },
+    "csv-data-summarizer": {
+      "displayName": "CSV 数据分析器",
+      "description": "使用 Python 和 pandas 分析 CSV 文件、生成汇总统计信息并绘制快速可视化图表。"
+    },
+    "deep-reading-analyst": {
+      "displayName": "深度阅读分析",
+      "description": "使用5种经过验证的思维模型（SCQA、5W2H、批判性思维、逆向思维、系统思维）对文章、论文和长篇内容进行系统性分析。适用于：(1) 文章/论文深度分析，(2) 结构化阅读笔记，(3) 论点评估，(4) 洞见提取，(5) 多源对比，(6) 框架应用。"
+    },
+    "developer-growth-analysis": {
+      "displayName": "开发者成长分析",
+      "description": "分析您最近的 Claude Code 聊天记录，识别编码模式、开发差距和改进领域，生成包含可操作建议的个性化成长报告。"
+    },
+    "development-brainstorming": {
+      "displayName": "开发头脑风暴",
+      "description": "在编写代码或实施计划之前规划软件开发任务时使用 - 通过协作提问、替代方案探索和增量验证，将粗略的技术想法细化为完整的设计。适用于软件架构、组件、数据流和技术设计决策。"
+    },
+    "docx": {
+      "displayName": "Word 文档处理",
+      "description": "全面的文档创建、编辑和分析功能，支持修订追踪、批注、格式保留和文本提取。当 Claude 需要处理专业文档（.docx 文件）时使用：(1) 创建新文档，(2) 修改或编辑内容，(3) 处理修订追踪，(4) 添加批注，或其他文档任务。"
+    },
+    "domain-name-brainstormer": {
+      "displayName": "域名创意生成器",
+      "description": "为您的项目生成创意域名并检查多个顶级域名（.com、.io、.dev、.ai 等）的可用性。节省数小时的头脑风暴和手动检查时间。"
+    },
+    "family-history-planning": {
+      "displayName": "家族历史研究",
+      "description": "为家族历史和族谱研究项目规划提供协助。"
+    },
+    "file-organizer": {
+      "displayName": "文件整理助手",
+      "description": "通过理解上下文、查找重复文件、建议更好的结构和自动化清理任务，智能地整理您计算机上的文件和文件夹。减轻认知负担，无需手动操作即可保持数字工作空间整洁。"
+    },
+    "frontend-design": {
+      "displayName": "前端界面设计",
+      "description": "创建独特的、生产级的高设计质量前端界面。当用户要求构建网页组件、页面或应用程序时使用。生成富有创意、精致的代码，避免通用的 AI 美学风格。"
+    },
+    "git-pushing": {
+      "displayName": "Git 提交推送",
+      "description": "使用规范的提交信息进行暂存、提交和推送 git 变更。当用户想要提交并推送变更、提到推送到远程仓库或要求保存并推送工作时使用。"
+    },
+    "image-enhancer": {
+      "displayName": "图像增强器",
+      "description": "提升图像质量，特别是截图，通过增强分辨率、锐度和清晰度。非常适合为演示文稿、文档或社交媒体帖子准备图像。"
+    },
+    "internal-comms": {
+      "displayName": "内部沟通助手",
+      "description": "一套帮助撰写各类内部沟通的资源，使用公司偏好的格式。当被要求撰写某类内部沟通时使用（状态报告、领导层更新、公司通讯、常见问题解答、事件报告、项目更新等）。"
+    },
+    "markdown-to-epub-converter": {
+      "displayName": "Markdown 转电子书",
+      "description": "将 Markdown 文档和聊天摘要转换为格式化的 EPUB 电子书文件，可在任何设备上阅读或上传到 Kindle。"
+    },
+    "mcp-builder": {
+      "displayName": "MCP 服务器构建器",
+      "description": "创建高质量 MCP（模型上下文协议）服务器的指南，使大语言模型能够通过精心设计的工具与外部服务交互。在构建 MCP 服务器以集成外部 API 或服务时使用，支持 Python（FastMCP）或 Node/TypeScript（MCP SDK）。"
+    },
+    "meeting-insights-analyzer": {
+      "displayName": "会议洞察分析",
+      "description": "分析会议记录和录音，发现行为模式、沟通洞见和可操作的反馈。识别您何时回避冲突、使用填充词、主导对话或错失倾听机会。非常适合希望提升沟通和领导技能的专业人士。"
+    },
+    "notebooklm": {
+      "displayName": "NotebookLM 集成",
+      "description": "使用此技能直接从 Claude Code 查询您的 Google NotebookLM 笔记本，获取来自 Gemini 的基于来源、带引用的答案。支持浏览器自动化、库管理和持久认证。通过仅基于文档的响应大幅减少幻觉。"
+    },
+    "pdf": {
+      "displayName": "PDF 文档处理",
+      "description": "全面的 PDF 处理工具包，用于提取文本和表格、创建新 PDF、合并/拆分文档和处理表单。当 Claude 需要填写 PDF 表单或以编程方式大规模处理、生成或分析 PDF 文档时使用。"
+    },
+    "pict-test-designer": {
+      "displayName": "PICT 测试设计器",
+      "description": "使用 PICT（成对独立组合测试）为任何需求或代码设计全面的测试用例。分析输入，生成包含参数、值和有效场景约束的 PICT 模型，使用成对测试方法。输出 PICT 模型、测试用例的 Markdown 表格和预期结果。"
+    },
+    "pptx": {
+      "displayName": "PPT 演示文稿处理",
+      "description": "演示文稿创建、编辑和分析。当 Claude 需要处理演示文稿（.pptx 文件）时使用：(1) 创建新演示文稿，(2) 修改或编辑内容，(3) 处理布局，(4) 添加批注或演讲者备注，或其他演示文稿任务。"
+    },
+    "raffle-winner-picker": {
+      "displayName": "抽奖选择器",
+      "description": "从列表、电子表格或 Google Sheets 中随机抽取赠品、抽奖和竞赛的获胜者。确保公平、无偏见的选择，并保持透明度。"
+    },
+    "ship-learn-next": {
+      "displayName": "学习行动转化器",
+      "description": "使用 Ship-Learn-Next 框架将学习内容（如 YouTube 视频字幕、文章、教程）转化为可执行的实施计划。当用户想要将建议、经验或教育内容转化为具体的行动步骤、练习或学习任务时使用。"
+    },
+    "skill-creator": {
+      "displayName": "技能创建指南",
+      "description": "创建有效技能的指南。当用户想要创建新技能（或更新现有技能）以通过专业知识、工作流程或工具集成来扩展 Claude 的能力时使用。"
+    },
+    "slack-gif-creator": {
+      "displayName": "Slack GIF 创建器",
+      "description": "创建针对 Slack 优化的动画 GIF 工具包，具有尺寸约束验证器和可组合的动画基元。当用户请求为 Slack 创建动画 GIF 或表情动画时使用。"
+    },
+    "terminal-title": {
+      "displayName": "终端标题管理",
+      "description": "自动更新终端窗口标题以反映当前的高级任务。在每个 Claude Code 会话开始时用户提供第一个提示时使用，以及当用户切换到明显不同的高级任务时使用。帮助开发者管理多个 Claude Code 终端。"
+    },
+    "test-driven-development": {
+      "displayName": "测试驱动开发",
+      "description": "在实现任何功能或修复 bug 时使用，在编写实现代码之前 - 先写测试，观察失败，然后编写最少的代码使其通过；通过要求先失败来确保测试真正验证行为。"
+    },
+    "test-fixing": {
+      "displayName": "测试修复助手",
+      "description": "使用智能错误分组运行测试并系统地修复所有失败的测试。当用户要求修复失败的测试、提到测试失败、运行测试套件出现失败或请求使测试通过时使用。"
+    },
+    "theme-factory": {
+      "displayName": "主题工厂",
+      "description": "为作品应用主题样式的工具包。这些作品可以是幻灯片、文档、报告、HTML 落地页等。有10个预设主题，包含颜色/字体，可应用于任何已创建的作品，也可以即时生成新主题。"
+    },
+    "video-downloader": {
+      "displayName": "视频下载器",
+      "description": "从 YouTube 和其他平台下载视频，用于离线观看、编辑或存档。支持各种格式和质量选项。"
+    },
+    "web-fetch": {
+      "displayName": "网页抓取转换",
+      "description": "当用户想要抓取网页内容并转换为干净的 Markdown 时使用。处理\"将此网页保存为 Markdown\"、\"获取这篇文章\"或\"抓取网页内容\"等工作流程。支持 crawl4ai 通用网页抓取和微信公众号文章专用抓取。"
+    },
+    "webapp-testing": {
+      "displayName": "Web 应用测试",
+      "description": "使用 Playwright 与本地 Web 应用程序交互和测试的工具包。支持验证前端功能、调试 UI 行为、捕获浏览器截图和查看浏览器日志。"
+    },
+    "xlsx": {
+      "displayName": "Excel 表格处理",
+      "description": "全面的电子表格创建、编辑和分析功能，支持公式、格式化、数据分析和可视化。当 Claude 需要处理电子表格（.xlsx、.xlsm、.csv、.tsv 等）时使用。"
+    },
+    "youtube-transcript": {
+      "displayName": "YouTube 字幕下载",
+      "description": "当用户提供 YouTube 链接或要求下载/获取 YouTube 视频字幕时使用。也适用于用户想要转录或获取 YouTube 视频的字幕/副标题时。"
+    }
+  }
+}

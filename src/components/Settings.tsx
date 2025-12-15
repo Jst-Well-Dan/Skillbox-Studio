@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ArrowLeft, 
-  Plus, 
-  Trash2, 
-  Save, 
+import {
+  ArrowLeft,
+  Save,
   AlertCircle,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -44,13 +41,6 @@ interface PermissionRule {
   value: string;
 }
 
-interface EnvironmentVariable {
-  id: string;
-  key: string;
-  value: string;
-  enabled: boolean;
-}
-
 /**
  * 全面的设置界面，用于管理 Claude Code 设置
  * 提供无代码界面来编辑 settings.json 文件
@@ -83,9 +73,6 @@ export const Settings: React.FC<SettingsProps> = ({
   // Permission rules state
   const [allowRules, setAllowRules] = useState<PermissionRule[]>([]);
   const [denyRules, setDenyRules] = useState<PermissionRule[]>([]);
-  
-  // Environment variables state
-  const [envVars, setEnvVars] = useState<EnvironmentVariable[]>([]);
 
   // Permission configuration state
   const [permissionConfig, setPermissionConfig] = useState<ClaudePermissionConfig | null>(null);
@@ -152,18 +139,6 @@ export const Settings: React.FC<SettingsProps> = ({
         }
       }
 
-      // Parse environment variables
-      if (loadedSettings.env && typeof loadedSettings.env === 'object' && !Array.isArray(loadedSettings.env)) {
-        setEnvVars(
-          Object.entries(loadedSettings.env).map(([key, value], index) => ({
-            id: `env-${index}`,
-            key,
-            value: value as string,
-            enabled: true, // 默认启用所有现有的环境变量
-          }))
-        );
-      }
-
       // Load permission configuration
       try {
         const config = await api.getClaudePermissionConfig();
@@ -205,19 +180,6 @@ export const Settings: React.FC<SettingsProps> = ({
           allow: allowRules.map(rule => rule.value).filter(v => v.trim()),
           deny: denyRules.map(rule => rule.value).filter(v => v.trim()),
         },
-        env: {
-          // 保留现有的所有环境变量（包括代理商配置的ANTHROPIC_*变量）
-          ...settings?.env,
-          // 然后添加/覆盖UI中配置的环境变量
-          ...envVars
-            .filter(envVar => envVar.enabled) // 只保存启用的环境变量
-            .reduce((acc, { key, value }) => {
-              if (key.trim() && value.trim()) {
-                acc[key] = value;
-              }
-              return acc;
-            }, {} as Record<string, string>),
-        },
       };
 
       await api.saveClaudeSettings(updatedSettings);
@@ -243,36 +205,6 @@ export const Settings: React.FC<SettingsProps> = ({
     } finally {
       setSaving(false);
     }
-  };
-
-
-  /**
-   * Adds a new environment variable
-   */
-  const addEnvVar = () => {
-    const newVar: EnvironmentVariable = {
-      id: `env-${Date.now()}`,
-      key: "",
-      value: "",
-      enabled: true, // 默认启用新的环境变量
-    };
-    setEnvVars(prev => [...prev, newVar]);
-  };
-
-  /**
-   * Updates an environment variable
-   */
-  const updateEnvVar = (id: string, field: "key" | "value" | "enabled", value: string | boolean) => {
-    setEnvVars(prev => prev.map(envVar => 
-      envVar.id === id ? { ...envVar, [field]: value } : envVar
-    ));
-  };
-
-  /**
-   * Removes an environment variable
-   */
-  const removeEnvVar = (id: string) => {
-    setEnvVars(prev => prev.filter(envVar => envVar.id !== id));
   };
 
   return (
@@ -308,7 +240,7 @@ export const Settings: React.FC<SettingsProps> = ({
             disabled={saving || loading}
             size="sm"
             className={cn(
-              "gap-2 px-5 font-medium shadow-lg shadow-primary/20",
+              "gap-2 font-medium shadow-lg shadow-primary/20 px-4 flex-shrink-0 bg-[#d97757] hover:bg-[#FE6F00]/90 text-white",
               "transition-all duration-300",
               saving && "scale-95 opacity-80"
             )}
@@ -360,12 +292,6 @@ export const Settings: React.FC<SettingsProps> = ({
                   {t('settings.general')}
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="environment"
-                  className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
-                >
-                  环境
-                </TabsTrigger>
-                <TabsTrigger 
                   value="translation"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
@@ -375,19 +301,19 @@ export const Settings: React.FC<SettingsProps> = ({
                   value="provider"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
-                  代理商
+                  API 配置
                 </TabsTrigger>
                 <TabsTrigger
                   value="router"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
-                  API Router
+                  CCR 服务
                 </TabsTrigger>
                 <TabsTrigger
                   value="diagnostic"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
-                  诊断
+                  环境检测
                 </TabsTrigger>
               </TabsList>
             
@@ -439,110 +365,6 @@ export const Settings: React.FC<SettingsProps> = ({
                             className="ml-4"
                           />
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-
-            {/* Environment Variables */}
-            <TabsContent value="environment" className="space-y-6">
-              <Card className="p-6 border-border/50 shadow-sm rounded-xl">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-base font-medium flex items-center gap-2 text-foreground/90">
-                        <span className="w-1 h-5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"/>
-                        环境变量
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1.5 pl-3 border-l-2 border-border/50 ml-1 font-light opacity-80">
-                        配置应用于 Claude Code 会话的全局环境变量
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={addEnvVar}
-                      className="gap-2 h-9 px-4 border-border/60 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      添加变量
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {envVars.length === 0 ? (
-                      <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed border-border/60">
-                        <p className="text-sm text-muted-foreground opacity-60">暂无环境变量配置</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="grid gap-3">
-                          {envVars.map((envVar) => (
-                            <motion.div
-                              key={envVar.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="flex items-center gap-3 p-3 rounded-lg bg-card/40 border border-border/40 hover:border-primary/20 hover:bg-card/80 hover:shadow-sm transition-all duration-200 group"
-                            >
-                              <Switch
-                                checked={envVar.enabled}
-                                onCheckedChange={(checked) => updateEnvVar(envVar.id, "enabled", checked)}
-                                className="scale-90"
-                              />
-                              
-                              <div className="flex-1 flex items-center gap-2">
-                                <Input
-                                  placeholder="变量名 (如 ANTHROPIC_MODEL)"
-                                  value={envVar.key}
-                                  onChange={(e) => updateEnvVar(envVar.id, "key", e.target.value)}
-                                  className={cn(
-                                    "font-mono text-sm h-9 bg-transparent border-border/40 focus:bg-background/50 transition-all",
-                                    !envVar.enabled && "opacity-50 text-muted-foreground"
-                                  )}
-                                />
-                                <span className="text-muted-foreground/50 font-light px-1">=</span>
-                                <Input
-                                  placeholder="值"
-                                  value={envVar.value}
-                                  onChange={(e) => updateEnvVar(envVar.id, "value", e.target.value)}
-                                  className={cn(
-                                    "font-mono text-sm h-9 bg-transparent border-border/40 focus:bg-background/50 transition-all",
-                                    !envVar.enabled && "opacity-50 text-muted-foreground"
-                                  )}
-                                />
-                              </div>
-                              
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeEnvVar(envVar.id)}
-                                className="h-8 w-8 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  
-                  <div className="pt-4 space-y-3 border-t border-border/30">
-                    <p className="text-xs font-medium text-muted-foreground/80 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary/40"/>
-                      常用变量参考
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="text-xs p-2 rounded bg-muted/30 border border-border/20 text-muted-foreground font-mono truncate hover:bg-muted/50 transition-colors cursor-help" title="CLAUDE_CODE_ENABLE_TELEMETRY - 启用/禁用遥测 (0 或 1)">
-                        CLAUDE_CODE_ENABLE_TELEMETRY
-                      </div>
-                      <div className="text-xs p-2 rounded bg-muted/30 border border-border/20 text-muted-foreground font-mono truncate hover:bg-muted/50 transition-colors cursor-help" title="ANTHROPIC_MODEL - 自定义模型名称">
-                        ANTHROPIC_MODEL
-                      </div>
-                      <div className="text-xs p-2 rounded bg-muted/30 border border-border/20 text-muted-foreground font-mono truncate hover:bg-muted/50 transition-colors cursor-help" title="DISABLE_COST_WARNINGS - 禁用费用警告 (1)">
-                        DISABLE_COST_WARNINGS
                       </div>
                     </div>
                   </div>
@@ -603,7 +425,10 @@ export const Settings: React.FC<SettingsProps> = ({
               {routerSetupComplete ? (
                 <RouterSettings />
               ) : (
-                <RouterSetupWizard onSetupComplete={() => setRouterSetupComplete(true)} />
+                <RouterSetupWizard
+                  onSetupComplete={() => setRouterSetupComplete(true)}
+                  onGoToEnvironment={() => setActiveTab("diagnostic")}
+                />
               )}
             </TabsContent>
 

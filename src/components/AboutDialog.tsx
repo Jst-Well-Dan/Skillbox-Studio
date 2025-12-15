@@ -11,7 +11,7 @@ interface AboutDialogProps {
 
 export function AboutDialog({ open, onClose, onCheckUpdate: _onCheckUpdate }: AboutDialogProps) {
   const [appVersion, setAppVersion] = useState<string>("加载中...");
-  const PLUGIN_LIBRARY_URL = "https://xiya.ai/plugins"; // 蹊涯插件库地址
+  const PLUGIN_LIBRARY_URL = "https://skill-box.zwtj.site/"; // 蹊涯插件库地址
 
   // 动态获取应用版本号
   useEffect(() => {
@@ -109,7 +109,7 @@ export function AboutDialog({ open, onClose, onCheckUpdate: _onCheckUpdate }: Ab
         {/* Footer */}
         <div className="p-4 bg-muted/50 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">
-            © 2025 上海蹊涯教育科技有限公司
+            © 2025 北京知微探界科技有限公司
           </p>
         </div>
       </div>

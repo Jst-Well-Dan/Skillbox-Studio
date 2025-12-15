@@ -7,58 +7,58 @@
 /* Default (Dark) theme configuration */
 :root,
 .dark {
-  /* 🎨 Modern Premium - Dark Theme */
+  /* 🎨 Anthropic Brand - Dark Theme */
 
-  /* 🌌 Backgrounds - Sophisticated Deep Blue-Gray */
-  --color-background: oklch(0.19 0.02 250); /* Refined Deep Blue-Gray - Warm & Premium */
-  --color-foreground: oklch(0.98 0.01 260); /* Soft White */
+  /* 🌌 Backgrounds - Anthropic Dark Warm Gray */
+  --color-background: oklch(0.145 0.005 75); /* #141413 - Anthropic Dark */
+  --color-foreground: oklch(0.98 0.008 85); /* #faf9f5 - Anthropic Light */
 
   /* 🃏 Surface/Cards - Elevated with Clear Hierarchy */
-  --color-card: oklch(0.23 0.025 250); /* Elevated card surface */
-  --color-card-foreground: oklch(0.98 0.01 260);
-  --color-popover: oklch(0.21 0.025 250); /* Slightly darker for depth */
-  --color-popover-foreground: oklch(0.98 0.01 260);
+  --color-card: oklch(0.20 0.008 75); /* Slightly lighter than background */
+  --color-card-foreground: oklch(0.98 0.008 85);
+  --color-popover: oklch(0.18 0.006 75); /* Slightly darker for depth */
+  --color-popover-foreground: oklch(0.98 0.008 85);
 
-  /* 🔷 Primary Brand - Vibrant Indigo/Violet */
-  --color-primary: oklch(0.65 0.18 270); /* Electric Violet */
-  --color-primary-hover: oklch(0.70 0.20 270);
-  --color-primary-active: oklch(0.60 0.16 270);
+  /* 🔷 Primary Brand - Xiya Orange */
+  --color-primary: oklch(0.65 0.20 45); /* #FE6F00 - Xiya Orange */
+  --color-primary-hover: oklch(0.70 0.21 45);
+  --color-primary-active: oklch(0.60 0.19 45);
   --color-primary-foreground: oklch(1.0 0 0);
 
   /* 📦 Secondary - Subtle Depth */
-  --color-secondary: oklch(0.26 0.03 250);
-  --color-secondary-hover: oklch(0.30 0.035 250);
-  --color-secondary-foreground: oklch(0.90 0.02 260);
+  --color-secondary: oklch(0.22 0.008 75);
+  --color-secondary-hover: oklch(0.26 0.01 75);
+  --color-secondary-foreground: oklch(0.92 0.01 85);
 
   /* 🔇 Muted - De-emphasized Elements */
-  --color-muted: oklch(0.24 0.025 250);
-  --color-muted-hover: oklch(0.28 0.03 250);
-  --color-muted-foreground: oklch(0.72 0.03 260);
+  --color-muted: oklch(0.20 0.006 75);
+  --color-muted-hover: oklch(0.24 0.008 75);
+  --color-muted-foreground: oklch(0.72 0.012 80); /* #b0aea5 - Anthropic Mid Gray */
 
-  /* ✴️ Accent - Bright Cyan/Teal for contrast */
-  --color-accent: oklch(0.75 0.15 190); /* Cyan */
-  --color-accent-hover: oklch(0.80 0.16 190);
-  --color-accent-foreground: oklch(0.10 0.02 260);
+  /* ✴️ Accent - Anthropic Blue */
+  --color-accent: oklch(0.65 0.10 240); /* #6a9bcc - Anthropic Blue */
+  --color-accent-hover: oklch(0.70 0.11 240);
+  --color-accent-foreground: oklch(0.145 0.005 75);
 
   /* ⚠️ Status Colors */
-  --color-destructive: oklch(0.62 0.20 20);
-  --color-destructive-hover: oklch(0.57 0.22 20);
+  --color-destructive: oklch(0.58 0.18 25);
+  --color-destructive-hover: oklch(0.53 0.20 25);
   --color-destructive-foreground: oklch(1.0 0 0);
 
-  --color-success: oklch(0.67 0.18 150);
-  --color-success-hover: oklch(0.62 0.20 150);
-  --color-warning: oklch(0.75 0.16 80);
-  --color-info: oklch(0.67 0.15 240);
+  --color-success: oklch(0.56 0.08 130); /* #788c5d - Anthropic Green */
+  --color-success-hover: oklch(0.51 0.10 130);
+  --color-warning: oklch(0.72 0.14 75);
+  --color-info: oklch(0.65 0.10 240);
 
   /* 🎨 UI Elements */
-  --color-border: oklch(0.30 0.03 250); /* More visible borders */
-  --color-border-hover: oklch(0.38 0.04 250);
-  --color-input: oklch(0.24 0.025 250);
-  --color-ring: oklch(0.65 0.18 270);
-  
+  --color-border: oklch(0.28 0.008 75); /* Warm gray border */
+  --color-border-hover: oklch(0.35 0.01 75);
+  --color-input: oklch(0.20 0.006 75);
+  --color-ring: oklch(0.62 0.14 40); /* Matches primary */
+
   /* Additional colors */
-  --color-green-500: oklch(0.65 0.18 150);
-  --color-green-600: oklch(0.55 0.20 150);
+  --color-green-500: oklch(0.56 0.08 130);
+  --color-green-600: oklch(0.50 0.10 130);
 
   /* 📐 Border Radius - Modern */
   --radius-xs: 0.375rem;
@@ -124,61 +124,61 @@
 }
 
 /* ========================================
-   🌞 LIGHT THEME - Premium Modern
+   🌞 LIGHT THEME - Anthropic Brand
    ======================================== */
 .light {
-  /* 🎨 Modern Premium - Light Theme */
+  /* 🎨 Anthropic Brand - Light Theme */
 
-  /* 🌌 Backgrounds - Soft Warm Gray */
-  --color-background: oklch(0.97 0.008 240); /* Soft warm gray - Not harsh white */
-  --color-foreground: oklch(0.15 0.04 260); /* Deep Slate Text */
+  /* 🌌 Backgrounds - Anthropic Light Warm */
+  --color-background: oklch(0.97 0.008 85); /* Warm gray background */
+  --color-foreground: oklch(0.20 0.008 75); /* Softer dark gray (not pure black) */
 
-  /* 🃏 Surface/Cards - Pure White for Contrast */
-  --color-card: oklch(0.995 0.002 240); /* Near-white with subtle warmth */
-  --color-card-foreground: oklch(0.15 0.04 260);
+  /* 🃏 Surface/Cards - Anthropic Light */
+  --color-card: oklch(0.995 0.003 85); /* Near-white #faf9f5 */
+  --color-card-foreground: oklch(0.20 0.008 75);
   --color-popover: oklch(1.0 0 0); /* Pure white popovers */
-  --color-popover-foreground: oklch(0.15 0.04 260);
+  --color-popover-foreground: oklch(0.20 0.008 75);
 
-  /* 🔷 Primary Brand - Vibrant Indigo/Violet */
-  --color-primary: oklch(0.55 0.22 270); /* Vibrant Violet */
-  --color-primary-hover: oklch(0.50 0.24 270);
-  --color-primary-active: oklch(0.45 0.20 270);
+  /* 🔷 Primary Brand - Xiya Orange */
+  --color-primary: oklch(0.60 0.20 45); /* #FE6F00 - Xiya Orange for light theme */
+  --color-primary-hover: oklch(0.55 0.21 45);
+  --color-primary-active: oklch(0.52 0.19 45);
   --color-primary-foreground: oklch(1.0 0 0);
 
-  /* 📦 Secondary - Subtle Depth */
-  --color-secondary: oklch(0.94 0.012 240);
-  --color-secondary-hover: oklch(0.91 0.015 240);
-  --color-secondary-foreground: oklch(0.18 0.04 260);
+  /* 📦 Secondary - Anthropic Light Gray */
+  --color-secondary: oklch(0.92 0.01 85); /* #e8e6dc - Anthropic Light Gray */
+  --color-secondary-hover: oklch(0.88 0.012 85);
+  --color-secondary-foreground: oklch(0.20 0.01 75);
 
   /* 🔇 Muted - De-emphasized Elements */
-  --color-muted: oklch(0.94 0.012 240);
-  --color-muted-hover: oklch(0.90 0.015 240);
-  --color-muted-foreground: oklch(0.48 0.03 260);
+  --color-muted: oklch(0.92 0.01 85); /* #e8e6dc */
+  --color-muted-hover: oklch(0.88 0.012 85);
+  --color-muted-foreground: oklch(0.50 0.015 80);
 
-  /* ✴️ Accent - Energetic Teal */
-  --color-accent: oklch(0.60 0.18 190);
-  --color-accent-hover: oklch(0.55 0.20 190);
+  /* ✴️ Accent - Anthropic Blue */
+  --color-accent: oklch(0.60 0.12 240); /* #6a9bcc - Anthropic Blue */
+  --color-accent-hover: oklch(0.55 0.14 240);
   --color-accent-foreground: oklch(1.0 0 0);
 
   /* ⚠️ Status Colors */
-  --color-destructive: oklch(0.58 0.22 25);
-  --color-destructive-hover: oklch(0.53 0.24 25);
+  --color-destructive: oklch(0.55 0.20 25);
+  --color-destructive-hover: oklch(0.50 0.22 25);
   --color-destructive-foreground: oklch(1.0 0 0);
 
-  --color-success: oklch(0.58 0.18 150);
-  --color-success-hover: oklch(0.53 0.20 150);
-  --color-warning: oklch(0.68 0.18 85);
-  --color-info: oklch(0.55 0.22 270);
+  --color-success: oklch(0.52 0.10 130); /* #788c5d - Anthropic Green */
+  --color-success-hover: oklch(0.47 0.12 130);
+  --color-warning: oklch(0.68 0.16 75);
+  --color-info: oklch(0.55 0.15 240);
 
   /* 🎨 UI Elements */
-  --color-border: oklch(0.88 0.015 240); /* More visible borders */
-  --color-border-hover: oklch(0.82 0.02 240);
-  --color-input: oklch(0.96 0.01 240);
-  --color-ring: oklch(0.55 0.22 270);
+  --color-border: oklch(0.88 0.01 85); /* #e8e6dc - Anthropic Light Gray */
+  --color-border-hover: oklch(0.82 0.012 85);
+  --color-input: oklch(0.96 0.008 85);
+  --color-ring: oklch(0.58 0.15 40); /* Matches primary */
 
   /* Additional colors */
-  --color-green-500: oklch(0.58 0.18 150);
-  --color-green-600: oklch(0.48 0.20 150);
+  --color-green-500: oklch(0.52 0.10 130);
+  --color-green-600: oklch(0.46 0.12 130);
 }
 
 /* Reset and base styles */

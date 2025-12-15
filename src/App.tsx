@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, FolderOpen } from "lucide-react";
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { api, type Project, type Session } from "@/lib/api";
 import { OutputCacheProvider } from "@/lib/outputCache";
@@ -30,14 +30,12 @@ import { Breadcrumbs, BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { ProjectCardSkeleton, SessionListItemSkeleton } from '@/components/ui/skeleton';
 import { WelcomeHome } from '@/components/WelcomeHome';
 import { PluginLibrary } from '@/components/PluginLibrary';
-import { ProjectsPage } from '@/components/ProjectsPage';
 import * as SessionHelpers from '@/lib/sessionHelpers';
 
 type View =
   | "welcome"
   | "agents"
   | "projects"
-  | "projects-workspace"
   | "editor"
   | "claude-code-session"
   | "claude-tab-manager"
@@ -600,7 +598,7 @@ function AppContent() {
               if (target === 'agents') {
                 handleViewChange('agents');
               } else if (target === 'projects') {
-                handleViewChange('projects-workspace');
+                handleViewChange('projects');
               }
             }}
           />
@@ -610,6 +608,49 @@ function AppContent() {
         return (
           <PluginLibrary
             onBack={() => handleViewChange('welcome')}
+            onNavigateToProject={async (projectPath: string) => {
+              try {
+                // 检查项目是否已存在
+                const existingProjects = await api.listProjects();
+                const existingProject = existingProjects.find(p => p.path === projectPath);
+
+                if (existingProject) {
+                  // 已存在的项目，直接导航到其 SessionList
+                  await handleProjectClick(existingProject);
+                  handleViewChange("projects");
+                } else {
+                  // 创建新项目对象
+                  const mockProject: Project = {
+                    id: projectPath,
+                    path: projectPath,
+                    sessions: [],
+                    created_at: Math.floor(Date.now() / 1000)
+                  };
+
+                  // 加载会话列表（会自动创建项目目录结构）
+                  const sessionList = await api.getProjectSessions(mockProject.id);
+                  setSessions(sessionList);
+                  setSelectedProject(mockProject);
+                  handleViewChange("projects");
+
+                  // 刷新项目列表
+                  const projectList = await api.listProjects();
+                  setProjects(projectList);
+
+                  const projectName = projectPath.split(/[\\/]/).pop() || projectPath;
+                  setToast({
+                    message: `项目 "${projectName}" 已创建`,
+                    type: "success"
+                  });
+                }
+              } catch (err) {
+                console.error("Failed to navigate to project:", err);
+                setToast({
+                  message: `跳转失败: ${err instanceof Error ? err.message : String(err)}`,
+                  type: "error"
+                });
+              }
+            }}
           />
         );
 
@@ -647,24 +688,6 @@ function AppContent() {
           </div>
         );
 
-      case "projects-workspace":
-        return (
-          <ProjectsPage
-            onBack={() => handleViewChange('welcome')}
-            onStartConversation={(projectPath) => {
-              // Set the new session project path
-              setNewSessionProjectPath(projectPath);
-              setSelectedSession(null);
-              setTabManagerSource('plugin-library');
-              handleViewChange('claude-tab-manager');
-            }}
-            onCreateProject={() => {
-              // Navigate to traditional projects view to create project
-              handleViewChange('projects');
-            }}
-          />
-        );
-
       case "projects":
         return (
           <div className="flex-1 overflow-y-auto">
@@ -692,7 +715,7 @@ function AppContent() {
                     <Button
                       onClick={handleNewProject}
                       size="default"
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 bg-[#d97757] hover:bg-[#c56647] text-white"
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       {t('common.newProject')}
@@ -719,6 +742,38 @@ function AppContent() {
                       </button>
                     )}
                   </div>
+
+                  {/* 快速访问区域 - 显示最近3个项目 */}
+                  {!projectSearchQuery && projects.length > 0 && (
+                    <div className="mt-6">
+                      <h2 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        快速访问
+                      </h2>
+                      <div className="flex gap-3 flex-wrap">
+                        {projects.slice(0, 3).map((project) => {
+                          const projectName = project.path.replace(/\\/g, '/').split('/').filter(Boolean).pop() || project.path;
+                          return (
+                            <button
+                              key={project.id}
+                              onClick={() => handleProjectClick(project)}
+                              className="px-5 py-4 rounded-xl bg-card hover:bg-muted/50 border border-border/60 hover:border-primary/40 transition-all group text-left min-w-[200px]"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <FolderOpen className="w-5 h-5 text-primary/70 group-hover:text-primary" />
+                                <span className="font-medium text-base group-hover:text-primary transition-colors">{projectName}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground font-mono truncate max-w-[280px]" title={project.path}>
+                                {project.path}
+                              </p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -885,8 +940,8 @@ function AppContent() {
   return (
     <OutputCacheProvider>
       <div className="h-screen bg-background flex flex-col">
-          {/* Topbar - 条件渲染：在欢迎页、Agent库、标签页管理器中隐藏，提供沉浸式体验 */}
-          {view !== "claude-tab-manager" && view !== "welcome" && view !== "agents" && (
+          {/* Topbar - 条件渲染：在欢迎页、标签页管理器中隐藏，提供沉浸式体验 */}
+          {view !== "claude-tab-manager" && view !== "welcome" && (
             <Topbar
               onClaudeClick={() => handleViewChange("editor")}
               onSettingsClick={() => handleViewChange("settings")}
@@ -896,12 +951,13 @@ function AppContent() {
               onTabsClick={() => handleViewChange("claude-tab-manager")}
               onUpdateClick={() => setShowUpdateDialog(true)}
               onAboutClick={() => setShowAboutDialog(true)}
+              onHomeClick={() => handleViewChange("welcome")}
               tabsCount={getTabStats().total}
             />
           )}
 
           {/* 🍞 Breadcrumb Navigation - 面包屑导航 */}
-          {view !== "claude-tab-manager" && view !== "welcome" && view !== "agents" && renderBreadcrumbs()}
+          {view !== "claude-tab-manager" && view !== "welcome" && renderBreadcrumbs()}
 
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto">

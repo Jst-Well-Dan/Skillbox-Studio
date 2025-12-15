@@ -3,18 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Settings2, 
-  Globe, 
-  Check, 
-  RefreshCw, 
-  Trash2, 
+import {
+  Settings2,
+  Globe,
+  Check,
+  RefreshCw,
+  Trash2,
   TestTube,
   Eye,
   EyeOff,
   Plus,
   Edit,
-  Trash
+  Trash,
+  FolderOpen
 } from 'lucide-react';
 import { api, type ProviderConfig, type CurrentProviderConfig } from '@/lib/api';
 import { Toast } from '@/components/ui/toast';
@@ -208,14 +209,23 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             <Settings2 className="h-4 w-4" aria-hidden="true" />
           </Button>
           <div>
-            <h1 className="text-lg font-semibold">代理商管理</h1>
+            <h1 className="text-lg font-semibold">API 配置管理</h1>
             <p className="text-xs text-muted-foreground">
-              一键切换不同的 Claude API 代理商
+              管理 Claude API 的连接配置，支持添加多个第三方 API 服务商，一键切换使用
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => api.openClaudeConfigDir()}
+            className="text-xs"
+          >
+            <FolderOpen className="h-3 w-3 mr-1" aria-hidden="true" />
+            配置目录
+          </Button>
           <Button
             variant="default"
             size="sm"
@@ -223,7 +233,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             className="text-xs"
           >
             <Plus className="h-3 w-3 mr-1" aria-hidden="true" />
-            添加代理商
+            添加配置
           </Button>
           <Button
             variant="destructive"
@@ -245,14 +255,21 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* 适用场景提示 */}
+          <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800/50 mt-3">
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              💡 <span className="font-medium">适用场景：</span>使用中转 API 服务、管理多个 API 密钥、切换不同服务商
+            </p>
+          </div>
+
           {presets.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground mb-4">还没有配置任何代理商</p>
+                <p className="text-sm text-muted-foreground mb-4">还没有配置任何 API 服务商</p>
                 <Button onClick={handleAddProvider} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  添加第一个代理商
+                  添加第一个配置
                 </Button>
               </div>
             </div>

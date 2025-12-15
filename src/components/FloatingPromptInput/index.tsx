@@ -453,12 +453,14 @@ const FloatingPromptInputInner = (
 
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* 模型选择器已隐藏 - Hidden for simplification
                   <ModelSelector
                     models={availableModels}
                     selectedModel={selectedModel}
                     onSelect={setSelectedModel}
                     disabled={disabled}
                   />
+                  */}
                   <ThinkingModeToggle
                     isEnabled={selectedThinkingMode === "on"}
                     onToggle={handleToggleThinkingMode}
@@ -588,12 +590,14 @@ const FloatingPromptInputInner = (
 
           {/* Second Row: All Controls */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* 模型选择器已隐藏 - Hidden for simplification
             <ModelSelector
               models={availableModels}
               selectedModel={selectedModel}
               onSelect={setSelectedModel}
               disabled={disabled}
             />
+            */}
             {/* Thinking Mode Toggle */}
             <ThinkingModeToggle
               isEnabled={selectedThinkingMode === "on"}

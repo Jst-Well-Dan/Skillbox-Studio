@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bot,
   FolderOpen,
   Plus,
-  Package,
   Sparkles,
   Loader2,
   ArrowLeft,
@@ -12,24 +11,12 @@ import {
   RefreshCw,
   Network,
   Languages,
-  Search,
-  Command,
-  Users,
-  Zap,
-  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
-import type { MarketplaceDetail, SkillInfo, AgentInfo, PluginMetadata } from "@/lib/api";
+import type { MarketplaceDetail, SkillInfo, AgentInfo } from "@/lib/api";
 import { MCPManager } from "@/components/MCPManager";
 import { translatePlugins } from '@/hooks/usePluginTranslation';
 
@@ -48,23 +35,6 @@ interface ClaudeExtensionsManagerProps {
   projectPath?: string;
   className?: string;
   onBack?: () => void;
-}
-
-interface PluginInfo {
-  name: string;
-  description?: string;
-  version: string;
-  author?: string;
-  marketplace?: string;
-  path: string;
-  enabled: boolean;
-  components: {
-    commands: number;
-    agents: number;
-    skills: number;
-    hooks: number;
-    mcpServers: number;
-  };
 }
 
 interface AgentFile {
@@ -81,23 +51,20 @@ interface SkillFile {
   description?: string;
 }
 
-type AvailablePlugin = PluginMetadata & { marketplaceName?: string };
-
 /**
  * Claude 扩展管理器
- * 
+ *
  * 根据官方文档管理：
+ * - Marketplaces: 插件市场源管理
  * - Subagents: .claude/agents/ 下的 Markdown 文件
  * - Agent Skills: .claude/skills/ 下的 SKILL.md 文件
- * - Slash Commands: 已有独立管理器
+ * - MCP: Model Context Protocol 服务器配置
  */
 export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = ({
   projectPath,
   className,
   onBack
 }) => {
-  const [plugins, setPlugins] = useState<PluginInfo[]>([]);
-  const [originalPlugins, setOriginalPlugins] = useState<PluginInfo[]>([]);
   const [agents, setAgents] = useState<AgentFile[]>([]);
   const [originalAgents, setOriginalAgents] = useState<AgentFile[]>([]);
   const [projectAgents, setProjectAgents] = useState<AgentInfo[]>([]); // 从插件获取的代理
@@ -112,11 +79,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
   const [loading, setLoading] = useState(false);
   const [addMarketplaceOpen, setAddMarketplaceOpen] = useState(false);
   const [newMarketplaceSource, setNewMarketplaceSource] = useState("");
-  const [installPluginDialogOpen, setInstallPluginDialogOpen] = useState(false);
-  const [availablePlugins, setAvailablePlugins] = useState<AvailablePlugin[]>([]);
-  const [installSearchQuery, setInstallSearchQuery] = useState("");
-  const [installCategory, setInstallCategory] = useState<string>("all");
-  const [installingPlugin, setInstallingPlugin] = useState<string | null>(null);
 
   // 语言切换状态
   const [language, setLanguage] = useState<'en' | 'zh'>(() => {
@@ -124,62 +86,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
     return (saved === 'zh' || saved === 'en') ? saved : 'en';
   });
   const [translating, setTranslating] = useState(false);
-  const installedPluginKeys = useMemo(() => {
-    const keys = new Set<string>();
-    plugins.forEach((plugin) => {
-      const key = plugin.marketplace ? `${plugin.name}@${plugin.marketplace}` : plugin.name;
-      keys.add(key);
-    });
-    return keys;
-  }, [plugins]);
-
-  const installCategories = useMemo(() => {
-    const cats = new Set<string>();
-    availablePlugins.forEach((plugin) => {
-      if (plugin.category) {
-        cats.add(plugin.category);
-      }
-    });
-    return ['all', ...Array.from(cats).sort()];
-  }, [availablePlugins]);
-
-  const filteredAvailablePlugins = useMemo(() => {
-    const query = installSearchQuery.toLowerCase().trim();
-    return availablePlugins.filter((plugin) => {
-      const displayName = plugin.displayName.toLowerCase();
-      const description = (plugin.description || '').toLowerCase();
-      const matchesSearch =
-        !query ||
-        displayName.includes(query) ||
-        description.includes(query);
-      const matchesCategory =
-        installCategory === 'all' ||
-        (plugin.category || 'other') === installCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [availablePlugins, installCategory, installSearchQuery]);
-
-  // 加载插件
-  const loadPlugins = async () => {
-    try {
-      setLoading(true);
-      const result = await api.listPlugins(projectPath);
-      // 保存原始数据
-      setOriginalPlugins(result);
-      // 如果当前是中文模式，立即翻译
-      if (language === 'zh') {
-        const translatedPlugins = await translatePlugins(result);
-        setPlugins(translatedPlugins);
-      } else {
-        setPlugins(result);
-      }
-      console.log('[ClaudeExtensions] Loaded', result.length, 'plugins');
-    } catch (error) {
-      console.error('[ClaudeExtensions] Failed to load plugins:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // 加载子代理
   const loadAgents = async () => {
@@ -331,14 +237,12 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
       setTranslating(true);
       try {
         const [
-          translatedPlugins,
           translatedAgents,
           translatedProjectAgents,
           translatedSkills,
           translatedProjectSkills,
           translatedMarketplaces
         ] = await Promise.all([
-          translatePlugins(originalPlugins),
           translatePlugins(originalAgents),
           translatePlugins(originalProjectAgents),
           translatePlugins(originalSkills),
@@ -346,7 +250,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
           translatePlugins(originalMarketplaces)
         ]);
 
-        setPlugins(translatedPlugins);
         setAgents(translatedAgents);
         setProjectAgents(translatedProjectAgents);
         setSkills(translatedSkills);
@@ -359,7 +262,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
       }
     } else {
       // 切换到英文：显示原始数据
-      setPlugins(originalPlugins);
       setAgents(originalAgents);
       setProjectAgents(originalProjectAgents);
       setSkills(originalSkills);
@@ -369,15 +271,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
   };
 
   // 打开目录
-  const handleOpenPluginsDir = async () => {
-    try {
-      const dirPath = await api.openPluginsDirectory(projectPath);
-      await api.openDirectoryInExplorer(dirPath);
-    } catch (error) {
-      console.error('Failed to open plugins directory:', error);
-    }
-  };
-
   const handleOpenAgentsDir = async () => {
     try {
       const dirPath = await api.openAgentsDirectory(projectPath);
@@ -396,61 +289,7 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
     }
   };
 
-  const getPluginIdentifier = (plugin: AvailablePlugin) => {
-    const marketplace = plugin.marketplace || plugin.marketplaceName;
-    return marketplace ? `${plugin.name}@${marketplace}` : plugin.name;
-  };
-
-  // 打开安装插件对话框
-  const handleOpenInstallDialog = async () => {
-    try {
-      setLoading(true);
-      // 获取所有marketplace中的可用插件
-      const allPlugins: AvailablePlugin[] = [];
-      for (const marketplace of marketplaces) {
-        try {
-          const plugins = await api.listMarketplacePlugins(marketplace.name);
-          allPlugins.push(...plugins.map((p) => ({
-            ...p,
-            marketplaceName: marketplace.name
-          })));
-        } catch (error) {
-          console.error(`Failed to load plugins from ${marketplace.name}:`, error);
-        }
-      }
-      setAvailablePlugins(allPlugins);
-      setInstallSearchQuery("");
-      setInstallCategory("all");
-      setInstallPluginDialogOpen(true);
-    } catch (error) {
-      console.error('Failed to load available plugins:', error);
-      alert('加载可用插件失败：' + error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 安装插件
-  const handleInstallPlugin = async (plugin: AvailablePlugin) => {
-    const pluginIdentifier = getPluginIdentifier(plugin);
-    const pluginLabel = plugin.displayName || pluginIdentifier;
-    try {
-      setInstallingPlugin(pluginIdentifier);
-      await api.installPluginGlobally(pluginIdentifier);
-      alert(`插件 "${pluginLabel}" 安装成功！`);
-      setInstallPluginDialogOpen(false);
-      // 重新加载插件列表
-      await loadPlugins();
-    } catch (error) {
-      console.error('Failed to install plugin:', error);
-      alert(`安装失败（命令: /plugin install ${pluginIdentifier}）：` + error);
-    } finally {
-      setInstallingPlugin(null);
-    }
-  };
-
   useEffect(() => {
-    loadPlugins();
     loadAgents();
     loadSkills();
     loadMarketplaces();
@@ -494,17 +333,17 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
       )}
 
       {/* 系统级说明提示 */}
-      <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+      <Card className="bg-accent/10 dark:bg-accent/5 border-accent/30 dark:border-accent/20">
         <div className="p-4">
           <div className="flex gap-3">
-            <div className="flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5">
+            <div className="flex-shrink-0 text-accent dark:text-accent mt-0.5">
               💡
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+              <p className="text-sm font-bold text-amber-800 mb-1">
                 关于系统级扩展
               </p>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="text-xs text-amber-800 dark:text-amber-200">
                 这里的配置会<strong>影响所有项目</strong>。若需为单个项目定制能力，请在项目页面使用"项目能力管理"。
               </p>
             </div>
@@ -513,14 +352,10 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="marketplaces">
             <Store className="h-4 w-4 mr-2" />
             Marketplaces
-          </TabsTrigger>
-          <TabsTrigger value="plugins">
-            <Package className="h-4 w-4 mr-2" />
-            Plugins
           </TabsTrigger>
           <TabsTrigger value="agents">
             <Bot className="h-4 w-4 mr-2" />
@@ -619,91 +454,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
           )}
         </TabsContent>
 
-        {/* Plugins Tab */}
-        <TabsContent value="plugins" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Plugins</h3>
-              <p className="text-sm text-muted-foreground">
-                已安装的插件（可包含 commands、agents、skills、hooks、MCP servers）
-              </p>
-            </div>
-            <Button onClick={handleOpenInstallDialog} size="sm" disabled={marketplaces.length === 0}>
-              <Plus className="h-4 w-4 mr-2" />
-              安装插件
-            </Button>
-          </div>
-
-          {/* 插件列表 */}
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : plugins.length > 0 ? (
-            <div className="space-y-2">
-              {plugins.map((plugin) => (
-                <Card key={plugin.path} className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1">
-                      <Package className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{plugin.name}</h4>
-                          <Badge variant="outline" className="text-xs">
-                            v{plugin.version}
-                          </Badge>
-                          {plugin.enabled && (
-                            <Badge variant="default" className="text-xs bg-green-600">
-                              已启用
-                            </Badge>
-                          )}
-                        </div>
-                        {plugin.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {plugin.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                          {plugin.components.commands > 0 && <span>📝 {plugin.components.commands} 命令</span>}
-                          {plugin.components.agents > 0 && <span>🤖 {plugin.components.agents} 代理</span>}
-                          {plugin.components.skills > 0 && <span>✨ {plugin.components.skills} 技能</span>}
-                          {plugin.components.hooks > 0 && <span>🪝 钩子</span>}
-                          {plugin.components.mcpServers > 0 && <span>🔌 MCP</span>}
-                        </div>
-                        {plugin.author && (
-                          <p className="text-xs text-muted-foreground mt-1">作者: {plugin.author}</p>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleOpenPluginsDir}
-                    >
-                      <FolderOpen className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-6 text-center border-dashed">
-              <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h4 className="font-medium mb-2">暂无已安装的 Plugins</h4>
-              <p className="text-sm text-muted-foreground mb-4">
-                Plugins 存储在 .claude/plugins/ 目录下
-              </p>
-              <div className="text-xs text-muted-foreground mb-4">
-                使用 <code className="bg-muted px-1 py-0.5 rounded">/plugin</code> 命令管理插件
-              </div>
-              <Button variant="outline" size="sm" onClick={handleOpenPluginsDir}>
-                <FolderOpen className="h-4 w-4 mr-2" />
-                打开目录
-              </Button>
-            </Card>
-          )}
-        </TabsContent>
-
         {/* Subagents Tab */}
         <TabsContent value="agents" className="space-y-4">
           <div className="flex items-center justify-between">
@@ -774,7 +524,7 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 flex-1">
-                          <Bot className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                          <Bot className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-medium">{agent.displayName || agent.name}</h4>
@@ -979,7 +729,7 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
           <div className="space-y-4 py-4">
             <div>
               <Input
-                placeholder="例如: anthropics/anthropic-agent-skills"
+                placeholder="例如: anthropics/skills"
                 value={newMarketplaceSource}
                 onChange={(e) => setNewMarketplaceSource(e.target.value)}
                 onKeyDown={(e) => {
@@ -1000,146 +750,6 @@ export const ClaudeExtensionsManager: React.FC<ClaudeExtensionsManagerProps> = (
             <Button onClick={handleAddMarketplace} disabled={!newMarketplaceSource.trim() || loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               添加
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* 安装插件对话框 */}
-      <Dialog open={installPluginDialogOpen} onOpenChange={setInstallPluginDialogOpen}>
-        <DialogContent className="max-w-5xl h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>安装插件</DialogTitle>
-            <DialogDescription>
-              从已配置的 Marketplace 中选择插件进行安装
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-4 flex-1 min-h-0">
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="搜索插件..."
-                  value={installSearchQuery}
-                  onChange={(e) => setInstallSearchQuery(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-              <Select value={installCategory} onValueChange={setInstallCategory}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="选择分类" />
-                </SelectTrigger>
-                <SelectContent>
-                  {installCategories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category === 'all' ? '所有分类' : category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3 overflow-y-auto flex-1 min-h-0 pr-1">
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : filteredAvailablePlugins.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredAvailablePlugins.map((plugin) => {
-                    const pluginKey = getPluginIdentifier(plugin);
-                    const isInstalled =
-                      installedPluginKeys.has(pluginKey) ||
-                      installedPluginKeys.has(plugin.name);
-                    const isInstalling = installingPlugin === pluginKey;
-
-                    return (
-                      <Card key={pluginKey} className="p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-3 flex-1">
-                            <Package className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium">{plugin.displayName || plugin.name}</h4>
-                                <Badge variant="outline" className="text-xs">
-                                  v{plugin.version}
-                                </Badge>
-                                <Badge variant="secondary" className="text-xs">
-                                  {plugin.marketplaceName || plugin.marketplace}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {plugin.category || 'general'}
-                                </Badge>
-                              </div>
-                              {plugin.description && (
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                  {plugin.description}
-                                </p>
-                              )}
-                              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                {plugin.components.commands > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Command className="h-3 w-3" />
-                                    {plugin.components.commands} 命令
-                                  </span>
-                                )}
-                                {plugin.components.agents > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Users className="h-3 w-3" />
-                                    {plugin.components.agents} 代理
-                                  </span>
-                                )}
-                                {plugin.components.skills > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Zap className="h-3 w-3" />
-                                    {plugin.components.skills} 技能
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant={isInstalled ? "outline" : "default"}
-                            onClick={() => {
-                              if (!isInstalled && !isInstalling) {
-                                handleInstallPlugin(plugin);
-                              }
-                            }}
-                            disabled={isInstalled || isInstalling}
-                          >
-                            {isInstalling ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : isInstalled ? (
-                              "已安装"
-                            ) : (
-                              <>
-                                <Download className="h-4 w-4 mr-1" />
-                                安装
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <p className="text-sm text-muted-foreground">
-                    暂无可用插件
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    请先在 Marketplaces 标签页中添加 Marketplace 源
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setInstallPluginDialogOpen(false)}>
-              关闭
             </Button>
           </DialogFooter>
         </DialogContent>

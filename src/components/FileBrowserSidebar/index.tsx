@@ -57,6 +57,10 @@ export const FileBrowserSidebar: React.FC<FileBrowserSidebarProps> = ({
     clearToast,
   } = useFileBrowserSidebar(projectPath);
 
+  const handleOpenProjectFolder = () => {
+    openFolderInExplorer(projectPath);
+  };
+
   return (
     <>
       {/* Sidebar with animation */}
@@ -68,7 +72,10 @@ export const FileBrowserSidebar: React.FC<FileBrowserSidebarProps> = ({
       >
         <div className="h-full flex flex-col w-[280px]">
           {/* Header */}
-          <SidebarHeader onToggleCollapse={onToggle} />
+          <SidebarHeader
+            onToggleCollapse={onToggle}
+            onOpenProjectFolder={handleOpenProjectFolder}
+          />
 
           {/* Usage hints */}
           <FileUsageHints />
@@ -95,6 +102,7 @@ export const FileBrowserSidebar: React.FC<FileBrowserSidebarProps> = ({
                 onToggle={toggleDirectory}
                 onCopyPath={copyFilePath}
                 onOpenFolder={openFolderInExplorer}
+                projectPath={projectPath}
               />
             )}
           </div>

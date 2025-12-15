@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderOpen, PanelLeftClose } from 'lucide-react';
+import { FolderOpen, PanelLeftClose, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -8,6 +8,10 @@ interface SidebarHeaderProps {
    * Callback when the collapse button is clicked
    */
   onToggleCollapse: () => void;
+  /**
+   * Callback to open project folder in system file explorer
+   */
+  onOpenProjectFolder?: () => void;
 }
 
 /**
@@ -20,6 +24,7 @@ interface SidebarHeaderProps {
  */
 export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   onToggleCollapse,
+  onOpenProjectFolder,
 }) => {
   const { t } = useTranslation();
 
@@ -31,16 +36,32 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         <h3 className="text-sm font-semibold">{t('fileBrowser.title')}</h3>
       </div>
 
-      {/* Collapse button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggleCollapse}
-        className="h-7 w-7 p-0"
-        aria-label="折叠侧边栏"
-      >
-        <PanelLeftClose className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-1">
+        {/* Open project folder button */}
+        {onOpenProjectFolder && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onOpenProjectFolder}
+            className="h-7 w-7 p-0"
+            aria-label={t('fileBrowser.openProjectFolder')}
+            title={t('fileBrowser.openProjectFolder')}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        )}
+
+        {/* Collapse button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleCollapse}
+          className="h-7 w-7 p-0"
+          aria-label="折叠侧边栏"
+        >
+          <PanelLeftClose className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };

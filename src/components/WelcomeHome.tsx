@@ -51,9 +51,9 @@ export const WelcomeHome: React.FC<WelcomeHomeProps> = ({ onNavigateTo }) => {
             className="text-lg max-w-2xl mx-auto leading-relaxed"
             style={{ color: '#666666' }}
           >
-            聊出来的只是灵感，装进 <span className="font-bold text-black dark:text-white bg-muted px-1.5 py-0.5 rounded">Skillbox</span> 的才是生产力。
+            <span className="font-bold bg-muted px-1.5 py-0.5 rounded" style={{ color: '#4C5458' }}>Skillbox</span> ,让 AI 拥有解决问题的“手”与“眼”。
             <br className="hidden sm:block" />
-            无需编程基础，你构想法即刻落地。
+            无需编程基础，你的想法即刻落地。
           </motion.p>
         </div>
 

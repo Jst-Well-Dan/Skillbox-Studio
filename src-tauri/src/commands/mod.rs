@@ -1,4 +1,5 @@
 pub mod acemcp;
+pub mod bundled_plugins;  // 内置插件安装
 pub mod claude;
 pub mod clipboard;
 pub mod context_commands;
@@ -9,6 +10,7 @@ pub mod extensions;
 pub mod file_operations;
 pub mod git_stats;
 pub mod mcp;
+pub mod nodejs_installer;  // Node.js 自动安装
 pub mod permission_config;
 pub mod project_plugins;
 pub mod prompt_tracker;

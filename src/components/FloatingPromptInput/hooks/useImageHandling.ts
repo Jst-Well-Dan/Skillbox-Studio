@@ -244,18 +244,28 @@ export function useImageHandling({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setDragActive(false);
+
+    // First, check if there's text data (from sidebar file drag)
+    const droppedText = e.dataTransfer.getData('text/plain');
+    if (droppedText && droppedText.trim()) {
+      // Dragged from sidebar - add file reference
+      addFileReference(droppedText);
+      return;
+    }
+
+    // Otherwise, handle as file drop (original behavior)
+    // This would handle system file manager drops if needed
   };
 
-  // Add image programmatically (via ref)
-  const addImage = (imagePath: string) => {
-    if (!isImageFile(imagePath)) return;
-
+  // Add any file reference programmatically (generalized from addImage)
+  const addFileReference = (filePath: string) => {
     const existingPaths = extractImagePaths(prompt);
-    if (existingPaths.includes(imagePath)) return;
+    if (existingPaths.includes(filePath)) return;
 
-    const mention = imagePath.includes(' ') ? `@"${imagePath}"` : `@${imagePath}`;
+    const mention = filePath.includes(' ') ? `@"${filePath}"` : `@${filePath}`;
     const newPrompt = prompt + (prompt.endsWith(' ') || prompt === '' ? '' : ' ') + mention + ' ';
-    
+
     onPromptChange(newPrompt);
 
     setTimeout(() => {
@@ -263,6 +273,12 @@ export function useImageHandling({
       target?.focus();
       target?.setSelectionRange(newPrompt.length, newPrompt.length);
     }, 0);
+  };
+
+  // Add image programmatically (via ref) - now uses addFileReference internally
+  const addImage = (imagePath: string) => {
+    if (!isImageFile(imagePath)) return;
+    addFileReference(imagePath);
   };
 
   return {
@@ -275,6 +291,7 @@ export function useImageHandling({
     handleDrag,
     handleDrop,
     addImage,
+    addFileReference,
     setImageAttachments,
     setEmbeddedImages,
   };

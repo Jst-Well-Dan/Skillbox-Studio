@@ -200,12 +200,7 @@ export const TabManager: React.FC<TabManagerProps> = ({
                 {tabs.map((tab, index) => (
                   <Tooltip key={tab.id}>
                     <TooltipTrigger asChild>
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
+                      <div
                         className={cn(
                           "group relative flex items-center gap-2 px-3 py-1.5 rounded-lg min-w-0 max-w-[200px] cursor-pointer",
                           "transition-colors",
@@ -254,7 +249,7 @@ export const TabManager: React.FC<TabManagerProps> = ({
                         >
                           <X className="h-3 w-3" />
                         </button>
-                      </motion.div>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-sm">
                       <div className="space-y-1 text-xs">

@@ -191,17 +191,19 @@
   "fileBrowser": {
     "title": "项目文件",
     "pathCopied": "已复制到剪贴板",
+    "openProjectFolder": "在文件管理器中打开项目目录",
     "emptyDirectory": "空目录",
     "loadError": "加载失败",
     "hints": {
       "clickToCopy": "点击文件复制路径",
+      "dragToReference": "拖拽文件/文件夹到输入框引用",
       "useAtSymbol": "在输入框输入 @ 引用文件",
       "toggleShortcut": "使用 Ctrl+B 切换侧边栏"
     }
   },
   "common": {
     "backToHome": "← 返回主页",
-    "newProject": "新建项目",
+    "newProject": "打开文件夹",
     "newClaudeSession": "新建 Claude Code 会话",
     "browseClaudeSessions": "浏览您的 Claude Code 会话",
     "noProjectsFound": "在 ~/.claude/projects 中未找到项目",

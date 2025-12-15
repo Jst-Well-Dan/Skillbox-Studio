@@ -32,6 +32,10 @@ interface DirectoryTreeProps {
    * Callback to open folder in explorer
    */
   onOpenFolder: (path: string) => void;
+  /**
+   * Project root path for calculating relative paths
+   */
+  projectPath: string;
 }
 
 /**
@@ -51,6 +55,7 @@ export const DirectoryTree: React.FC<DirectoryTreeProps> = ({
   onToggle,
   onCopyPath,
   onOpenFolder,
+  projectPath,
 }) => {
   const { t } = useTranslation();
 
@@ -84,6 +89,7 @@ export const DirectoryTree: React.FC<DirectoryTreeProps> = ({
               onToggle={onToggle}
               onCopyPath={onCopyPath}
               onOpenFolder={onOpenFolder}
+              projectPath={projectPath}
             />
 
             {/* Recursively render children if directory is expanded */}
@@ -96,6 +102,7 @@ export const DirectoryTree: React.FC<DirectoryTreeProps> = ({
                 onToggle={onToggle}
                 onCopyPath={onCopyPath}
                 onOpenFolder={onOpenFolder}
+                projectPath={projectPath}
               />
             )}
           </React.Fragment>

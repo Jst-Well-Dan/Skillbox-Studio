@@ -41,11 +41,15 @@ use commands::prompt_tracker::{
 use commands::provider::{
     add_provider_config, clear_provider_config, delete_provider_config,
     get_current_provider_config, get_provider_config, get_provider_presets, switch_provider_config,
-    test_provider_connection, update_provider_config,
+    test_provider_connection, update_provider_config, open_claude_config_dir,
 };
 use commands::router::{
-    check_router_dependencies, generate_router_config, get_router_status, load_router_config,
-    save_router_config, start_router, stop_router, RouterManagerState,
+    check_router_dependencies, generate_router_config, get_ccr_config_dir, get_router_status,
+    install_ccr, load_router_config, open_ccr_config_dir, open_ccr_ui, restart_router,
+    save_router_config, start_ccr_native, start_router, stop_router, RouterManagerState,
+};
+use commands::nodejs_installer::{
+    get_latest_nodejs_lts, download_nodejs, install_nodejs_complete, check_nodejs_installed,
 };
 use commands::simple_git::check_and_init_git;
 use commands::storage::{
@@ -69,6 +73,10 @@ use commands::extensions::{
     list_workspace_projects, open_agents_directory, open_plugins_directory,
     open_skills_directory, read_skill, read_subagent,
 };
+use commands::bundled_plugins::{
+    force_reinstall_bundled_plugins, get_bundled_plugins_status,
+    install_bundled_plugins_command,
+};
 use commands::project_plugins::{
     add_marketplace, get_project_agents, get_project_commands, get_project_skills,
     install_plugin_to_project, is_plugin_installed, list_known_marketplaces,
@@ -80,7 +88,7 @@ use commands::file_operations::{
     path_exists, read_file,
 };
 use commands::git_stats::{get_git_diff_stats, get_session_code_changes};
-use commands::diagnostic::{diagnostic_claude_cli, diagnostic_test_event};
+use commands::diagnostic::{diagnostic_claude_cli, diagnostic_test_event, install_claude_code};
 use process::ProcessRegistryState;
 use tauri::Manager;
 use tauri_plugin_window_state::Builder as WindowStatePlugin;
@@ -141,6 +149,23 @@ fn main() {
             // Initialize translation service with saved configuration
             tauri::async_runtime::spawn(async move {
                 commands::translator::init_translation_service_with_saved_config().await;
+            });
+
+            // Initialize bundled plugins in background (silent, non-blocking)
+            // This installs/updates the pre-bundled Skill-Box plugins to ~/.claude/plugins/marketplaces/
+            let app_handle_for_plugins = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                match commands::bundled_plugins::install_bundled_plugins(&app_handle_for_plugins).await {
+                    Ok(plugins) => {
+                        if !plugins.is_empty() {
+                            log::info!("Bundled plugins installed: {} plugins from Skill-Box", plugins.len());
+                        }
+                    }
+                    Err(e) => {
+                        log::warn!("Failed to install bundled plugins: {}", e);
+                        // Non-fatal - app continues normally
+                    }
+                }
             });
 
             Ok(())
@@ -251,6 +276,7 @@ fn main() {
             update_provider_config,
             delete_provider_config,
             get_provider_config,
+            open_claude_config_dir,
             // Router Management (Claude Code Router Integration)
             check_router_dependencies,
             generate_router_config,
@@ -259,6 +285,17 @@ fn main() {
             start_router,
             stop_router,
             get_router_status,
+            restart_router,
+            open_ccr_ui,
+            install_ccr,
+            get_ccr_config_dir,
+            open_ccr_config_dir,
+            start_ccr_native,
+            // Node.js Auto Installation
+            get_latest_nodejs_lts,
+            download_nodejs,
+            install_nodejs_complete,
+            check_nodejs_installed,
             // Translation
             translate,
             translate_batch,
@@ -300,6 +337,10 @@ fn main() {
             open_skills_directory,
             get_project_plugins_summary,
             list_workspace_projects,
+            // Bundled Plugins (Pre-installed Skill-Box)
+            get_bundled_plugins_status,
+            install_bundled_plugins_command,
+            force_reinstall_bundled_plugins,
             // Project-Level Plugin Management
             list_plugin_marketplaces,
             list_marketplace_plugins,
@@ -329,6 +370,7 @@ fn main() {
             // Diagnostic Tools
             diagnostic_claude_cli,
             diagnostic_test_event,
+            install_claude_code,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

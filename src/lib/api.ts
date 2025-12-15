@@ -279,6 +279,24 @@ export interface DependencyStatus {
 }
 
 /**
+ * Node.js version information from nodejs.org API
+ */
+export interface NodeVersion {
+  version: string;
+  date: string;
+  lts: boolean | string;
+}
+
+/**
+ * Node.js installation progress
+ */
+export interface NodejsInstallProgress {
+  stage: 'FetchingVersion' | 'Downloading' | 'Verifying' | 'Installing' | 'Completed' | 'Failed';
+  percentage: number;
+  message: string;
+}
+
+/**
  * Router running status
  */
 export interface RouterStatus {
@@ -1784,6 +1802,18 @@ export const api = {
   },
 
   /**
+   * Opens the Claude configuration directory (~/.claude) in file explorer
+   */
+  async openClaudeConfigDir(): Promise<void> {
+    try {
+      await invoke<void>("open_claude_config_dir");
+    } catch (error) {
+      console.error("Failed to open Claude config dir:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Adds a new provider configuration
    * @param config - The provider configuration to add
    * @returns Promise resolving to success message
@@ -1955,6 +1985,142 @@ export const api = {
       return await invoke<RouterStatus>("get_router_status");
     } catch (error) {
       console.error("Failed to get router status:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Restarts the Router service (stop + start)
+   * @returns Promise resolving to router status after restart
+   */
+  async restartRouter(): Promise<RouterStatus> {
+    try {
+      return await invoke<RouterStatus>("restart_router");
+    } catch (error) {
+      console.error("Failed to restart router:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Opens CCR Web UI in the default browser
+   * @returns Promise resolving to success message
+   */
+  async openCcrUi(): Promise<string> {
+    try {
+      return await invoke<string>("open_ccr_ui");
+    } catch (error) {
+      console.error("Failed to open CCR UI:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Installs or updates CCR (claude-code-router) via npm
+   * @param force - Whether to force reinstall (--force flag)
+   * @returns Promise resolving to installation result message
+   */
+  async installCcr(force: boolean = true): Promise<string> {
+    try {
+      return await invoke<string>("install_ccr", { force });
+    } catch (error) {
+      console.error("Failed to install CCR:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets the CCR configuration directory path
+   * @returns Promise resolving to directory path
+   */
+  async getCcrConfigDir(): Promise<string> {
+    try {
+      return await invoke<string>("get_ccr_config_dir");
+    } catch (error) {
+      console.error("Failed to get CCR config dir:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Opens the CCR configuration directory in file explorer
+   */
+  async openCcrConfigDir(): Promise<void> {
+    try {
+      await invoke<void>("open_ccr_config_dir");
+    } catch (error) {
+      console.error("Failed to open CCR config dir:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Starts CCR using native configuration (~/.claude-code-router/config.json)
+   * @returns Promise resolving to router status
+   */
+  async startCcrNative(): Promise<RouterStatus> {
+    try {
+      return await invoke<RouterStatus>("start_ccr_native");
+    } catch (error) {
+      console.error("Failed to start CCR native:", error);
+      throw error;
+    }
+  },
+
+  // ============================================================================
+  // NODE.JS AUTO INSTALLATION
+  // ============================================================================
+
+  /**
+   * Gets the latest Node.js LTS version from nodejs.org
+   * @returns Promise resolving to version info
+   */
+  async getLatestNodejsLts(): Promise<NodeVersion> {
+    try {
+      return await invoke<NodeVersion>("get_latest_nodejs_lts");
+    } catch (error) {
+      console.error("Failed to get latest Node.js LTS:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Downloads Node.js installer for the current platform
+   * @param version - The version to download (e.g., "v22.11.0")
+   * @returns Promise resolving to the downloaded file path
+   */
+  async downloadNodejs(version: string): Promise<string> {
+    try {
+      return await invoke<string>("download_nodejs", { version });
+    } catch (error) {
+      console.error("Failed to download Node.js:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Runs the complete Node.js installation workflow
+   * Downloads, verifies, and installs Node.js with automatic admin elevation
+   * @returns Promise resolving to success message
+   */
+  async installNodejsComplete(): Promise<string> {
+    try {
+      return await invoke<string>("install_nodejs_complete");
+    } catch (error) {
+      console.error("Failed to install Node.js:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Checks if Node.js is already installed
+   * @returns Promise resolving to version string if installed, null otherwise
+   */
+  async checkNodejsInstalled(): Promise<string | null> {
+    try {
+      return await invoke<string | null>("check_nodejs_installed");
+    } catch (error) {
+      console.error("Failed to check Node.js installation:", error);
       throw error;
     }
   },
@@ -2724,6 +2890,52 @@ export const api = {
     }
   },
 
+  // ==================== Bundled Plugins ====================
+
+  /**
+   * Bundled plugins metadata
+   */
+  async getBundledPluginsStatus(): Promise<{
+    app_version: string;
+    installed_plugins: string[];
+    installed_at: string;
+  } | null> {
+    try {
+      return await invoke<{
+        app_version: string;
+        installed_plugins: string[];
+        installed_at: string;
+      } | null>("get_bundled_plugins_status");
+    } catch (error) {
+      console.error("Failed to get bundled plugins status:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Manually install bundled plugins
+   */
+  async installBundledPlugins(): Promise<string[]> {
+    try {
+      return await invoke<string[]>("install_bundled_plugins_command");
+    } catch (error) {
+      console.error("Failed to install bundled plugins:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Force reinstall bundled plugins (useful after update)
+   */
+  async forceReinstallBundledPlugins(): Promise<string[]> {
+    try {
+      return await invoke<string[]>("force_reinstall_bundled_plugins");
+    } catch (error) {
+      console.error("Failed to force reinstall bundled plugins:", error);
+      throw error;
+    }
+  },
+
   /**
    * Open a directory in system file explorer (cross-platform)
    */
@@ -3106,6 +3318,19 @@ export const api = {
       return await invoke<string>("diagnostic_claude_cli");
     } catch (error) {
       console.error("Failed to run Claude CLI diagnostic:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Install or update Claude Code CLI via npm
+   * Runs: npm install -g @anthropic-ai/claude-code
+   */
+  async installClaudeCode(): Promise<string> {
+    try {
+      return await invoke<string>("install_claude_code");
+    } catch (error) {
+      console.error("Failed to install Claude Code:", error);
       throw error;
     }
   },

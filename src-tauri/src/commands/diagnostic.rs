@@ -78,7 +78,7 @@ pub async fn diagnostic_claude_cli(app: tauri::AppHandle) -> Result<String, Stri
         Err(e) => {
             report.push_str(&format!("   ❌ Claude CLI not found: {}\n\n", e));
             report.push_str("Troubleshooting steps:\n");
-            report.push_str("   1. Install Claude CLI: npm install -g @anthropic/claude\n");
+            report.push_str("   1. Install Claude Code: npm install -g @anthropic-ai/claude-code\n");
             report.push_str("   2. Verify installation: claude --version\n");
             report.push_str("   3. Restart the application\n\n");
         }
@@ -105,6 +105,74 @@ pub async fn diagnostic_claude_cli(app: tauri::AppHandle) -> Result<String, Stri
     report.push_str("\n=== End of Diagnostic Report ===\n");
 
     Ok(report)
+}
+
+/// Install or update Claude Code CLI via npm
+#[tauri::command]
+pub async fn install_claude_code() -> Result<String, String> {
+    log::info!("安装/更新 Claude Code CLI...");
+
+    #[cfg(target_os = "windows")]
+    let (shell, shell_arg) = ("cmd", "/c");
+
+    #[cfg(not(target_os = "windows"))]
+    let (shell, shell_arg) = ("sh", "-c");
+
+    // 构建安装命令
+    let install_cmd = "npm install -g @anthropic-ai/claude-code";
+
+    log::info!("执行命令: {}", install_cmd);
+
+    let mut cmd = std::process::Command::new(shell);
+    cmd.args([shell_arg, install_cmd]);
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    }
+
+    let output = cmd
+        .output()
+        .map_err(|e| format!("执行安装命令失败: {}", e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    log::info!("安装输出 stdout: {}", stdout);
+    log::info!("安装输出 stderr: {}", stderr);
+
+    if output.status.success() {
+        // 检测安装后的版本
+        let version_output = std::process::Command::new(shell)
+            .args([shell_arg, "claude --version"])
+            .output();
+
+        let version_info = if let Ok(v_output) = version_output {
+            if v_output.status.success() {
+                let version = String::from_utf8_lossy(&v_output.stdout);
+                format!("版本: {}", version.trim())
+            } else {
+                "已安装".to_string()
+            }
+        } else {
+            "已安装".to_string()
+        };
+
+        Ok(format!("✅ Claude Code CLI 安装成功！{}", version_info))
+    } else {
+        // npm 安装有时会在 stderr 输出信息但仍然成功
+        // 检查是否真的失败
+        if stderr.contains("added") || stderr.contains("up to date") || stdout.contains("added") {
+            Ok("✅ Claude Code CLI 安装成功！".to_string())
+        } else {
+            Err(format!(
+                "安装失败:\n{}\n{}",
+                stdout.trim(),
+                stderr.trim()
+            ))
+        }
+    }
 }
 
 /// Test event emission to verify Tauri event system
