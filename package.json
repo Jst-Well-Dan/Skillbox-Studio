@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:build": "tauri build",
-    "tauri:build-fast": "tauri build --profile dev-release",
+    "tauri:build-fast": "tauri build -- --profile dev-release",
     "tauri:dev": "tauri dev"
   },
   "dependencies": {

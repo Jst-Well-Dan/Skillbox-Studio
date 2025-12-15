@@ -1,6 +1,6 @@
-# Claude Workbench 安装与部署速查
+# Xiya Claude Studio 安装与部署速查
 
-> 本文概括 `E:\Python_Doc\AI Learning\claude-workbench\claude-workbench` 项目的搭建流程，方便在 Windows 环境下快速完成安装、开发与打包。
+> 本文概括 Xiya Claude Studio 项目的搭建流程，方便在 Windows 环境下快速完成安装、开发与打包。
 
 ## 1. 终端环境准备
 
@@ -30,7 +30,7 @@ setx PATH "$env:USERPROFILE\.bun\bin;$env:PATH"
 进入项目目录安装依赖（优先使用 `bun install`，可重用 `bun.lock`）：
 
 ```powershell
-cd "E:\Python_Doc\AI Learning\claude-workbench\claude-workbench"
+cd "项目目录"
 bun install
 ```
 

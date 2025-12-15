@@ -84,7 +84,7 @@ export const DeletedProjects: React.FC<DeletedProjectsProps> = ({
             .replace(/^C\//, 'C:/')
             .replace(/^\/+/, '/');
         }
-        // Handle double-dash format (legacy claude-workbench)
+        // Handle double-dash format 
         else if (projectId.includes('--')) {
           decodedPath = projectId
             .replace(/--/g, '/')

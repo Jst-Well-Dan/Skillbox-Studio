@@ -56,6 +56,10 @@
       "displayName": "CSV 数据分析器",
       "description": "使用 Python 和 pandas 分析 CSV 文件、生成汇总统计信息并绘制快速可视化图表。"
     },
+    "invoice-processor": {
+      "displayName": "发票处理器",
+      "description": "使用 AI 视觉识别自动处理 PDF/图片格式的发票，提取信息并导出到 Excel 表格。当用户提到\"发票\"、\"invoice\"、\"处理发票\"、\"识别发票\"、\"提取发票\"或需要将发票文件转换为 Excel 格式时使用。"
+    },
     "deep-reading-analyst": {
       "displayName": "深度阅读分析",
       "description": "使用5种经过验证的思维模型（SCQA、5W2H、批判性思维、逆向思维、系统思维）对文章、论文和长篇内容进行系统性分析。适用于：(1) 文章/论文深度分析，(2) 结构化阅读笔记，(3) 论点评估，(4) 洞见提取，(5) 多源对比，(6) 框架应用。"

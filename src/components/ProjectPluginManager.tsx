@@ -108,7 +108,7 @@ export const ProjectPluginManager: React.FC<ProjectPluginManagerProps> = ({
 
   // 首次使用引导状态
   const [showWelcome, setShowWelcome] = useState(false);
-  const WELCOME_DISMISSED_KEY = 'claude-workbench-project-plugin-welcome-dismissed';
+  const WELCOME_DISMISSED_KEY = 'xiya-claude-studio-project-plugin-welcome-dismissed';
 
   // 检查是否需要显示首次使用引导
   useEffect(() => {

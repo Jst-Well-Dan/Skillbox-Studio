@@ -306,8 +306,8 @@ export const PluginLibrary: React.FC<PluginLibraryProps> = ({ onBack, onNavigate
             <h1 className="text-3xl font-bold tracking-tight">系统插件库</h1>
             <p className="text-sm text-muted-foreground mt-1">管理全局可用的系统级插件，适用于所有项目</p>
           </div>
-          {/* Skill-Box 一键安装按钮 - 暂时隐藏 */}
-          {/* <Button
+          {/* Skill-Box 一键安装按钮 */}
+          <Button
             variant="outline"
             size="sm"
             onClick={handleInstallSkillBox}
@@ -321,7 +321,7 @@ export const PluginLibrary: React.FC<PluginLibraryProps> = ({ onBack, onNavigate
               <Package className="w-4 h-4" />
             )}
             安装 Skill-Box
-          </Button> */}
+          </Button>
           {/* 语言切换按钮 */}
           <Button
             variant="outline"

@@ -50,14 +50,14 @@ pub fn ensure_git_repo(project_path: &str) -> Result<(), String> {
 
     // Configure Git user if not set (needed for commits)
     let mut config_name = Command::new("git");
-    config_name.args(["config", "user.name", "Claude Workbench"]);
+    config_name.args(["config", "user.name", "Xiya Claude Studio"]);
     config_name.current_dir(project_path);
     #[cfg(target_os = "windows")]
     config_name.creation_flags(0x08000000);
     let _ = config_name.output();
 
     let mut config_email = Command::new("git");
-    config_email.args(["config", "user.email", "ai@claude.workbench"]);
+    config_email.args(["config", "user.email", "ai@xiya-claude-studio"]);
     config_email.current_dir(project_path);
     #[cfg(target_os = "windows")]
     config_email.creation_flags(0x08000000);
@@ -88,7 +88,7 @@ pub fn ensure_git_repo(project_path: &str) -> Result<(), String> {
         "commit",
         "--allow-empty",
         "-m",
-        "[Claude Workbench] Initial commit - preserving existing code",
+        "[Xiya Claude Studio] Initial commit - preserving existing code",
     ]);
     commit_cmd.current_dir(project_path);
 

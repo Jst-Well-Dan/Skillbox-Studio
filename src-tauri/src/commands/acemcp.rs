@@ -489,7 +489,7 @@ impl AcemcpClient {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
             "clientInfo": {
-                "name": "claude-workbench",
+                "name": "xiya-claude-studio",
                 "version": "4.1.3"
             }
         });
