@@ -36,6 +36,8 @@ temp_lib/
 .cursor/
 AGENTS.md
 *_TASK.md
+CLAUDE.md
+header.txt
 
 # Claude project-specific files
 .claude/
@@ -78,3 +80,8 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Project documentation and assets (local only)
+docs/
+assets/
+scripts/
