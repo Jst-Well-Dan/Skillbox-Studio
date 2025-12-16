@@ -190,7 +190,7 @@ fn register_marketplace_directly(install_location: &Path, marketplace_name: &str
     let marketplace_entry = serde_json::json!({
         "source": {
             "source": "directory",
-            "url": install_location.to_string_lossy()
+            "path": install_location.to_string_lossy()
         },
         "installLocation": install_location.to_string_lossy(),
         "lastUpdated": chrono::Utc::now().to_rfc3339()
