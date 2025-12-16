@@ -158,14 +158,12 @@ jobs:
           DARWIN_AARCH64_SIG=$(find artifacts -name "*aarch64.app.tar.gz.sig" -type f | head -n 1)
           DARWIN_X64_SIG=$(find artifacts -name "*x64.app.tar.gz.sig" -type f | head -n 1)
           LINUX_SIG=$(find artifacts -name "*.AppImage.sig" -type f | head -n 1)
-          WINDOWS_MSI_SIG=$(find artifacts -name "*.msi.sig" -type f | head -n 1)
           WINDOWS_NSIS_SIG=$(find artifacts -name "*-setup.exe.sig" -type f | head -n 1)
 
           # Read signatures
           DARWIN_AARCH64_SIGNATURE=$(cat "$DARWIN_AARCH64_SIG" 2>/dev/null || echo "")
           DARWIN_X64_SIGNATURE=$(cat "$DARWIN_X64_SIG" 2>/dev/null || echo "")
           LINUX_SIGNATURE=$(cat "$LINUX_SIG" 2>/dev/null || echo "")
-          WINDOWS_MSI_SIGNATURE=$(cat "$WINDOWS_MSI_SIG" 2>/dev/null || echo "")
           WINDOWS_NSIS_SIGNATURE=$(cat "$WINDOWS_NSIS_SIG" 2>/dev/null || echo "")
 
           # Generate latest.json
@@ -213,7 +211,7 @@ jobs:
 
             - **macOS (Apple Silicon)**: `*-aarch64.dmg` or `*-aarch64.app.tar.gz`
             - **macOS (Intel)**: `*-x64.dmg` or `*-x64.app.tar.gz`
-            - **Windows (安装版)**: `*-setup.exe` (NSIS) or `*.msi` - **支持自动更新**
+            - **Windows (安装版)**: `*-setup.exe` (NSIS) - **支持自动更新**
             - **Windows (免安装版)**: `*.exe` (Portable) - 需手动更新
             - **Linux**: `*.AppImage` or `*.deb`
 
@@ -227,8 +225,6 @@ jobs:
             artifacts/**/*.dmg
             artifacts/**/*.app.tar.gz
             artifacts/**/*.app.tar.gz.sig
-            artifacts/**/*.msi
-            artifacts/**/*.msi.sig
             artifacts/**/*-setup.exe
             artifacts/**/*-setup.exe.sig
             artifacts/**/*-portable.exe
