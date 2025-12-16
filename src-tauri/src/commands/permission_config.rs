@@ -27,7 +27,14 @@ impl Default for ClaudePermissionConfig {
                 "Edit".to_string(),
                 "Bash".to_string(),
             ],
-            disallowed_tools: vec![],
+            // 禁用危险的删除命令，防止误删文件
+            disallowed_tools: vec![
+                "Bash(rm:*)".to_string(),      // 禁用 rm 命令
+                "Bash(rm -rf:*)".to_string(),  // 禁用 rm -rf 命令
+                "Bash(rmdir:*)".to_string(),   // 禁用 rmdir 命令
+                "Bash(del:*)".to_string(),     // 禁用 Windows del 命令
+                "Bash(rd:*)".to_string(),      // 禁用 Windows rd 命令
+            ],
             permission_mode: PermissionMode::Interactive,
             auto_approve_edits: false,
             enable_dangerous_skip: true, // 默认保持现有行为

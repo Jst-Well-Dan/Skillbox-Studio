@@ -726,16 +726,9 @@ export class TranslationMiddleware {
       };
     }
 
-    // 检查翻译功能是否启用
-    if (!this.config?.enabled) {
-      const detectedLang = await this.detectLanguage(claudeResponse);
-      return {
-        translatedText: claudeResponse,
-        originalText: claudeResponse,
-        wasTranslated: false,
-        detectedLanguage: detectedLang,
-      };
-    }
+    // 🔧 响应翻译始终启用，不受全局 enabled 配置影响
+    // 用户输入翻译已在 usePromptExecution 中单独禁用
+    // if (!this.config?.enabled) { ... } - 已移除此检查
 
     try {
       // 检测响应语言

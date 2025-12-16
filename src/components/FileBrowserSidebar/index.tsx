@@ -5,7 +5,8 @@ import { SidebarHeader } from './SidebarHeader';
 import { FileUsageHints } from './FileUsageHints';
 import { DirectoryTree } from './DirectoryTree';
 import { Toast, ToastContainer } from '@/components/ui/toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PanelLeftOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FileBrowserSidebarProps {
   /**
@@ -63,51 +64,70 @@ export const FileBrowserSidebar: React.FC<FileBrowserSidebarProps> = ({
 
   return (
     <>
-      {/* Sidebar with animation */}
-      <motion.div
-        initial={false}
-        animate={{ width: isVisible ? 280 : 0 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 bg-background border-r border-border overflow-hidden"
-      >
-        <div className="h-full flex flex-col w-[280px]">
-          {/* Header */}
-          <SidebarHeader
-            onToggleCollapse={onToggle}
-            onOpenProjectFolder={handleOpenProjectFolder}
-          />
-
-          {/* Usage hints */}
-          <FileUsageHints />
-
-          {/* Content area */}
-          <div className="flex-1 overflow-y-auto">
-            {loading ? (
-              // Loading state
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : error ? (
-              // Error state
-              <div className="px-3 py-4 text-sm text-destructive">
-                {error}
-              </div>
-            ) : (
-              // Directory tree
-              <DirectoryTree
-                entries={rootEntries}
-                depth={0}
-                expandedDirs={expandedDirs}
-                loadedDirs={loadedDirs}
-                onToggle={toggleDirectory}
-                onCopyPath={copyFilePath}
-                onOpenFolder={openFolderInExplorer}
-                projectPath={projectPath}
-              />
-            )}
-          </div>
+      {/* Expand button when sidebar is collapsed */}
+      {!isVisible && (
+        <div className="flex-shrink-0 border-r border-border bg-background">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="h-10 w-10 p-0 m-1"
+            aria-label="展开侧边栏"
+            title="展开项目文件"
+          >
+            <PanelLeftOpen className="h-4 w-4" />
+          </Button>
         </div>
-      </motion.div>
+      )}
+
+      {/* Sidebar with animation */}
+      {isVisible && (
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: 280 }}
+          exit={{ width: 0 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+          className="flex-shrink-0 bg-background border-r border-border overflow-hidden"
+        >
+          <div className="h-full flex flex-col w-[280px]">
+            {/* Header */}
+            <SidebarHeader
+              onToggleCollapse={onToggle}
+              onOpenProjectFolder={handleOpenProjectFolder}
+            />
+
+            {/* Usage hints */}
+            <FileUsageHints />
+
+            {/* Content area */}
+            <div className="flex-1 overflow-y-auto">
+              {loading ? (
+                // Loading state
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : error ? (
+                // Error state
+                <div className="px-3 py-4 text-sm text-destructive">
+                  {error}
+                </div>
+              ) : (
+                // Directory tree
+                <DirectoryTree
+                  entries={rootEntries}
+                  depth={0}
+                  expandedDirs={expandedDirs}
+                  loadedDirs={loadedDirs}
+                  onToggle={toggleDirectory}
+                  onCopyPath={copyFilePath}
+                  onOpenFolder={openFolderInExplorer}
+                  projectPath={projectPath}
+                />
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Toast notifications */}
       <ToastContainer>

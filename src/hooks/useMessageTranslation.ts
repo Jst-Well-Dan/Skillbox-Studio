@@ -147,13 +147,15 @@ export function useMessageTranslation(config: UseMessageTranslationConfig): UseM
       let processedMessage = { ...message };
 
       try {
-        const isEnabled = await translationMiddleware.isEnabled();
+        // 🔧 响应翻译始终启用，不依赖全局 enabled 配置
+        // 用户输入翻译已单独在 usePromptExecution 中禁用
+        const isResponseTranslationEnabled = true;
 
         // 使用传递的翻译结果或状态中的结果
         const effectiveTranslationResult = currentTranslationResult || lastTranslationResult;
 
         console.log('[useMessageTranslation] Translation debug:', {
-          isEnabled,
+          isResponseTranslationEnabled,
           hasCurrentResult: !!currentTranslationResult,
           hasStateResult: !!lastTranslationResult,
           hasEffectiveResult: !!effectiveTranslationResult,
@@ -168,7 +170,7 @@ export function useMessageTranslation(config: UseMessageTranslationConfig): UseM
                                // Handle any message with actual content regardless of type
                                !!(message.content || message.message?.content || (message as any).text || (message as any).result || (message as any).summary || (message as any).error);
 
-        if (isEnabled && isClaudeResponse) {
+        if (isResponseTranslationEnabled && isClaudeResponse) {
           console.log('[useMessageTranslation] Found Claude response message, checking translation conditions...');
 
           // 🌟 COMPREHENSIVE CONTENT EXTRACTION STRATEGY

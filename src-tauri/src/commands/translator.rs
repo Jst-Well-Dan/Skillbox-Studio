@@ -369,11 +369,14 @@ impl TranslationService {
     }
 
     /// 智能翻译文本
+    /// 🔧 移除 enabled 检查，翻译功能的启用/禁用由前端控制
+    /// 前端已单独控制：用户输入翻译（已禁用）和响应翻译（已启用）
     pub async fn translate(&self, text: &str, target_lang: Option<&str>) -> Result<String> {
-        if !self.config.enabled {
-            debug!("Translation disabled, returning original text");
-            return Ok(text.to_string());
-        }
+        // 🔧 不再检查 self.config.enabled，始终执行翻译
+        // if !self.config.enabled {
+        //     debug!("Translation disabled, returning original text");
+        //     return Ok(text.to_string());
+        // }
 
         if text.trim().is_empty() {
             return Ok(text.to_string());

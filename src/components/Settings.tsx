@@ -285,17 +285,17 @@ export const Settings: React.FC<SettingsProps> = ({
           <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
               <TabsList className="w-full justify-start h-12 p-1 bg-muted/30 rounded-xl border border-border/30 gap-1">
-                <TabsTrigger 
-                  value="general" 
+                <TabsTrigger
+                  value="diagnostic"
+                  className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
+                >
+                  环境检测
+                </TabsTrigger>
+                <TabsTrigger
+                  value="general"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
                   {t('settings.general')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="translation"
-                  className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
-                >
-                  翻译
                 </TabsTrigger>
                 <TabsTrigger
                   value="provider"
@@ -310,10 +310,10 @@ export const Settings: React.FC<SettingsProps> = ({
                   CCR 服务
                 </TabsTrigger>
                 <TabsTrigger
-                  value="diagnostic"
+                  value="translation"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
-                  环境检测
+                  翻译
                 </TabsTrigger>
               </TabsList>
             
@@ -321,7 +321,7 @@ export const Settings: React.FC<SettingsProps> = ({
             <TabsContent value="general" className="space-y-6">
               <Card className="p-6 space-y-6 border-border/50 shadow-sm rounded-xl">
                 <div>
-                  <h3 className="text-base font-medium mb-6 flex items-center gap-2 text-foreground/90">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-foreground">
                     <span className="w-1 h-5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"/>
                     {t('settings.general')}
                   </h3>
@@ -336,7 +336,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     <div className="bg-muted/30 p-4 rounded-lg border border-border/30 hover:border-border/60 transition-colors">
                       <div className="space-y-4">
                         <div>
-                          <h4 className="text-sm font-medium text-foreground/90 mb-1">权限设置</h4>
+                          <h4 className="text-lg font-semibold text-foreground mb-1">权限设置</h4>
                           <p className="text-xs text-muted-foreground">
                             配置 Claude Code 执行权限和安全选项
                           </p>
@@ -345,11 +345,10 @@ export const Settings: React.FC<SettingsProps> = ({
                         <div className="flex items-center justify-between py-2">
                           <div className="flex-1">
                             <label className="text-sm font-medium text-foreground/90 cursor-pointer">
-                              跳过权限检查
+                              自动授权常规操作
                             </label>
                             <p className="text-xs text-muted-foreground mt-1">
-                              启用后，Claude 将使用 <code className="px-1.5 py-0.5 bg-muted rounded text-xs font-mono">--dangerously-skip-permissions</code> 参数，绕过所有权限检查。
-                              <span className="text-destructive font-medium"> ⚠️ 请谨慎使用</span>
+                              开启后将自动批准读取和写入权限，避免频繁的确认中断，让对话更流畅。系统内置安全锁，将强制拦截删除（rm/del）等危险命令，确保您的文件绝对安全。
                             </p>
                           </div>
                           <Switch
@@ -364,7 +363,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             }}
                             className="ml-4"
                           />
-                        </div>
+                          </div>
                       </div>
                     </div>
                   </div>

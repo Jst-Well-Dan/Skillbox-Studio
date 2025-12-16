@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, XCircle, Terminal, RefreshCw, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, AlertTriangle, Download, Loader2 } from 'lucide-react';
 import { api, type DependencyStatus } from '@/lib/api';
 import { listen } from '@tauri-apps/api/event';
 
@@ -15,6 +15,10 @@ export default function RouterSetupWizard({ onSetupComplete, onGoToEnvironment }
   const [status, setStatus] = useState<DependencyStatus | null>(null);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // CCR 安装状态
+  const [isInstallingCcr, setIsInstallingCcr] = useState(false);
+  const [ccrInstallMessage, setCcrInstallMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const checkDependencies = useCallback(async () => {
     setChecking(true);
@@ -38,6 +42,25 @@ export default function RouterSetupWizard({ onSetupComplete, onGoToEnvironment }
   useEffect(() => {
     checkDependencies();
   }, [checkDependencies]);
+
+  // CCR 一键安装/更新
+  const handleInstallCcr = async () => {
+    setIsInstallingCcr(true);
+    setCcrInstallMessage(null);
+
+    try {
+      // 如果已安装则更新时使用 force，首次安装不使用 force
+      const useForce = status?.ccr_installed ?? false;
+      const result = await api.installCcr(useForce);
+      setCcrInstallMessage({ type: 'success', text: result });
+      // 刷新状态
+      await checkDependencies();
+    } catch (err: any) {
+      setCcrInstallMessage({ type: 'error', text: `安装失败: ${err}` });
+    } finally {
+      setIsInstallingCcr(false);
+    }
+  };
 
   // Listen for Node.js installation completion to auto-refresh
   useEffect(() => {
@@ -151,25 +174,46 @@ export default function RouterSetupWizard({ onSetupComplete, onGoToEnvironment }
               <p className="text-sm text-muted-foreground mt-1">
                 {status?.ccr_installed
                   ? `已安装 (版本 ${status.ccr_version})`
-                  : '未安装 - 需要通过 npm 安装'}
+                  : '未安装 - 点击下方按钮一键安装'}
               </p>
             </div>
           </div>
         </div>
-      </Card>
 
-      {/* 安装说明 - 仅当 Node.js 已安装但 CCR 未安装时显示 */}
-      {status?.node_installed && !status?.ccr_installed && (
-        <Alert>
-          <Terminal className="w-4 h-4" />
-          <AlertDescription>
-            <h4 className="font-medium mb-2">安装步骤：</h4>
-            <pre className="text-sm whitespace-pre-wrap bg-muted p-3 rounded font-mono">
-              {status.install_instructions}
-            </pre>
-          </AlertDescription>
-        </Alert>
-      )}
+        {/* CCR 安装消息 */}
+        {ccrInstallMessage && (
+          <Alert
+            variant={ccrInstallMessage.type === 'error' ? 'destructive' : 'default'}
+            className="mt-3"
+          >
+            <AlertDescription className={ccrInstallMessage.type === 'success' ? 'text-green-600' : ''}>
+              {ccrInstallMessage.text}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* CCR 安装/更新按钮 - 仅当 Node.js 已安装时显示 */}
+        {status?.node_installed && (
+          <Button
+            onClick={handleInstallCcr}
+            disabled={isInstallingCcr || checking}
+            className="w-full mt-3"
+            variant={status?.ccr_installed ? "outline" : "default"}
+          >
+            {isInstallingCcr ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {status?.ccr_installed ? '更新中...' : '安装中...'}
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                {status?.ccr_installed ? '更新 CCR' : '安装 CCR'}
+              </>
+            )}
+          </Button>
+        )}
+      </Card>
 
       {/* Node.js 未安装时的提示 */}
       {!status?.node_installed && (

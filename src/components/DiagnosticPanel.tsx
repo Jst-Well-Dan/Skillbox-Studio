@@ -4,10 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { Loader2, CheckCircle2, XCircle, RefreshCw, Download, Terminal, ExternalLink, Box } from 'lucide-react';
-import { listen } from '@tauri-apps/api/event';
-import type { NodejsInstallProgress } from '@/lib/api';
 
 interface DiagnosticResult {
   // Node.js
@@ -24,34 +21,9 @@ export const DiagnosticPanel: React.FC = () => {
   const [isChecking, setIsChecking] = useState(false);
   const [result, setResult] = useState<DiagnosticResult | null>(null);
 
-  // Node.js installation state
-  const [isInstallingNode, setIsInstallingNode] = useState(false);
-  const [nodeProgress, setNodeProgress] = useState<NodejsInstallProgress | null>(null);
-  const [nodeInstallError, setNodeInstallError] = useState<string | null>(null);
-
   // Claude Code installation state
   const [isInstallingCli, setIsInstallingCli] = useState(false);
   const [cliInstallMessage, setCliInstallMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  // Listen for Node.js installation progress
-  useEffect(() => {
-    const unlisten = listen<NodejsInstallProgress>('nodejs-install-progress', (event) => {
-      setNodeProgress(event.payload);
-
-      if (event.payload.stage === 'Completed') {
-        setIsInstallingNode(false);
-        // Refresh after successful installation
-        setTimeout(() => checkEnvironment(), 1000);
-      } else if (event.payload.stage === 'Failed') {
-        setNodeInstallError(event.payload.message);
-        setIsInstallingNode(false);
-      }
-    });
-
-    return () => {
-      unlisten.then(fn => fn());
-    };
-  }, []);
 
   // Auto-check on mount
   useEffect(() => {
@@ -61,7 +33,6 @@ export const DiagnosticPanel: React.FC = () => {
   const checkEnvironment = useCallback(async () => {
     setIsChecking(true);
     setResult(null);
-    setNodeInstallError(null);
     setCliInstallMessage(null);
 
     try {
@@ -93,26 +64,6 @@ export const DiagnosticPanel: React.FC = () => {
     }
   }, []);
 
-  const handleInstallNode = async () => {
-    setIsInstallingNode(true);
-    setNodeInstallError(null);
-    setNodeProgress(null);
-
-    try {
-      await api.installNodejsComplete();
-      // Success is handled by event listener
-    } catch (err: any) {
-      const errorMessage = typeof err === 'string' ? err : err?.message || '未知错误';
-      setNodeInstallError(`安装失败：${errorMessage}`);
-      setNodeProgress({
-        stage: 'Failed',
-        percentage: 0,
-        message: errorMessage,
-      });
-      setIsInstallingNode(false);
-    }
-  };
-
   const handleInstallCli = async () => {
     setIsInstallingCli(true);
     setCliInstallMessage(null);
@@ -141,18 +92,6 @@ export const DiagnosticPanel: React.FC = () => {
     });
   };
 
-  const getStageText = (stage: string): string => {
-    const stageMap: Record<string, string> = {
-      FetchingVersion: '正在获取版本信息...',
-      Downloading: '正在下载 Node.js 安装包...',
-      Verifying: '正在验证安装包完整性...',
-      Installing: '正在安装 Node.js（请在弹出的授权窗口中确认）...',
-      Completed: '安装完成！',
-      Failed: '安装失败',
-    };
-    return stageMap[stage] || stage;
-  };
-
   const nodeInstalled = result?.nodeInstalled;
   const cliInstalled = result?.cliFound && result?.cliExecutable;
 
@@ -171,7 +110,7 @@ export const DiagnosticPanel: React.FC = () => {
           variant="outline"
           size="sm"
           onClick={checkEnvironment}
-          disabled={isChecking || isInstallingNode || isInstallingCli}
+          disabled={isChecking || isInstallingCli}
         >
           {isChecking ? (
             <Loader2 className="h-4 w-4 animate-spin mr-1" />
@@ -239,94 +178,41 @@ export const DiagnosticPanel: React.FC = () => {
                           未安装
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          点击下方按钮一键自动安装
+                          请按照下方步骤手动安装
                         </div>
                       </div>
                     </>
                   )}
                 </div>
 
-                {/* Node.js Installation Progress */}
-                {nodeProgress && nodeProgress.stage !== 'Failed' && nodeProgress.stage !== 'Completed' && (
-                  <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="font-medium">{getStageText(nodeProgress.stage)}</span>
-                    </div>
-                    <Progress value={nodeProgress.percentage} className="h-2" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{nodeProgress.message}</span>
-                      <span>{Math.round(nodeProgress.percentage)}%</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Node.js Installation Error */}
-                {nodeInstallError && (
-                  <Alert variant="destructive">
-                    <XCircle className="w-4 h-4" />
-                    <AlertDescription className="ml-2">
-                      <div className="font-medium mb-1">安装失败</div>
-                      <div className="text-sm">{nodeInstallError}</div>
-                      <div className="mt-2 text-xs opacity-80">
-                        如果问题持续存在，请尝试
-                        <a onClick={openNodePage} className="ml-1 underline hover:no-underline cursor-pointer">
-                          手动安装
-                        </a>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Node.js Install Button */}
+                {/* Node.js Manual Install Guide */}
                 {!nodeInstalled && (
                   <>
+                    {/* 手动安装指导 */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800/50 space-y-3">
+                      <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                        📋 安装步骤：
+                      </p>
+                      <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-2 list-decimal list-inside">
+                        <li>点击下方按钮打开 Node.js 官网下载页面</li>
+                        <li>下载 <strong>Windows Installer (.msi)</strong> 版本（推荐 LTS 长期支持版）</li>
+                        <li>双击下载的 .msi 文件，按照提示完成安装</li>
+                        <li>安装完成后，点击上方"刷新状态"按钮检测</li>
+                      </ol>
+                    </div>
+
                     <Button
-                      onClick={handleInstallNode}
-                      disabled={isInstallingNode || isChecking}
+                      onClick={openNodePage}
                       className="w-full"
                       size="lg"
                     >
-                      {isInstallingNode ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          安装中...
-                        </>
-                      ) : nodeInstallError ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          重试安装
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4 mr-2" />
-                          自动安装 Node.js (LTS)
-                        </>
-                      )}
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      打开 Node.js 官网下载
                     </Button>
 
-                    {/* Permission notice */}
-                    {!nodeInstallError && (
-                      <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                        <p className="text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                          <span className="text-base">🔐</span>
-                          <span>
-                            安装过程中系统可能会弹出授权窗口，请点击"是"或输入密码以允许安装。
-                          </span>
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Manual install link */}
-                    <div className="text-center">
-                      <a
-                        onClick={openNodePage}
-                        className="text-xs text-muted-foreground hover:text-primary cursor-pointer inline-flex items-center gap-1"
-                      >
-                        或者手动下载安装
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      💡 提示：安装完成后可能需要重启本应用才能检测到
+                    </p>
                   </>
                 )}
 

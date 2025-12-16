@@ -505,32 +505,17 @@ export function usePromptExecution(config: UsePromptExecutionConfig): UsePromptE
         // 3️⃣ Translation Processing
         // ========================================================================
 
+        // 🔧 用户输入翻译已禁用 - 用户的中文输入直接发送给 Claude，不再翻译成英文
         // Skip translation entirely for slash commands
         if (!isSlashCommandInput) {
-          try {
-            const isEnabled = await translationMiddleware.isEnabled();
-            if (isEnabled) {
-              console.log('[usePromptExecution] Translation enabled, processing user input...');
-              userInputTranslation = await translationMiddleware.translateUserInput(prompt);
-              processedPrompt = userInputTranslation.translatedText;
-
-              if (userInputTranslation.wasTranslated) {
-                console.log('[usePromptExecution] User input translated:', {
-                  original: userInputTranslation.originalText,
-                  translated: userInputTranslation.translatedText,
-                  language: userInputTranslation.detectedLanguage
-                });
-              }
-            }
-          } catch (translationError) {
-            console.error('[usePromptExecution] Translation failed, using original prompt:', translationError);
-            // Continue with original prompt if translation fails
-          }
+          // 用户输入翻译已禁用，直接使用原始 prompt
+          console.log('[usePromptExecution] User input translation DISABLED - sending original prompt directly');
+          // 不再调用 translationMiddleware.translateUserInput()
+          // processedPrompt 保持为原始 prompt
         } else {
           const commandPreview = trimmedPrompt.split('\n')[0];
-          console.log('[usePromptExecution] [OK] Slash command detected, skipping translation:', {
-            command: commandPreview,
-            translationEnabled: await translationMiddleware.isEnabled()
+          console.log('[usePromptExecution] [OK] Slash command detected:', {
+            command: commandPreview
           });
         }
 
