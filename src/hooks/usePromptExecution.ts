@@ -15,7 +15,7 @@
 import { useCallback } from 'react';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { api, type Session } from '@/lib/api';
-import { translationMiddleware, isSlashCommand, type TranslationResult } from '@/lib/translationMiddleware';
+import { isSlashCommand, type TranslationResult } from '@/lib/translationMiddleware';
 import type { ClaudeStreamMessage } from '@/types/claude';
 import type { ModelType } from '@/components/FloatingPromptInput/types';
 
@@ -548,13 +548,8 @@ export function usePromptExecution(config: UsePromptExecutionConfig): UsePromptE
               }
             ]
           },
-          sentAt: new Date().toISOString(),
-          // Add translation metadata for debugging/info
-          translationMeta: userInputTranslation ? {
-            wasTranslated: userInputTranslation.wasTranslated,
-            detectedLanguage: userInputTranslation.detectedLanguage,
-            translatedText: userInputTranslation.translatedText
-          } : undefined
+          sentAt: new Date().toISOString()
+          // Translation metadata removed - user input translation is disabled
         };
         setMessages(prev => [...prev, userMessage]);
       }
