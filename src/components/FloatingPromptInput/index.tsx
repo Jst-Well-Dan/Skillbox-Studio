@@ -10,7 +10,7 @@ import { SlashCommandPicker } from "../SlashCommandPicker";
 import { ImagePreview } from "../ImagePreview";
 import { ThinkingModeToggle } from "./ThinkingModeToggle";
 import { PlanModeToggle } from "./PlanModeToggle";
-import { ModelSelector } from "./ModelSelector";
+// ModelSelector import removed - hidden for UI simplification
 import { Popover } from "@/components/ui/popover";
 import { FloatingPromptInputProps, FloatingPromptInputRef, ThinkingMode, ModelType, ModelConfig } from "./types";
 import { THINKING_MODES, MODELS } from "./constants";
@@ -85,7 +85,8 @@ const FloatingPromptInputInner = (
   const [cursorPosition, setCursorPosition] = useState(0);
 
   // 动态加载模型列表（包括自定义模型）
-  const [availableModels, setAvailableModels] = useState<ModelConfig[]>(MODELS);
+  // Note: availableModels is kept for future use when ModelSelector is re-enabled
+  const [_availableModels, setAvailableModels] = useState<ModelConfig[]>(MODELS);
 
 
   // Refs
