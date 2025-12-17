@@ -1,6 +1,6 @@
 [package]
 name = "xiya-claude-studio"
-version = "1.0.1"
+version = "1.0.2"
 description = "Xiya Claude Studio - AI-powered workspace for solving everyday work and learning challenges"
 authors = ["mufeedvh", "123vviekr"]
 license = "AGPL-3.0"
