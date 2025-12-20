@@ -75,7 +75,7 @@ pub async fn save_clipboard_image(
     // 规范化路径，确保获得完整的长文件名路径
     let temp_dir = temp_dir.canonicalize().unwrap_or(temp_dir);
 
-    let images_dir = temp_dir.join("xiya_claude_studio_clipboard_images");
+    let images_dir = temp_dir.join("skillbox_studio_clipboard_images");
 
     // 创建目录
     fs::create_dir_all(&images_dir)

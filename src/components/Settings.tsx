@@ -2,22 +2,14 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
-  Save,
   AlertCircle,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  api,
-  type ClaudeSettings,
-  type ClaudePermissionConfig
-} from "@/lib/api";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Toast, ToastContainer } from "@/components/ui/toast";
-import { LanguageSelector } from "./LanguageSelector";
 import { useTranslation } from "@/hooks/useTranslation";
 import ProviderManager from "./ProviderManager";
 import { TranslationSettings } from "./TranslationSettings";
@@ -36,11 +28,6 @@ interface SettingsProps {
   className?: string;
 }
 
-interface PermissionRule {
-  id: string;
-  value: string;
-}
-
 /**
  * 全面的设置界面，用于管理 Claude Code 设置
  * 提供无代码界面来编辑 settings.json 文件
@@ -52,11 +39,9 @@ export const Settings: React.FC<SettingsProps> = ({
   className,
 }) => {
   const { t } = useTranslation();
-  const [settings, setSettings] = useState<ClaudeSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("diagnostic");
 
   // Hidden for simplified UI - Event listener for switching to prompt-api tab
   // useEffect(() => {
@@ -70,16 +55,15 @@ export const Settings: React.FC<SettingsProps> = ({
   // }, []);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Permission rules state
-  const [allowRules, setAllowRules] = useState<PermissionRule[]>([]);
-  const [denyRules, setDenyRules] = useState<PermissionRule[]>([]);
+  // Permission rules state (hidden for simplified UI)
+  // const [allowRules, setAllowRules] = useState<PermissionRule[]>([]);
+  // const [denyRules, setDenyRules] = useState<PermissionRule[]>([]);
 
-  // Permission configuration state
-  const [permissionConfig, setPermissionConfig] = useState<ClaudePermissionConfig | null>(null);
+  // Permission configuration removed - 权限默认始终开启
 
-  // Hooks state
-  const [userHooksChanged, setUserHooksChanged] = useState(false);
-  const getUserHooks = React.useRef<(() => any) | null>(null);
+  // Hooks state (hidden for simplified UI)
+  // const [userHooksChanged, setUserHooksChanged] = useState(false);
+  // const getUserHooks = React.useRef<(() => any) | null>(null);
 
   // Router setup state
   const [routerSetupComplete, setRouterSetupComplete] = useState(false);
@@ -103,109 +87,22 @@ export const Settings: React.FC<SettingsProps> = ({
 
   /**
    * Loads the current Claude settings
+   * 权限配置已固定，无需加载
    */
   const loadSettings = async () => {
     try {
       setLoading(true);
       setError(null);
-      const loadedSettings = await api.getClaudeSettings();
-      
-      // Ensure loadedSettings is an object
-      if (!loadedSettings || typeof loadedSettings !== 'object') {
-        console.warn("Loaded settings is not an object:", loadedSettings);
-        setSettings({});
-        return;
-      }
-      
-      setSettings(loadedSettings);
-
-      // Parse permissions
-      if (loadedSettings.permissions && typeof loadedSettings.permissions === 'object') {
-        if (Array.isArray(loadedSettings.permissions.allow)) {
-          setAllowRules(
-            loadedSettings.permissions.allow.map((rule: string, index: number) => ({
-              id: `allow-${index}`,
-              value: rule,
-            }))
-          );
-        }
-        if (Array.isArray(loadedSettings.permissions.deny)) {
-          setDenyRules(
-            loadedSettings.permissions.deny.map((rule: string, index: number) => ({
-              id: `deny-${index}`,
-              value: rule,
-            }))
-          );
-        }
-      }
-
-      // Load permission configuration
-      try {
-        const config = await api.getClaudePermissionConfig();
-        setPermissionConfig(config);
-      } catch (err) {
-        console.error("Failed to load permission config:", err);
-        // Set default permission config if loading fails
-        setPermissionConfig({
-          allowed_tools: [],
-          disallowed_tools: [],
-          permission_mode: 'Interactive',
-          auto_approve_edits: false,
-          enable_dangerous_skip: true, // Default to true for backward compatibility
-        });
-      }
-
+      // 权限配置已固定，无需从后端加载
     } catch (err) {
       console.error("Failed to load settings:", err);
       setError("加载设置失败。请确保 ~/.claude 目录存在。");
-      setSettings({});
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * Saves the current settings
-   */
-  const saveSettings = async () => {
-    try {
-      setSaving(true);
-      setError(null);
-      setToast(null);
-
-      // Build the settings object
-      const updatedSettings: ClaudeSettings = {
-        ...settings,
-        permissions: {
-          allow: allowRules.map(rule => rule.value).filter(v => v.trim()),
-          deny: denyRules.map(rule => rule.value).filter(v => v.trim()),
-        },
-      };
-
-      await api.saveClaudeSettings(updatedSettings);
-      setSettings(updatedSettings);
-
-      // Save permission configuration
-      if (permissionConfig) {
-        await api.updateClaudePermissionConfig(permissionConfig);
-      }
-
-      // Save user hooks if changed
-      if (userHooksChanged && getUserHooks.current) {
-        const hooks = getUserHooks.current();
-        await api.updateHooksConfig('user', hooks);
-        setUserHooksChanged(false);
-      }
-
-      setToast({ message: "Settings saved successfully!", type: "success" });
-    } catch (err) {
-      console.error("Failed to save settings:", err);
-      setError("保存设置失败。");
-      setToast({ message: "保存设置失败", type: "error" });
-    } finally {
-      setSaving(false);
-    }
-  };
+  // savePermissionConfig removed - 权限配置已固定，无需用户设置
 
   return (
     <div className={cn("flex flex-col h-full bg-background text-foreground", className)}>
@@ -234,29 +131,6 @@ export const Settings: React.FC<SettingsProps> = ({
               </p>
             </div>
           </div>
-          
-          <Button
-            onClick={saveSettings}
-            disabled={saving || loading}
-            size="sm"
-            className={cn(
-              "gap-2 font-medium shadow-lg shadow-primary/20 px-4 flex-shrink-0 bg-[#d97757] hover:bg-[#FE6F00]/90 text-white",
-              "transition-all duration-300",
-              saving && "scale-95 opacity-80"
-            )}
-          >
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t('common.savingSettings')}
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                {t('common.saveSettings')}
-              </>
-            )}
-          </Button>
         </motion.div>
       
         {/* Error message */}
@@ -291,12 +165,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 >
                   环境检测
                 </TabsTrigger>
-                <TabsTrigger
-                  value="general"
-                  className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
-                >
-                  {t('settings.general')}
-                </TabsTrigger>
+{/* 语言与权限标签已移除 - 默认使用中文，权限始终开启 */}
                 <TabsTrigger
                   value="provider"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
@@ -313,63 +182,11 @@ export const Settings: React.FC<SettingsProps> = ({
                   value="translation"
                   className="h-full px-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary transition-all duration-300"
                 >
-                  翻译
+                  智能翻译
                 </TabsTrigger>
               </TabsList>
             
-            {/* General Settings */}
-            <TabsContent value="general" className="space-y-6">
-              <Card className="p-6 space-y-6 border-border/50 shadow-sm rounded-xl">
-                <div>
-                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-foreground">
-                    <span className="w-1 h-5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"/>
-                    {t('settings.general')}
-                  </h3>
-
-                  <div className="space-y-6">
-                    {/* Language Selector */}
-                    <div className="bg-muted/30 p-4 rounded-lg border border-border/30 hover:border-border/60 transition-colors">
-                       <LanguageSelector />
-                    </div>
-
-                    {/* Permission Settings */}
-                    <div className="bg-muted/30 p-4 rounded-lg border border-border/30 hover:border-border/60 transition-colors">
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="text-lg font-semibold text-foreground mb-1">权限设置</h4>
-                          <p className="text-xs text-muted-foreground">
-                            配置 Claude Code 执行权限和安全选项
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between py-2">
-                          <div className="flex-1">
-                            <label className="text-sm font-medium text-foreground/90 cursor-pointer">
-                              自动授权常规操作
-                            </label>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              开启后将自动批准读取和写入权限，避免频繁的确认中断，让对话更流畅。系统内置安全锁，将强制拦截删除（rm/del）等危险命令，确保您的文件绝对安全。
-                            </p>
-                          </div>
-                          <Switch
-                            checked={permissionConfig?.enable_dangerous_skip ?? false}
-                            onCheckedChange={(checked) => {
-                              if (permissionConfig) {
-                                setPermissionConfig({
-                                  ...permissionConfig,
-                                  enable_dangerous_skip: checked,
-                                });
-                              }
-                            }}
-                            className="ml-4"
-                          />
-                          </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
+{/* General Settings 已移除 - 语言默认中文，权限默认始终开启 */}
 
             {/* Hidden for simplified UI - Hooks Settings */}
             {/* <TabsContent value="hooks" className="space-y-6">

@@ -489,7 +489,7 @@ impl AcemcpClient {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
             "clientInfo": {
-                "name": "xiya-claude-studio",
+                "name": "skillbox-studio",
                 "version": "4.1.3"
             }
         });

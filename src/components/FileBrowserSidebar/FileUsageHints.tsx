@@ -50,10 +50,6 @@ export const FileUsageHints: React.FC = () => {
         <CollapsibleContent className="mt-2 space-y-1 text-xs text-muted-foreground">
           <div className="flex items-start gap-2">
             <span className="select-none">•</span>
-            <span>{t('fileBrowser.hints.dragToReference')}</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="select-none">•</span>
             <span>{t('fileBrowser.hints.clickToCopy')}</span>
           </div>
           <div className="flex items-start gap-2">

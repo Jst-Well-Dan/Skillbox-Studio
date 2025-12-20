@@ -24,7 +24,8 @@ pub struct InstallProgress {
     pub message: String,
 }
 
-/// 下载进度信息
+/// 下载进度信息（预留给将来的下载进度功能）
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DownloadProgress {
     pub downloaded: u64,

@@ -19,8 +19,8 @@
   --color-popover: oklch(0.18 0.006 75); /* Slightly darker for depth */
   --color-popover-foreground: oklch(0.98 0.008 85);
 
-  /* 🔷 Primary Brand - Xiya Orange */
-  --color-primary: oklch(0.65 0.20 45); /* #FE6F00 - Xiya Orange */
+  /* 🔷 Primary Brand - Skillbox Orange */
+  --color-primary: oklch(0.65 0.20 45); /* #FE6F00 - Skillbox Orange */
   --color-primary-hover: oklch(0.70 0.21 45);
   --color-primary-active: oklch(0.60 0.19 45);
   --color-primary-foreground: oklch(1.0 0 0);
@@ -139,8 +139,8 @@
   --color-popover: oklch(1.0 0 0); /* Pure white popovers */
   --color-popover-foreground: oklch(0.20 0.008 75);
 
-  /* 🔷 Primary Brand - Xiya Orange */
-  --color-primary: oklch(0.60 0.20 45); /* #FE6F00 - Xiya Orange for light theme */
+  /* 🔷 Primary Brand - Skillbox Orange */
+  --color-primary: oklch(0.60 0.20 45); /* #FE6F00 - Skillbox Orange for light theme */
   --color-primary-hover: oklch(0.55 0.21 45);
   --color-primary-active: oklch(0.52 0.19 45);
   --color-primary-foreground: oklch(1.0 0 0);

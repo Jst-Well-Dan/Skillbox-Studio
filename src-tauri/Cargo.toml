@@ -1,7 +1,7 @@
 [package]
-name = "xiya-claude-studio"
+name = "skillbox-studio"
 version = "1.0.2"
-description = "Xiya Claude Studio - AI-powered workspace for solving everyday work and learning challenges"
+description = "Skillbox Studio - AI-powered workspace for solving everyday work and learning challenges"
 authors = ["mufeedvh", "123vviekr"]
 license = "AGPL-3.0"
 edition = "2021"

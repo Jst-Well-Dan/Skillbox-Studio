@@ -1,17 +1,18 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Xiya Claude Studio",
-  "version": "1.0.0",
-  "identifier": "com.xiya.claude.studio",
+  "productName": "Skillbox Studio",
+  "version": "1.0.2",
+  "identifier": "com.skillbox.studio",
   "build": {
     "beforeDevCommand": "bun run dev",
+    "beforeBuildCommand": "bun run build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "Xiya Claude Studio",
+        "title": "Skillbox Studio",
         "width": 1200,
         "height": 800,
         "minWidth": 800,
@@ -73,7 +74,7 @@
     "copyright": "",
     "category": "Productivity",
     "shortDescription": "AI-powered workspace for work and learning",
-    "longDescription": "Xiya Claude Studio is an AI-powered workspace that leverages Claude's agent orchestration capabilities to solve everyday work and learning challenges. Provides an intuitive interface for AI interactions, project management, and intelligent assistance. Supports Windows, macOS, and Linux.",
+    "longDescription": "Skillbox Studio is an AI-powered workspace that leverages Claude's agent orchestration capabilities to solve everyday work and learning challenges. Provides an intuitive interface for AI interactions, project management, and intelligent assistance. Supports Windows, macOS, and Linux.",
     "windows": {
       "nsis": {
         "installerIcon": "icons/icon.ico",

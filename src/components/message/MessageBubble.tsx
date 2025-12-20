@@ -39,15 +39,19 @@ const MessageBubbleComponent: React.FC<MessageBubbleProps> = ({
       )}
     >
       {isUser ? (
-        // 用户消息：紧凑气泡样式
+        // 用户消息：紧凑气泡样式 - 莫兰迪杏橙色系
         <div className="flex flex-col items-end max-w-[85%] sm:max-w-[70%]">
           <div
             className={cn(
               "rounded-2xl px-4 py-3",
-              "bg-primary text-primary-foreground",
               "shadow-sm",
               "break-words"
             )}
+            style={{
+              background: 'linear-gradient(135deg, #E8D4CC 0%, #DDBFB4 100%)',
+              color: '#5D4E4A',
+              boxShadow: '0 2px 6px rgba(180, 150, 140, 0.2)'
+            }}
           >
             {children}
           </div>

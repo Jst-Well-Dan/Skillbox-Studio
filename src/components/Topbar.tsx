@@ -71,7 +71,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             <Bot size={14} strokeWidth={2.5} />
           </div>
           <span className="text-sm font-semibold tracking-tight text-foreground/90">
-            Xiya Studio
+            Skillbox Studio
           </span>
         </motion.div>
 
@@ -82,7 +82,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/50 transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            title="关于 Xiya Studio"
+            title="关于 Skillbox Studio"
           >
             <Info size={14} strokeWidth={2} />
           </motion.button>

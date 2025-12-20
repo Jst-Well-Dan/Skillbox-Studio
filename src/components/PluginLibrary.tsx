@@ -586,52 +586,54 @@ export const PluginLibrary: React.FC<PluginLibraryProps> = ({ onBack, onNavigate
                           }
                           content={
                             <div className="space-y-1">
-                              <p className="text-xs text-muted-foreground px-2 py-1">选择项目</p>
-                              {projects.length > 0 ? (
-                                <div className="max-h-48 overflow-y-auto">
-                                  {projects.slice(0, 10).map((project) => {
-                                    const projectName = project.path.split(/[\\/]/).pop() || project.path;
-                                    return (
-                                      <button
-                                        key={project.id}
-                                        className="w-full text-left px-2 py-2 text-sm rounded hover:bg-accent flex items-center gap-2 truncate"
-                                        onClick={() => {
-                                          setOpenPopoverId(null);
-                                          onNavigateToProject(project.path);
-                                        }}
-                                      >
-                                        <FolderOpen className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-                                        <span className="truncate" title={project.path}>{projectName}</span>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-muted-foreground px-2 py-2">暂无项目</p>
-                              )}
-                              <div className="border-t border-border mt-1 pt-1">
-                                <button
-                                  className="w-full text-left px-2 py-2 text-sm rounded hover:bg-accent flex items-center gap-2 text-primary"
-                                  onClick={async () => {
-                                    setOpenPopoverId(null);
-                                    try {
-                                      const selected = await open({
-                                        directory: true,
-                                        multiple: false,
-                                        title: '选择项目目录'
-                                      });
-                                      if (selected && typeof selected === 'string') {
-                                        onNavigateToProject(selected);
-                                      }
-                                    } catch (error) {
-                                      console.error('Failed to select directory:', error);
+                              {/* 打开任意文件夹按钮 - 放在顶部更醒目 */}
+                              <button
+                                className="w-full text-left px-2 py-2 text-sm rounded hover:bg-primary/10 flex items-center gap-2 text-primary font-medium border border-primary/20 bg-primary/5"
+                                onClick={async () => {
+                                  setOpenPopoverId(null);
+                                  try {
+                                    const selected = await open({
+                                      directory: true,
+                                      multiple: false,
+                                      title: '选择项目目录'
+                                    });
+                                    if (selected && typeof selected === 'string') {
+                                      onNavigateToProject(selected);
                                     }
-                                  }}
-                                >
-                                  <Plus className="w-4 h-4 flex-shrink-0" />
-                                  选择其他目录...
-                                </button>
-                              </div>
+                                  } catch (error) {
+                                    console.error('Failed to select directory:', error);
+                                  }
+                                }}
+                              >
+                                <Plus className="w-4 h-4 flex-shrink-0" />
+                                打开任意文件夹...
+                              </button>
+
+                              {/* 最近项目列表 */}
+                              {projects.length > 0 && (
+                                <>
+                                  <div className="border-t border-border my-1" />
+                                  <p className="text-xs text-muted-foreground px-2 py-1">最近项目</p>
+                                  <div>
+                                    {projects.slice(0, 5).map((project) => {
+                                      const projectName = project.path.split(/[\\/]/).pop() || project.path;
+                                      return (
+                                        <button
+                                          key={project.id}
+                                          className="w-full text-left px-2 py-2 text-sm rounded hover:bg-accent flex items-center gap-2 truncate"
+                                          onClick={() => {
+                                            setOpenPopoverId(null);
+                                            onNavigateToProject(project.path);
+                                          }}
+                                        >
+                                          <FolderOpen className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+                                          <span className="truncate" title={project.path}>{projectName}</span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </>
+                              )}
                             </div>
                           }
                           className="w-64 p-2"

@@ -1,20 +1,20 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Maximize2, Minimize2, X, DollarSign, Info, Sparkles } from "lucide-react"; // Removed: Zap
+import { Maximize2, Minimize2, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+// Badge import removed - hidden for UI simplification
 import { FilePicker } from "../FilePicker";
 import { SlashCommandPicker } from "../SlashCommandPicker";
 import { ImagePreview } from "../ImagePreview";
 import { ThinkingModeToggle } from "./ThinkingModeToggle";
 import { PlanModeToggle } from "./PlanModeToggle";
 // ModelSelector import removed - hidden for UI simplification
-import { Popover } from "@/components/ui/popover";
+// Popover import removed - hidden for UI simplification
 import { FloatingPromptInputProps, FloatingPromptInputRef, ThinkingMode, ModelType, ModelConfig } from "./types";
 import { THINKING_MODES, MODELS } from "./constants";
-import { formatDuration } from "@/lib/pricing";
+// formatDuration import removed - hidden for UI simplification
 import { useImageHandling } from "./hooks/useImageHandling";
 import { useFileSelection } from "./hooks/useFileSelection";
 import { useSlashCommands } from "./hooks/useSlashCommands";
@@ -53,9 +53,9 @@ const FloatingPromptInputInner = (
     messages,       // 🆕 完整消息列表
     isPlanMode = false,
     onTogglePlanMode,
-    sessionCost,
-  sessionStats,
-    hasMessages = false,
+    sessionCost: _sessionCost,
+    sessionStats: _sessionStats,
+    hasMessages: _hasMessages = false,
     session,
   }: FloatingPromptInputProps,
   ref: React.Ref<FloatingPromptInputRef>,
@@ -81,7 +81,7 @@ const FloatingPromptInputInner = (
   const [customModelName, setCustomModelName] = useState<string | null>(null);
   const [selectedThinkingMode, setSelectedThinkingMode] = useState<ThinkingMode>("on");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showCostPopover, setShowCostPopover] = useState(false);
+  // showCostPopover state removed - hidden for UI simplification
   const [cursorPosition, setCursorPosition] = useState(0);
 
   // 动态加载模型列表（包括自定义模型）
@@ -615,7 +615,7 @@ const FloatingPromptInputInner = (
               />
             )}
 
-            {/* Session Cost with Details */}
+            {/* Session Cost - Hidden for UI simplification
             {hasMessages && sessionCost && sessionStats && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -684,8 +684,7 @@ const FloatingPromptInputInner = (
                 />
               </motion.div>
             )}
-            
-            {/* Session Cost without Details (fallback) */}
+
             {hasMessages && sessionCost && !sessionStats && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -698,6 +697,7 @@ const FloatingPromptInputInner = (
                 </Badge>
               </motion.div>
             )}
+            */}
 
             {/* Loading Indicator */}
             {isLoading && (

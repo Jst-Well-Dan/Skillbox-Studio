@@ -1,36 +1,26 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import language resources
-import en from './locales/en.json';
 import zh from './locales/zh.json';
 
 const resources = {
-  en: {
-    translation: en
-  },
   zh: {
     translation: zh
   }
 };
 
+// 固定使用中文，不再支持语言切换
 i18n
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'zh', // Default to Chinese
-    lng: 'zh', // Set Chinese as default language
+    lng: 'zh', // 固定中文
+    fallbackLng: 'zh',
     debug: false,
 
     interpolation: {
       escapeValue: false, // React already does escaping
-    },
-
-    detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
     },
   });
 

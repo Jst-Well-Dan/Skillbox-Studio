@@ -253,10 +253,10 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto px-6 pb-6 pt-3">
         <div className="max-w-4xl mx-auto space-y-4">
           {/* 适用场景提示 */}
-          <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800/50 mt-3">
+          <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800/50">
             <p className="text-xs text-amber-800 dark:text-amber-200">
               💡 <span className="font-medium">适用场景：</span>使用中转 API 服务、管理多个 API 密钥、切换不同服务商
             </p>

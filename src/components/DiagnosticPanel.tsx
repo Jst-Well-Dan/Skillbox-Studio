@@ -86,12 +86,6 @@ export const DiagnosticPanel: React.FC = () => {
     });
   };
 
-  const openNpmPage = () => {
-    import('@tauri-apps/plugin-shell').then(({ open }) => {
-      open('https://www.npmjs.com/package/@anthropic-ai/claude-code');
-    });
-  };
-
   const nodeInstalled = result?.nodeInstalled;
   const cliInstalled = result?.cliFound && result?.cliExecutable;
 
@@ -127,7 +121,7 @@ export const DiagnosticPanel: React.FC = () => {
           <span className="text-muted-foreground">正在检测环境...</span>
         </div>
       ) : result ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Node.js Card */}
           <Card>
             <CardHeader className="pb-3">
@@ -153,34 +147,30 @@ export const DiagnosticPanel: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {/* Status */}
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2 p-2.5 rounded-md bg-muted/50">
                   {nodeInstalled ? (
                     <>
-                      <CheckCircle2 className="h-8 w-8 text-green-500" />
-                      <div className="flex-1">
-                        <div className="font-medium text-green-700 dark:text-green-400">
-                          已安装
-                        </div>
-                        {result.nodeVersion && (
-                          <div className="text-sm text-muted-foreground">
-                            版本: {result.nodeVersion}
-                          </div>
-                        )}
-                      </div>
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="font-medium text-green-700 dark:text-green-400">
+                        已安装
+                      </span>
+                      {result.nodeVersion && (
+                        <span className="text-sm text-muted-foreground">
+                          · {result.nodeVersion}
+                        </span>
+                      )}
                     </>
                   ) : (
                     <>
-                      <XCircle className="h-8 w-8 text-red-500" />
-                      <div className="flex-1">
-                        <div className="font-medium text-red-700 dark:text-red-400">
-                          未安装
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          请按照下方步骤手动安装
-                        </div>
-                      </div>
+                      <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <span className="font-medium text-red-700 dark:text-red-400">
+                        未安装
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        · 请按下方步骤安装
+                      </span>
                     </>
                   )}
                 </div>
@@ -189,38 +179,28 @@ export const DiagnosticPanel: React.FC = () => {
                 {!nodeInstalled && (
                   <>
                     {/* 手动安装指导 */}
-                    <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800/50 space-y-3">
-                      <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                    <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-800/50 space-y-1.5">
+                      <p className="text-xs text-blue-800 dark:text-blue-200 font-medium">
                         📋 安装步骤：
                       </p>
-                      <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-2 list-decimal list-inside">
-                        <li>点击下方按钮打开 Node.js 官网下载页面</li>
-                        <li>下载 <strong>Windows Installer (.msi)</strong> 版本（推荐 LTS 长期支持版）</li>
-                        <li>双击下载的 .msi 文件，按照提示完成安装</li>
-                        <li>安装完成后，点击上方"刷新状态"按钮检测</li>
+                      <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-0.5 list-decimal list-inside">
+                        <li>点击下方按钮打开 Node.js 官网</li>
+                        <li>下载 <strong>Windows Installer (.msi)</strong> LTS 版</li>
+                        <li>双击安装文件，按提示完成安装</li>
+                        <li>安装完成后点击"刷新状态"检测</li>
                       </ol>
                     </div>
 
-                    <Button
-                      onClick={openNodePage}
-                      className="w-full"
-                      size="lg"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      打开 Node.js 官网下载
-                    </Button>
-
-                    <p className="text-xs text-muted-foreground text-center">
-                      💡 提示：安装完成后可能需要重启本应用才能检测到
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button onClick={openNodePage} size="sm">
+                        <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+                        打开 Node.js 官网
+                      </Button>
+                      <span className="text-xs text-muted-foreground">
+                        安装后可能需要重启应用
+                      </span>
+                    </div>
                   </>
-                )}
-
-                {/* Node.js installed - show update option */}
-                {nodeInstalled && (
-                  <div className="text-sm text-muted-foreground">
-                    ✨ Node.js 环境已就绪
-                  </div>
                 )}
               </div>
             </CardContent>
@@ -251,36 +231,30 @@ export const DiagnosticPanel: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {/* Status */}
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2 p-2.5 rounded-md bg-muted/50">
                   {cliInstalled ? (
                     <>
-                      <CheckCircle2 className="h-8 w-8 text-green-500" />
-                      <div className="flex-1">
-                        <div className="font-medium text-green-700 dark:text-green-400">
-                          已安装
-                        </div>
-                        {result.cliVersion && (
-                          <div className="text-sm text-muted-foreground">
-                            版本: {result.cliVersion}
-                          </div>
-                        )}
-                      </div>
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span className="font-medium text-green-700 dark:text-green-400">
+                        已安装
+                      </span>
+                      {result.cliVersion && (
+                        <span className="text-sm text-muted-foreground">
+                          · {result.cliVersion}
+                        </span>
+                      )}
                     </>
                   ) : (
                     <>
-                      <XCircle className="h-8 w-8 text-red-500" />
-                      <div className="flex-1">
-                        <div className="font-medium text-red-700 dark:text-red-400">
-                          未安装
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {nodeInstalled
-                            ? '点击下方按钮一键安装'
-                            : '请先安装 Node.js'}
-                        </div>
-                      </div>
+                      <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <span className="font-medium text-red-700 dark:text-red-400">
+                        未安装
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        · {nodeInstalled ? '点击下方按钮安装' : '请先安装 Node.js'}
+                      </span>
                     </>
                   )}
                 </div>
@@ -295,50 +269,32 @@ export const DiagnosticPanel: React.FC = () => {
                 )}
 
                 {/* CLI Install Button */}
-                <Button
-                  onClick={handleInstallCli}
-                  disabled={isInstallingCli || isChecking || !nodeInstalled}
-                  className="w-full"
-                  variant={cliInstalled ? "outline" : "default"}
-                >
-                  {isInstallingCli ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {cliInstalled ? '更新中...' : '安装中...'}
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4 mr-2" />
-                      {cliInstalled ? '更新 Claude Code' : '安装 Claude Code'}
-                    </>
-                  )}
-                </Button>
-
-                {/* Dependency hint */}
-                {!nodeInstalled && !cliInstalled && (
-                  <div className="text-xs text-muted-foreground text-center">
-                    💡 Claude Code CLI 依赖 Node.js，请先完成上方的 Node.js 安装
-                  </div>
-                )}
-
-                {/* CLI installed message */}
-                {cliInstalled && (
-                  <div className="text-sm text-muted-foreground">
-                    ✨ Claude Code CLI 已就绪，您可以开始使用 AI 助手功能
-                  </div>
-                )}
-
-                {/* Help link */}
-                <div className="flex items-center justify-center pt-2">
+                <div className="flex items-center gap-2">
                   <Button
-                    variant="ghost"
+                    onClick={handleInstallCli}
+                    disabled={isInstallingCli || isChecking || !nodeInstalled}
+                    variant={cliInstalled ? "outline" : "default"}
                     size="sm"
-                    onClick={openNpmPage}
-                    className="text-xs text-muted-foreground"
                   >
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    查看 npm 包
+                    {isInstallingCli ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                        {cliInstalled ? '更新中...' : '安装中...'}
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5 mr-1.5" />
+                        {cliInstalled ? '更新' : '安装 Claude Code'}
+                      </>
+                    )}
                   </Button>
+
+                  {/* Dependency hint */}
+                  {!nodeInstalled && !cliInstalled && (
+                    <span className="text-xs text-muted-foreground">
+                      需先安装 Node.js
+                    </span>
+                  )}
                 </div>
               </div>
             </CardContent>

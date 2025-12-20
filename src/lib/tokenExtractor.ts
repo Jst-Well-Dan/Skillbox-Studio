@@ -1,7 +1,7 @@
 /**
  * 统一Token数据提取和显示工具
  *
- * 解决Xiya Claude Studio中token字段命名不一致的问题：
+ * 解决Skillbox Studio中token字段命名不一致的问题：
  * - 消息使用: cache_creation_tokens, cache_read_tokens
  * - 数据库使用: cache_write_tokens, cache_read_tokens
  * - API类型使用: cache_creation_tokens, cache_read_tokens

@@ -31,7 +31,7 @@ export const WelcomeHome: React.FC<WelcomeHomeProps> = ({ onNavigateTo }) => {
             className="flex items-center justify-center gap-2 mb-4"
           >
             <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium tracking-wide uppercase border border-primary/20">
-              Xiya Claude Studio
+              Skillbox Studio
             </span>
           </motion.div>
 

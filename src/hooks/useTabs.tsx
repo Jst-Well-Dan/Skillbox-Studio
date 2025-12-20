@@ -83,7 +83,7 @@ export const TabProvider: React.FC<TabProviderProps> = ({ children }) => {
   // Cleanup callbacks stored separately (not in state)
   const cleanupCallbacksRef = useRef<Map<string, () => Promise<void> | void>>(new Map());
 
-  const STORAGE_KEY = 'xiya-claude-studio-tabs-state';
+  const STORAGE_KEY = 'skillbox-studio-tabs-state';
 
   // ✨ REFACTORED: Load persisted state on mount (simplified)
   useEffect(() => {

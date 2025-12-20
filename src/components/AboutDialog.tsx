@@ -56,7 +56,7 @@ export function AboutDialog({ open, onClose, onCheckUpdate: _onCheckUpdate }: Ab
           <div className="flex items-center gap-2">
             <Info className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground">
-              关于 Xiya Claude Studio
+              关于 Skillbox Studio
             </h2>
           </div>
           <button
@@ -76,7 +76,7 @@ export function AboutDialog({ open, onClose, onCheckUpdate: _onCheckUpdate }: Ab
               <Info className="w-8 h-8 text-primary" />
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">
-              Xiya Claude Studio
+              Skillbox Studio
             </h3>
             <div className="flex items-center justify-center gap-2">
               <span className="text-sm text-muted-foreground">版本:</span>
@@ -89,7 +89,7 @@ export function AboutDialog({ open, onClose, onCheckUpdate: _onCheckUpdate }: Ab
           {/* Description */}
           <div className="mb-6 p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground text-center">
-              Xiya Claude Studio 是一个专业的 AI 工作平台，
+              Skillbox Studio 是一个专业的 AI 工作平台，
               整合海量社区技能，助您高效完成工作与学习中的各类任务。
             </p>
           </div>
@@ -101,7 +101,7 @@ export function AboutDialog({ open, onClose, onCheckUpdate: _onCheckUpdate }: Ab
               className="w-full px-4 py-2.5 text-sm font-medium text-primary hover:text-primary/80 border border-border hover:border-primary/30 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <ExternalLink className="w-4 h-4" />
-              访问蹊涯插件库
+              访问Skill Box插件库
             </button>
           </div>
         </div>

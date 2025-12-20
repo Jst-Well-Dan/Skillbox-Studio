@@ -1,12 +1,14 @@
 name: Build Test
 
-# Trigger on every push and pull request
+# DISABLED: Auto-build temporarily disabled to save GitHub Actions quota
+# To restore automatic builds, uncomment the push/pull_request triggers below
 on:
-  push:
-    branches: [ main, develop, 'release/**', 'feature/**' ]
-  pull_request:
-    branches: [ main, develop ]
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+  # push:
+  #   branches: [ main, develop, 'release/**', 'feature/**' ]
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   types: [opened, synchronize, reopened]
 
 # Cancel in-progress workflows when a new commit is pushed
 concurrency:

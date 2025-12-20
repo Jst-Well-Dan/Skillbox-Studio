@@ -47,8 +47,6 @@ export default function RouterSettings() {
 
   useEffect(() => {
     loadStatus();
-    const interval = setInterval(loadStatus, 5000);
-    return () => clearInterval(interval);
   }, [loadStatus]);
 
   // 清除提示信息

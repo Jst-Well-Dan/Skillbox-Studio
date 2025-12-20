@@ -111,9 +111,17 @@ impl std::fmt::Display for OutputFormat {
 pub fn build_permission_args(config: &ClaudePermissionConfig) -> Vec<String> {
     let mut args = Vec::new();
 
-    // 如果启用了危险跳过模式（向后兼容）
+    // 如果启用了危险跳过模式
     if config.enable_dangerous_skip {
         args.push("--dangerously-skip-permissions".to_string());
+
+        // 🔥 安全增强：即使跳过权限，仍然应用 disallowedTools 来阻止危险命令
+        // --disallowedTools 在 --dangerously-skip-permissions 模式下仍然有效
+        if !config.disallowed_tools.is_empty() {
+            args.push("--disallowedTools".to_string());
+            args.push(config.disallowed_tools.join(","));
+        }
+
         return args;
     }
 

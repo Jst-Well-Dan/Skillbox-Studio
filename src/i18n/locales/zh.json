@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Xiya Claude Studio",
+    "title": "Skillbox Studio",
     "subtitle": "让 AI 助力工作学习，解决各类问题"
   },
   "navigation": {
@@ -211,7 +211,7 @@
     "loadingProjects": "加载项目失败。请确保 ~/.claude 目录存在。",
     "loadingSessions": "加载此项目的会话失败。",
     "claudeStillResponding": "Claude 仍在响应。如果您离开，Claude 将在后台继续运行。\n\n您可以从项目视图返回此会话。\n\n您要继续吗？",
-    "configureClaudePreferences": "配置 Claude Code 偏好设置",
+    "configureClaudePreferences": "配置偏好设置",
     "savingSettings": "保存中...",
     "saveSettings": "保存设置",
     "about": "关于",

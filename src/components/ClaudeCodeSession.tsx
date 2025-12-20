@@ -225,6 +225,9 @@ const ClaudeCodeSessionInner: React.FC<ClaudeCodeSessionProps> = ({
   // Add collapsed state for queued prompts
   const [queuedPromptsCollapsed, setQueuedPromptsCollapsed] = useState(false);
 
+  // 🆕 State for user message navigation (tracks current visible user message index in messageGroups)
+  const [currentUserMsgGroupIndex, setCurrentUserMsgGroupIndex] = useState(-1);
+
   // ✅ All refs declared BEFORE custom Hooks that depend on them
   const unlistenRefs = useRef<UnlistenFn[]>([]);
   const hasActiveSessionRef = useRef(false);
@@ -373,6 +376,61 @@ const ClaudeCodeSessionInner: React.FC<ClaudeCodeSessionProps> = ({
       return element?.getBoundingClientRect().height ?? 200;
     },
   });
+
+  // 🆕 Calculate indices of user messages in messageGroups for navigation
+  const userMessageGroupIndices = useMemo(() => {
+    return messageGroups
+      .map((group, index) => {
+        if (group.type === 'normal' && group.message?.type === 'user') {
+          return index;
+        }
+        return -1;
+      })
+      .filter(index => index !== -1);
+  }, [messageGroups]);
+
+  // 🆕 Navigation functions for user messages
+  const scrollToPrevUserMessage = useCallback(() => {
+    if (userMessageGroupIndices.length === 0) return;
+
+    // Find the previous user message index
+    const currentIdx = currentUserMsgGroupIndex === -1
+      ? userMessageGroupIndices.length // Start from end if not set
+      : userMessageGroupIndices.findIndex(i => i >= currentUserMsgGroupIndex);
+
+    const prevIdx = currentIdx > 0 ? currentIdx - 1 : 0;
+    const targetGroupIndex = userMessageGroupIndices[prevIdx];
+
+    if (targetGroupIndex !== undefined) {
+      setUserScrolled(true);
+      setShouldAutoScroll(false);
+      rowVirtualizer.scrollToIndex(targetGroupIndex, { align: 'start', behavior: 'smooth' });
+      setCurrentUserMsgGroupIndex(targetGroupIndex);
+    }
+  }, [userMessageGroupIndices, currentUserMsgGroupIndex, rowVirtualizer, setUserScrolled, setShouldAutoScroll]);
+
+  const scrollToNextUserMessage = useCallback(() => {
+    if (userMessageGroupIndices.length === 0) return;
+
+    // Find the next user message index
+    const nextIdx = userMessageGroupIndices.findIndex(i => i > currentUserMsgGroupIndex);
+
+    if (nextIdx !== -1) {
+      const targetGroupIndex = userMessageGroupIndices[nextIdx];
+      setUserScrolled(true);
+      setShouldAutoScroll(false);
+      rowVirtualizer.scrollToIndex(targetGroupIndex, { align: 'start', behavior: 'smooth' });
+      setCurrentUserMsgGroupIndex(targetGroupIndex);
+    } else {
+      // Already at last user message, scroll to bottom
+      setUserScrolled(false);
+      setShouldAutoScroll(true);
+      if (parentRef.current) {
+        parentRef.current.scrollTo({ top: parentRef.current.scrollHeight, behavior: 'smooth' });
+      }
+      setCurrentUserMsgGroupIndex(userMessageGroupIndices[userMessageGroupIndices.length - 1] ?? -1);
+    }
+  }, [userMessageGroupIndices, currentUserMsgGroupIndex, rowVirtualizer, setUserScrolled, setShouldAutoScroll, parentRef]);
 
   // Debug logging
   useEffect(() => {
@@ -905,24 +963,6 @@ const ClaudeCodeSessionInner: React.FC<ClaudeCodeSessionProps> = ({
           </div>
         )}
 
-        {/* Selected project confirmation */}
-        {projectPath && (
-          <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-md">
-            <FolderOpen className="h-4 w-4 text-primary flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">已选择项目</p>
-              <p className="text-xs text-muted-foreground truncate">{projectPath}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setProjectPath("")}
-              disabled={isLoading}
-            >
-              更改
-            </Button>
-          </div>
-        )}
       </div>
     </motion.div>
   );
@@ -1086,18 +1126,10 @@ const ClaudeCodeSessionInner: React.FC<ClaudeCodeSessionProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setUserScrolled(true);
-                      setShouldAutoScroll(false);
-                      if (parentRef.current) {
-                        parentRef.current.scrollTo({
-                          top: 0,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
+                    onClick={scrollToPrevUserMessage}
                     className="px-1.5 py-1.5 hover:bg-accent/80 rounded-none h-auto min-h-0"
-                    title="滚动到顶部"
+                    title="上一条用户消息"
+                    disabled={userMessageGroupIndices.length === 0}
                   >
                     <ChevronUp className="h-3.5 w-3.5" />
                   </Button>
@@ -1105,18 +1137,10 @@ const ClaudeCodeSessionInner: React.FC<ClaudeCodeSessionProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setUserScrolled(false);
-                      setShouldAutoScroll(true);
-                      if (parentRef.current) {
-                        parentRef.current.scrollTo({
-                          top: parentRef.current.scrollHeight,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
+                    onClick={scrollToNextUserMessage}
                     className="px-1.5 py-1.5 hover:bg-accent/80 rounded-none h-auto min-h-0"
-                    title="滚动到底部"
+                    title="下一条用户消息"
+                    disabled={userMessageGroupIndices.length === 0}
                   >
                     <ChevronDown className="h-3.5 w-3.5" />
                   </Button>

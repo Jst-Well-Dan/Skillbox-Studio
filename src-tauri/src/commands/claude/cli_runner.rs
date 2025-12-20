@@ -391,11 +391,12 @@ pub async fn execute_claude_code(
         execution_config.permissions = ClaudePermissionConfig::plan_mode();
     }
 
-    log::info!("Using execution config: permissions_mode={:?}, dangerous_skip={}, plan_mode={}, max_thinking_tokens={:?}",
+    log::info!("Using execution config: permissions_mode={:?}, dangerous_skip={}, plan_mode={}, max_thinking_tokens={:?}, disallowed_tools={:?}",
         execution_config.permissions.permission_mode,
         execution_config.permissions.enable_dangerous_skip,
         plan_mode,
-        execution_config.max_thinking_tokens
+        execution_config.max_thinking_tokens,
+        execution_config.permissions.disallowed_tools
     );
     
     // 使用新的参数构建函数（先映射模型名称）
@@ -454,11 +455,12 @@ pub async fn continue_claude_code(
         execution_config.permissions = ClaudePermissionConfig::plan_mode();
     }
 
-    log::info!("Continuing with execution config: permissions_mode={:?}, dangerous_skip={}, plan_mode={}, max_thinking_tokens={:?}",
+    log::info!("Continuing with execution config: permissions_mode={:?}, dangerous_skip={}, plan_mode={}, max_thinking_tokens={:?}, disallowed_tools={:?}",
         execution_config.permissions.permission_mode,
         execution_config.permissions.enable_dangerous_skip,
         plan_mode,
-        execution_config.max_thinking_tokens
+        execution_config.max_thinking_tokens,
+        execution_config.permissions.disallowed_tools
     );
     
     // 使用新的参数构建函数，添加 -c 标志用于继续对话（先映射模型名称）
@@ -554,11 +556,12 @@ pub async fn resume_claude_code(
         execution_config.permissions = ClaudePermissionConfig::plan_mode();
     }
 
-    log::info!("Resuming with execution config: permissions_mode={:?}, dangerous_skip={}, plan_mode={}, max_thinking_tokens={:?}",
+    log::info!("Resuming with execution config: permissions_mode={:?}, dangerous_skip={}, plan_mode={}, max_thinking_tokens={:?}, disallowed_tools={:?}",
         execution_config.permissions.permission_mode,
         execution_config.permissions.enable_dangerous_skip,
         plan_mode,
-        execution_config.max_thinking_tokens
+        execution_config.max_thinking_tokens,
+        execution_config.permissions.disallowed_tools
     );
     
     // 使用新的参数构建函数，添加 --resume 和 session_id（先映射模型名称）

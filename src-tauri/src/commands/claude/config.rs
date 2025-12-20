@@ -681,18 +681,30 @@ pub async fn get_claude_execution_config(_app: AppHandle) -> Result<ClaudeExecut
 #[tauri::command]
 pub async fn update_claude_execution_config(
     _app: AppHandle,
-    config: ClaudeExecutionConfig,
+    mut config: ClaudeExecutionConfig,
 ) -> Result<(), String> {
     let claude_dir = get_claude_dir()
         .map_err(|e| format!("Failed to get Claude directory: {}", e))?;
     let config_file = claude_dir.join("execution_config.json");
-    
+
+    // 安全保护：如果 disallowed_tools 为空，使用默认的安全锁（禁止删除命令）
+    if config.permissions.disallowed_tools.is_empty() {
+        config.permissions.disallowed_tools = vec![
+            "Bash(rm:*)".to_string(),
+            "Bash(rm -rf:*)".to_string(),
+            "Bash(rmdir:*)".to_string(),
+            "Bash(del:*)".to_string(),
+            "Bash(rd:*)".to_string(),
+        ];
+        log::info!("Applied default disallowed_tools safety lock");
+    }
+
     let json_string = serde_json::to_string_pretty(&config)
         .map_err(|e| format!("Failed to serialize config: {}", e))?;
-        
+
     fs::write(&config_file, json_string)
         .map_err(|e| format!("Failed to write config file: {}", e))?;
-        
+
     log::info!("Updated Claude execution config");
     Ok(())
 }

@@ -1,4 +1,4 @@
-# Xiya Claude Studio
+# Skillbox Studio
 
 <div align="center">
 
@@ -18,7 +18,7 @@
 
 ## 项目简介
 
-**Xiya Claude Studio** 是一款专为**计算机小白**设计的 AI 智能助手桌面应用。它为 Claude Code 提供了简洁直观的可视化界面，让你无需掌握命令行操作，就能轻松使用强大的 AI 编程助手。
+**Skillbox Studio** 是一款专为**计算机小白**设计的 AI 智能助手桌面应用。它为 Claude Code 提供了简洁直观的可视化界面，让你无需掌握命令行操作，就能轻松使用强大的 AI 编程助手。
 
 ### 核心特点
 

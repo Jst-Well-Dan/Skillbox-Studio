@@ -176,6 +176,18 @@ fn get_router_config_path() -> Result<PathBuf, String> {
 
 /// 检测 Node.js 环境
 fn detect_nodejs() -> Option<NodeInfo> {
+    #[cfg(target_os = "windows")]
+    use std::os::windows::process::CommandExt;
+
+    #[cfg(target_os = "windows")]
+    let output = {
+        std::process::Command::new("node")
+            .arg("-v")
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .output()
+    };
+
+    #[cfg(not(target_os = "windows"))]
     let output = std::process::Command::new("node")
         .arg("-v")
         .output();
@@ -199,9 +211,15 @@ fn detect_nodejs() -> Option<NodeInfo> {
 /// 检测 ccr 安装
 fn detect_ccr() -> Option<CcrInfo> {
     #[cfg(target_os = "windows")]
-    let output = std::process::Command::new("cmd")
-        .args(["/c", "ccr", "-v"])
-        .output();
+    use std::os::windows::process::CommandExt;
+
+    #[cfg(target_os = "windows")]
+    let output = {
+        std::process::Command::new("cmd")
+            .args(["/c", "ccr", "-v"])
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .output()
+    };
 
     #[cfg(not(target_os = "windows"))]
     let output = std::process::Command::new("ccr")
@@ -235,7 +253,7 @@ fn generate_install_instructions(
             "步骤 1: 下载并安装 Node.js\n\
              访问: https://nodejs.org/zh-cn/download/\n\
              下载 Windows 安装包并运行安装程序\n\n\
-             步骤 2: 重启 Xiya Claude Studio\n\n\
+             步骤 2: 重启 Skillbox Studio\n\n\
              步骤 3: 安装 Claude Code Router\n\
              在命令提示符中运行: npm install -g claude-code-router"
                 .to_string()
