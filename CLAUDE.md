@@ -19,7 +19,7 @@ npm run dev
 # Build frontend only
 npm run build
 ```
-
+--dangerously-skip-permissions 
 ### Full Application (Tauri)
 ```bash
 # Start development mode with hot reload

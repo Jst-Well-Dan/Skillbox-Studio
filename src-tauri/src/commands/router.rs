@@ -255,11 +255,11 @@ fn generate_install_instructions(
              下载 Windows 安装包并运行安装程序\n\n\
              步骤 2: 重启 Skillbox Studio\n\n\
              步骤 3: 安装 Claude Code Router\n\
-             在命令提示符中运行: npm install -g claude-code-router"
+             在命令提示符中运行: npm install -g @musistudio/claude-code-router"
                 .to_string()
         } else if ccr.is_none() {
             "在命令提示符 (CMD) 中运行以下命令:\n\
-             npm install -g claude-code-router\n\n\
+             npm install -g @musistudio/claude-code-router\n\n\
              安装完成后点击\"重新检测\"按钮"
                 .to_string()
         } else {
@@ -278,11 +278,11 @@ fn generate_install_instructions(
              步骤 2: 安装 Node.js\n\
              brew install node\n\n\
              步骤 3: 安装 Claude Code Router\n\
-             npm install -g claude-code-router"
+             npm install -g @musistudio/claude-code-router"
                 .to_string()
         } else if ccr.is_none() {
             "在终端中运行以下命令:\n\
-             npm install -g claude-code-router\n\n\
+             npm install -g @musistudio/claude-code-router\n\n\
              安装完成后点击\"重新检测\"按钮"
                 .to_string()
         } else {
@@ -303,11 +303,11 @@ fn generate_install_instructions(
              Arch Linux:\n\
              sudo pacman -S nodejs npm\n\n\
              步骤 2: 安装 Claude Code Router\n\
-             npm install -g claude-code-router"
+             npm install -g @musistudio/claude-code-router"
                 .to_string()
         } else if ccr.is_none() {
             "在终端中运行以下命令:\n\
-             npm install -g claude-code-router\n\n\
+             npm install -g @musistudio/claude-code-router\n\n\
              安装完成后点击\"重新检测\"按钮"
                 .to_string()
         } else {
@@ -521,7 +521,7 @@ pub async fn start_router(app: AppHandle) -> Result<RouterStatus, String> {
         return Err("Node.js 未安装。请先安装 Node.js。".to_string());
     }
     if !deps.ccr_installed {
-        return Err("claude-code-router 未安装。请运行: npm install -g claude-code-router".to_string());
+        return Err("claude-code-router 未安装。请运行: npm install -g @musistudio/claude-code-router".to_string());
     }
 
     // 2. 检查配置文件
@@ -797,9 +797,9 @@ pub async fn install_ccr(force: bool) -> Result<String, String> {
 
     // 构建安装命令
     let install_cmd = if force {
-        "npm install -g claude-code-router --force"
+        "npm install -g @musistudio/claude-code-router --force"
     } else {
-        "npm install -g claude-code-router"
+        "npm install -g @musistudio/claude-code-router"
     };
 
     log::info!("执行命令: {}", install_cmd);
