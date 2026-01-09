@@ -54,9 +54,9 @@ export function applyPreTranslations<T extends {
   description?: string;
   category?: string;
 }>(plugins: T[], language: 'zh' | 'en'): T[] {
-  // 如果是英文模式，直接返回原数据
+  // 如果是英文模式，返回原数据的深拷贝（避免引用问题）
   if (language === 'en') {
-    return plugins;
+    return plugins.map(plugin => ({ ...plugin }));
   }
 
   return plugins.map(plugin => {

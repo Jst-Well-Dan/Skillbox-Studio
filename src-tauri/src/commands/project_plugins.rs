@@ -52,12 +52,40 @@ struct MarketplaceMetadata {
 pub struct MarketplacePlugin {
     pub name: String,
     pub description: String,
+    #[serde(deserialize_with = "deserialize_plugin_source")]
     pub source: String,
     pub category: Option<String>,
     pub version: Option<String>,
     pub author: Option<PluginAuthor>,
     #[serde(default)]
     pub skills: Vec<String>,
+}
+
+/// 自定义反序列化器,支持 source 字段为字符串或对象
+fn deserialize_plugin_source<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    use serde::de::Error;
+    use serde_json::Value;
+
+    let value = Value::deserialize(deserializer)?;
+
+    match value {
+        // 如果是字符串,直接返回
+        Value::String(s) => Ok(s),
+        // 如果是对象,提取 url 或 path 字段
+        Value::Object(obj) => {
+            if let Some(Value::String(url)) = obj.get("url") {
+                Ok(url.clone())
+            } else if let Some(Value::String(path)) = obj.get("path") {
+                Ok(path.clone())
+            } else {
+                Err(Error::custom("source object must contain 'url' or 'path' field"))
+            }
+        }
+        _ => Err(Error::custom("source must be a string or object")),
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
