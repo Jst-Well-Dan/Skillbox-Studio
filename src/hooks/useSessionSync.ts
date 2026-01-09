@@ -29,11 +29,12 @@ export const useSessionSync = () => {
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let isSubscribed = true; // 防止竞态条件
 
     // Listen to claude-session-state events
     const setupListener = async () => {
       try {
-        unlisten = await listen<{
+        const unlistenFn = await listen<{
           session_id: string;
           status: 'started' | 'stopped';
           success?: boolean;
@@ -43,6 +44,9 @@ export const useSessionSync = () => {
           pid?: number;
           run_id?: number;
         }>('claude-session-state', (event) => {
+          // 忽略已卸载组件的事件
+          if (!isSubscribed) return;
+
           const { session_id, status } = event.payload;
 
           console.log(`[SessionSync] Event received: ${status} for session ${session_id}`);
@@ -74,7 +78,14 @@ export const useSessionSync = () => {
           }
         });
 
-        console.log('[SessionSync] Event listener registered successfully');
+        // 只在组件仍然挂载时设置 unlisten
+        if (isSubscribed) {
+          unlisten = unlistenFn;
+          console.log('[SessionSync] Event listener registered successfully');
+        } else {
+          // 如果组件已卸载,立即清理
+          unlistenFn();
+        }
       } catch (error) {
         console.error('[SessionSync] Failed to setup event listener:', error);
         // Fallback: Continue without real-time updates
@@ -86,6 +97,7 @@ export const useSessionSync = () => {
 
     // Cleanup
     return () => {
+      isSubscribed = false;
       if (unlisten) {
         unlisten();
         console.log('[SessionSync] Event listener unregistered');

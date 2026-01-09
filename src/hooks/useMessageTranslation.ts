@@ -147,9 +147,10 @@ export function useMessageTranslation(config: UseMessageTranslationConfig): UseM
       let processedMessage = { ...message };
 
       try {
-        // 🔧 响应翻译始终启用，不依赖全局 enabled 配置
-        // 用户输入翻译已单独在 usePromptExecution 中禁用
-        const isResponseTranslationEnabled = true;
+        // 🔧 响应翻译现在可以通过配置禁用
+        // 检查配置中的 enable_response_translation 设置
+        const translationConfig = await api.getTranslationConfig();
+        const isResponseTranslationEnabled = translationConfig.enabled && translationConfig.enable_response_translation;
 
         // 使用传递的翻译结果或状态中的结果
         const effectiveTranslationResult = currentTranslationResult || lastTranslationResult;

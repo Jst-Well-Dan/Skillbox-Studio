@@ -157,6 +157,9 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
         <p className="text-xs text-amber-800 dark:text-amber-200">
           🌐 <span className="font-medium">自动翻译界面英文内容</span> — 插件描述、技能说明等英文内容自动显示为中文
         </p>
+        <p className="text-xs text-amber-800 dark:text-amber-200 mt-1">
+          💬 <span className="font-medium">对话翻译</span> — Claude 的英文回复自动翻译为中文（可选）
+        </p>
       </div>
 
       {error && (
@@ -192,6 +195,23 @@ export const TranslationSettings: React.FC<TranslationSettingsProps> = ({ onClos
               id="translation-enabled"
               checked={config.enabled}
               onCheckedChange={(enabled) => handleConfigChange('enabled', enabled)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="response-translation-enabled" className="text-sm font-medium">
+                启用对话翻译
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                自动将 Claude 的英文回复翻译为中文
+              </p>
+            </div>
+            <Switch
+              id="response-translation-enabled"
+              checked={config.enable_response_translation}
+              onCheckedChange={(enabled) => handleConfigChange('enable_response_translation', enabled)}
+              disabled={!config.enabled}
             />
           </div>
 

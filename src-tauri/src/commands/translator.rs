@@ -25,6 +25,8 @@ pub struct TranslationConfig {
     pub timeout_seconds: u64,
     /// 缓存有效期（秒）
     pub cache_ttl_seconds: u64,
+    /// 是否启用对话翻译
+    pub enable_response_translation: bool,
 }
 
 impl Default for TranslationConfig {
@@ -36,6 +38,7 @@ impl Default for TranslationConfig {
             model: "GLM-4-Flash".to_string(), // 🎯 使用 GLM-4-Flash 模型
             timeout_seconds: 30,
             cache_ttl_seconds: u64::MAX, // 🎯 永久缓存（除非用户手动清空）
+            enable_response_translation: true, // 默认启用对话翻译
         }
     }
 }

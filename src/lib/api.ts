@@ -437,6 +437,7 @@ export interface TranslationConfig {
   model: string;
   timeout_seconds: number;
   cache_ttl_seconds: number;
+  enable_response_translation: boolean; // 对话翻译开关
 }
 
 /**
