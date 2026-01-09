@@ -394,10 +394,10 @@ pub async fn update_thinking_mode(enabled: bool, tokens: Option<u32>) -> Result<
     Ok(format!("Thinking mode {} successfully", if enabled { "enabled" } else { "disabled" }))
 }
 
-/// 确保 hasCompletedOnboarding 配置项存在
+/// 确保必要的配置项存在 (hasCompletedOnboarding 和 language)
 /// 这对于国内用户在没有代理的情况下使用 Claude Code 是必需的
 pub async fn ensure_onboarding_completed() -> Result<(), String> {
-    log::info!("Checking hasCompletedOnboarding configuration");
+    log::info!("Checking required configuration items");
 
     let claude_dir = get_claude_dir().map_err(|e| e.to_string())?;
     let settings_path = claude_dir.join("settings.json");
@@ -412,36 +412,40 @@ pub async fn ensure_onboarding_completed() -> Result<(), String> {
         serde_json::json!({})
     };
 
-    // 检查是否已存在 hasCompletedOnboarding
-    let needs_update = if let Some(obj) = settings.as_object() {
-        !obj.contains_key("hasCompletedOnboarding")
-    } else {
-        true
-    };
+    // 确保 settings 是对象
+    if !settings.is_object() {
+        settings = serde_json::json!({});
+    }
 
-    if needs_update {
-        log::info!("Adding hasCompletedOnboarding: true to settings");
+    let mut needs_update = false;
 
-        // 确保 settings 是对象
-        if !settings.is_object() {
-            settings = serde_json::json!({});
-        }
-
-        // 添加 hasCompletedOnboarding
-        if let Some(obj) = settings.as_object_mut() {
+    // 检查并添加 hasCompletedOnboarding
+    if let Some(obj) = settings.as_object_mut() {
+        if !obj.contains_key("hasCompletedOnboarding") {
+            log::info!("Adding hasCompletedOnboarding: true to settings");
             obj.insert("hasCompletedOnboarding".to_string(), serde_json::json!(true));
+            needs_update = true;
         }
 
-        // 写入文件
+        // 检查并添加 language
+        if !obj.contains_key("language") {
+            log::info!("Adding language: 中文 to settings");
+            obj.insert("language".to_string(), serde_json::json!("中文"));
+            needs_update = true;
+        }
+    }
+
+    // 如果有更新,写入文件
+    if needs_update {
         let json_string = serde_json::to_string_pretty(&settings)
             .map_err(|e| format!("Failed to serialize settings: {}", e))?;
 
         fs::write(&settings_path, json_string)
             .map_err(|e| format!("Failed to write settings: {}", e))?;
 
-        log::info!("Successfully added hasCompletedOnboarding to settings");
+        log::info!("Successfully updated settings configuration");
     } else {
-        log::info!("hasCompletedOnboarding already exists in settings");
+        log::info!("All required configuration items already exist");
     }
 
     Ok(())
