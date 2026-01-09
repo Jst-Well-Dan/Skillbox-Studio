@@ -151,6 +151,14 @@ fn main() {
                 commands::translator::init_translation_service_with_saved_config().await;
             });
 
+            // 确保 hasCompletedOnboarding 配置存在 (国内用户支持)
+            tauri::async_runtime::spawn(async move {
+                if let Err(e) = commands::claude::ensure_onboarding_completed().await {
+                    log::warn!("Failed to ensure onboarding configuration: {}", e);
+                    // 非致命错误,应用继续正常运行
+                }
+            });
+
             // Initialize bundled plugins in background (silent, non-blocking)
             // This installs/updates the pre-bundled Skill-Box plugins to ~/.claude/plugins/marketplaces/
             let app_handle_for_plugins = app.handle().clone();

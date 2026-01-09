@@ -1,6 +1,6 @@
 [package]
 name = "skillbox-studio"
-version = "1.0.3"
+version = "1.0.4"
 description = "Skillbox Studio - AI-powered workspace for solving everyday work and learning challenges"
 authors = ["mufeedvh", "123vviekr"]
 license = "AGPL-3.0"
