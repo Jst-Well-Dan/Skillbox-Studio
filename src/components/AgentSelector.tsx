@@ -64,9 +64,17 @@ export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, o
 
     const toggleStar = (e: MouseEvent, id: string) => {
         e.stopPropagation(); // Prevent card click
-        setStarredAgents(prev =>
-            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-        );
+        const isStarred = starredAgents.includes(id);
+
+        if (!isStarred) {
+            // If starring, also select it if not already selected
+            if (!selectedAgents.includes(id)) {
+                onToggleAgent(id);
+            }
+            setStarredAgents(prev => [...prev, id]);
+        } else {
+            setStarredAgents(prev => prev.filter(x => x !== id));
+        }
     };
 
     const toggleAll = () => {

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { AppConfig } from '../../lib/types_config';
 import { addMarketplaceRepository, addRepositoryToConfig, removeRepositoryFromConfig, updateRepositoryEnabled, updateRepositoryInConfig } from '../../lib/api';
 import { Plus, Trash2, GitBranch, AlertCircle, Loader2, Pencil, X, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MarketplaceSettingsProps {
     config: AppConfig;
@@ -9,6 +11,7 @@ interface MarketplaceSettingsProps {
 }
 
 export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config, onChange }) => {
+    const { t } = useTranslation();
     const [isAdding, setIsAdding] = useState(false);
     const [newRepoUrl, setNewRepoUrl] = useState('');
     const [newRepoName, setNewRepoName] = useState('');
@@ -55,7 +58,11 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
     };
 
     const handleRemoveRepo = async (id: string) => {
-        if (!confirm('Are you sure you want to remove this repository?')) return;
+        const confirmed = await ask(t('dialogs.confirm_remove_repository'), {
+            title: t('dialogs.titles.confirm_remove'),
+            kind: 'warning',
+        });
+        if (!confirmed) return;
 
         try {
             await removeRepositoryFromConfig(id);
@@ -136,19 +143,19 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h3 className="text-base font-medium text-foreground">Repositories</h3>
+                <h3 className="text-base font-medium text-foreground">{t('settings.marketplace.repositories')}</h3>
                 <button
                     onClick={() => setIsAdding(true)}
                     className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
                 >
                     <Plus size={16} />
-                    Add Repository
+                    {t('settings.marketplace.add_repository')}
                 </button>
             </div>
 
             {isAdding && (
                 <div className="bg-card border border-border rounded-lg p-4 space-y-4 animate-in fade-in slide-in-from-top-2">
-                    <h4 className="text-sm font-medium">Add New Repository</h4>
+                    <h4 className="text-sm font-medium">{t('settings.marketplace.add_new_repository')}</h4>
                     {error && (
                         <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
                             <AlertCircle size={16} />
@@ -157,7 +164,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                     )}
                     <form onSubmit={handleAddRepo} className="space-y-3">
                         <div className="grid gap-2">
-                            <label className="text-xs text-muted-foreground">Git URL (HTTPS)</label>
+                            <label className="text-xs text-muted-foreground">{t('settings.marketplace.git_url')}</label>
                             <input
                                 type="url"
                                 value={newRepoUrl}
@@ -168,7 +175,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                             />
                         </div>
                         <div className="grid gap-2">
-                            <label className="text-xs text-muted-foreground">Name (Optional)</label>
+                            <label className="text-xs text-muted-foreground">{t('settings.marketplace.name_optional')}</label>
                             <input
                                 type="text"
                                 value={newRepoName}
@@ -183,7 +190,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                                 onClick={() => setIsAdding(false)}
                                 className="px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted rounded-md"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -191,7 +198,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                                 className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50"
                             >
                                 {isLoading && <Loader2 size={14} className="animate-spin" />}
-                                {isLoading ? 'Cloning...' : 'Add Repository'}
+                                {isLoading ? t('common.loading') : t('settings.marketplace.add_repository')}
                             </button>
                         </div>
                     </form>
@@ -201,7 +208,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
             <div className="space-y-3">
                 {config.marketplace.repositories.length === 0 ? (
                     <div className="text-center py-10 text-muted-foreground border border-dashed rounded-lg">
-                        No repositories configured. Add one to get started.
+                        {t('settings.marketplace.no_repositories')}
                     </div>
                 ) : (
                     config.marketplace.repositories.map(repo => (
@@ -209,7 +216,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                             {editingRepoId === repo.id ? (
                                 <form onSubmit={handleUpdateRepo} className="space-y-3">
                                     <div className="grid gap-2">
-                                        <label className="text-xs text-muted-foreground">Name</label>
+                                        <label className="text-xs text-muted-foreground">{t('settings.marketplace.name_optional').replace(' (Optional)', '')}</label>
                                         <input
                                             type="text"
                                             value={editRepoName}
@@ -219,7 +226,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                                         />
                                     </div>
                                     <div className="grid gap-2">
-                                        <label className="text-xs text-muted-foreground">Git URL (HTTPS)</label>
+                                        <label className="text-xs text-muted-foreground">{t('settings.marketplace.git_url')}</label>
                                         <input
                                             type="url"
                                             value={editRepoUrl}
@@ -274,7 +281,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                                                 onClick={() => handleStartEdit(repo)}
                                                 disabled={repo.type === 'official'}
                                                 className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                                                title="Edit Repository"
+                                                title={t('settings.marketplace.edit_repository')}
                                             >
                                                 <Pencil size={16} />
                                             </button>
@@ -282,7 +289,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
                                                 onClick={() => handleRemoveRepo(repo.id)}
                                                 disabled={repo.type === 'official'}
                                                 className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                                                title="Remove Repository"
+                                                title={t('settings.marketplace.remove_repository')}
                                             >
                                                 <Trash2 size={16} />
                                             </button>

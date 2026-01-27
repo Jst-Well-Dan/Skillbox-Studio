@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Sun, Moon, Settings } from "lucide-react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { SettingsDialog } from "./settings/SettingsDialog";
@@ -14,6 +15,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ currentPage, onPageChange, currentStep, onRefresh }: TopbarProps) {
+    const { t } = useTranslation();
     const { theme, setTheme } = useTheme();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [config, setConfig] = useState<AppConfig | null>(null);
@@ -57,7 +59,7 @@ export function Topbar({ currentPage, onPageChange, currentStep, onRefresh }: To
                                 : "text-muted-foreground hover:text-foreground"
                                 }`}
                         >
-                            Install
+                            {t('topbar.install')}
                         </button>
                         <button
                             onClick={() => onPageChange("installed")}
@@ -66,7 +68,7 @@ export function Topbar({ currentPage, onPageChange, currentStep, onRefresh }: To
                                 : "text-muted-foreground hover:text-foreground"
                                 }`}
                         >
-                            Installed
+                            {t('topbar.installed')}
                         </button>
                     </div>
                 </div>
@@ -76,17 +78,17 @@ export function Topbar({ currentPage, onPageChange, currentStep, onRefresh }: To
                     <div className="hidden md:flex items-center gap-6 text-sm font-medium">
                         <div className={`flex items-center gap-2 ${currentStep >= 1 ? "text-primary" : "text-muted-foreground"}`}>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep >= 1 ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>1</div>
-                            <span>Market</span>
+                            <span>{t('topbar.market')}</span>
                         </div>
                         <div className="w-8 h-px bg-border"></div>
                         <div className={`flex items-center gap-2 ${currentStep >= 2 ? "text-primary" : "text-muted-foreground"}`}>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep >= 2 ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>2</div>
-                            <span>Scope</span>
+                            <span>{t('topbar.scope')}</span>
                         </div>
                         <div className="w-8 h-px bg-border"></div>
                         <div className={`flex items-center gap-2 ${currentStep >= 3 ? "text-primary" : "text-muted-foreground"}`}>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep >= 3 ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>3</div>
-                            <span>Agents</span>
+                            <span>{t('topbar.agents')}</span>
                         </div>
                     </div>
                 )}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getAgents, getMarketplaceData, installPlugin, AgentConfig, Plugin } from "./lib/api";
+import { getAgents, getMarketplaceData, installPlugin, installLocalSkill, AgentConfig, Plugin, LocalSkill } from "./lib/api";
 import { Topbar } from "./components/Topbar";
 import { SkillMarket } from "./components/SkillMarket";
 import { InstallScope } from "./components/InstallScope";
@@ -27,6 +27,10 @@ function App() {
   const [projectPath, setProjectPath] = useState("");
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
+  // Local Install State
+  const [installMode, setInstallMode] = useState<'marketplace' | 'local'>('marketplace');
+  const [selectedLocalSkills, setSelectedLocalSkills] = useState<LocalSkill[]>([]);
+
   // Installation State
   const [installStatus, setInstallStatus] = useState<"idle" | "installing" | "success" | "error">("idle");
   const [installMessage, setInstallMessage] = useState("");
@@ -38,9 +42,26 @@ function App() {
       const agentsData = await getAgents();
       setAgents(agentsData);
 
-      // Pre-select some common agents
-      const common = ["claude", "cursor", "windsurf"];
-      const pre = agentsData.filter(a => common.includes(a.id)).map(a => a.id);
+      // Determine default selection
+      let defaultSelection: string[] = [];
+      try {
+        const starred = localStorage.getItem("starred_agents");
+        if (starred) {
+          const starredList = JSON.parse(starred);
+          if (Array.isArray(starredList) && starredList.length > 0) {
+            defaultSelection = starredList;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to read starred agents for default selection", e);
+      }
+
+      // Fallback to strict default if no stars
+      if (defaultSelection.length === 0) {
+        defaultSelection = ["claude"];
+      }
+
+      const pre = agentsData.filter(a => defaultSelection.includes(a.id)).map(a => a.id);
       setSelectedAgents(pre);
 
       const marketData = await getMarketplaceData();
@@ -63,23 +84,49 @@ function App() {
     setInstallMessage(t('common.installing'));
 
     try {
-      const results = [];
-      for (const pluginName of selectedPlugins) {
-        // Update message for current plugin
-        setInstallMessage(prev => prev ? prev + `\nInstalling ${pluginName}...` : `Installing ${pluginName}...`);
+      if (installMode === 'local' && selectedLocalSkills.length > 0) {
+        const results = [];
+        for (const skill of selectedLocalSkills) {
+          setInstallMessage(prev => prev ? prev + `\n` + t('common.installing_local', { name: skill.name }) : t('common.installing_local', { name: skill.name }));
+          const res = await installLocalSkill(skill.path, scope, selectedAgents, projectPath || undefined);
+          results.push(t('common.install_result', { name: skill.name, result: res }));
+        }
+        setInstallMessage(results.join("\n"));
+        setInstallStatus("success");
+      } else {
+        // Marketplace Install
+        const results = [];
+        for (const pluginName of selectedPlugins) {
+          // Update message for current plugin
+          setInstallMessage(prev => prev ? prev + `\n` + t('common.installing_market', { name: pluginName }) : t('common.installing_market', { name: pluginName }));
 
-        const res = await installPlugin(pluginName, selectedAgents, scope, projectPath || undefined);
-        results.push(`Plugin ${pluginName}: ${res}`);
+          const res = await installPlugin(pluginName, selectedAgents, scope, projectPath || undefined);
+          results.push(t('common.install_result', { name: `${t('common.plugin')} ${pluginName}`, result: res }));
+        }
+        setInstallMessage(results.join("\n"));
+        setInstallStatus("success");
+        // Clear selections on success
+        setSelectedPlugins([]);
       }
-      setInstallMessage(results.join("\n"));
-      setInstallStatus("success");
-      // Clear selections on success
-      setSelectedPlugins([]);
     } catch (e: any) {
-      setInstallMessage(`Error: ${e.toString()}`);
+      setInstallMessage(`${t('dialogs.titles.error')}: ${e.toString()}`);
       setInstallStatus("error");
     }
   };
+
+  const handleLocalInstallRequest = (skills: LocalSkill[]) => {
+    setInstallMode('local');
+    setSelectedLocalSkills(skills);
+    setStep(2); // Move to Scope selection
+  };
+
+  // Reset install mode when going back to step 1
+  useEffect(() => {
+    if (step === 1) {
+      setInstallMode('marketplace');
+      setSelectedLocalSkills([]);
+    }
+  }, [step]);
 
   if (loading) {
     return (
@@ -127,6 +174,8 @@ function App() {
                   );
                 }}
                 onNext={() => setStep(2)}
+                onLocalInstall={handleLocalInstallRequest}
+                onRefresh={loadData}
               />
             )}
 

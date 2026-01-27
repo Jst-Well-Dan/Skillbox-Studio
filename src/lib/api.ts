@@ -23,6 +23,7 @@ export interface Plugin {
     authors?: Author[];
     skills: string[];
     source_repo?: string;
+    source_url?: string;
 }
 
 export interface MarketplaceData {
@@ -72,6 +73,7 @@ export interface InstalledPlugin {
     skills: string[];
     size_bytes: number;
     paths_by_agent: Record<string, string>;
+    source_type?: string;
 }
 
 export interface ScanSummary {
@@ -196,4 +198,64 @@ export async function updateRepositoryEnabled(repoId: string, enabled: boolean):
 
 export async function updateRepositoryInConfig(repoId: string, name: string, url: string): Promise<void> {
     return invoke("update_repository_in_config", { repoId, name, url });
+}
+
+// --- Local Skills API ---
+
+export interface LocalSkill {
+    name: string;
+    description: string;
+    path: string;
+    source: 'Marketplace' | 'LocalDirectory';
+    has_scripts: boolean;
+    has_references: boolean;
+    has_assets: boolean;
+    size_bytes: number;
+}
+
+export interface LocalSkillScanResult {
+    success: boolean;
+    path: string;
+    skills_found: LocalSkill[];
+    error_message?: string;
+    total_skills: number;
+}
+
+export interface LocalDirectory {
+    path: string;
+    name: string;
+}
+
+export async function scanLocalSkills(directory: string): Promise<LocalSkillScanResult> {
+    return invoke<LocalSkillScanResult>('scan_local_skills', { directory });
+}
+
+export async function registerLocalDirectory(path: string, name?: string): Promise<boolean> {
+    return invoke<boolean>('register_local_directory', { path, name });
+}
+
+export async function unregisterLocalDirectory(path: string): Promise<boolean> {
+    return invoke<boolean>('unregister_local_directory', { path });
+}
+
+export async function listRegisteredDirectories(): Promise<LocalDirectory[]> {
+    return invoke<LocalDirectory[]>('list_registered_directories');
+}
+
+export async function updateLocalDirectory(path: string, name: string): Promise<boolean> {
+    return invoke<boolean>('update_local_directory', { path, name });
+}
+
+export async function installLocalSkill(
+    skillPath: string,
+    scope: "global" | "project",
+    selectedAgents: string[],
+    scopePath?: string
+): Promise<string> {
+    return invoke("install_local_skill", {
+        skillPath,
+        scope,
+        selectedAgents,
+        scopePath
+    });
 }

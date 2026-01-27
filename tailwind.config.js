@@ -1,3 +1,5 @@
+import animate from "tailwindcss-animate";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
@@ -8,38 +10,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: 'oklch(var(--border) / <alpha-value>)',
-        input: 'oklch(var(--input) / <alpha-value>)',
-        ring: 'oklch(var(--ring) / <alpha-value>)',
-        background: 'oklch(var(--background) / <alpha-value>)',
-        foreground: 'oklch(var(--foreground) / <alpha-value>)',
+        border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
         primary: {
-          DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
-          foreground: 'oklch(var(--primary-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)'
         },
         secondary: {
-          DEFAULT: 'oklch(var(--secondary) / <alpha-value>)',
-          foreground: 'oklch(var(--secondary-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--secondary)',
+          foreground: 'var(--secondary-foreground)'
         },
         destructive: {
-          DEFAULT: 'oklch(var(--destructive) / <alpha-value>)',
-          foreground: 'oklch(var(--destructive-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--destructive)',
+          foreground: 'var(--destructive-foreground)'
         },
         muted: {
-          DEFAULT: 'oklch(var(--muted) / <alpha-value>)',
-          foreground: 'oklch(var(--muted-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)'
         },
         accent: {
-          DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
-          foreground: 'oklch(var(--accent-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--accent)',
+          foreground: 'var(--accent-foreground)'
         },
         popover: {
-          DEFAULT: 'oklch(var(--popover) / <alpha-value>)',
-          foreground: 'oklch(var(--popover-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)'
         },
         card: {
-          DEFAULT: 'oklch(var(--card) / <alpha-value>)',
-          foreground: 'oklch(var(--card-foreground) / <alpha-value>)'
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)'
         }
       },
       borderRadius: {
@@ -49,6 +51,6 @@ export default {
       }
     }
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 }
 

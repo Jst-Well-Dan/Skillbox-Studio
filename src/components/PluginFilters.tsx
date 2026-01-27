@@ -1,5 +1,6 @@
 import { Input } from "./ui/input";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PluginFiltersProps {
     filters: {
@@ -16,12 +17,13 @@ export function PluginFilters({
     onFilterChange,
     agents,
 }: PluginFiltersProps) {
+    const { t } = useTranslation();
     return (
         <div className="flex gap-4 items-center flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search plugins..."
+                    placeholder={t('skill_market.search_placeholder')}
                     className="pl-8"
                     value={filters.search}
                     onChange={(e) =>
@@ -43,9 +45,9 @@ export function PluginFilters({
                     })
                 }
             >
-                <option value="all">All Scopes</option>
-                <option value="global">Global</option>
-                <option value="project">Project</option>
+                <option value="all">{t('installed_plugins.all_scopes')}</option>
+                <option value="global">{t('install_scope.global')}</option>
+                <option value="project">{t('install_scope.project')}</option>
             </select>
 
             <select
@@ -58,7 +60,7 @@ export function PluginFilters({
                     })
                 }
             >
-                <option value="all">All Agents</option>
+                <option value="all">{t('installed_plugins.all_agents')}</option>
                 {agents.map((agent) => (
                     <option key={agent} value={agent}>
                         {agent}

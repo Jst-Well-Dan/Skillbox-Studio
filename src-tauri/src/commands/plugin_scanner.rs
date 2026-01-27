@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::types::{InstalledPlugin, PluginLocation, ScanResult, ScanSummary};
-use crate::commands::{agent_config, marketplace};
+use crate::commands::{agent_config, marketplace, install_history};
 
 #[tauri::command]
 pub fn scan_installed_plugins(
@@ -44,10 +44,27 @@ pub fn scan_installed_plugins(
 
     // 扫描项目作用域
     if scope.is_none() || scope.as_deref() == Some("project") {
-        if let Some(proj_path) = &project_path {
+        let project_paths = if let Some(path) = project_path {
+            vec![path]
+        } else {
+            // 如果没有指定路径，尝试从历史记录中发现所有已安装过的项目路径
+            if let Ok(history) = install_history::get_install_history(None, None) {
+                history.into_iter()
+                    .filter(|r| r.status == "success")
+                    .filter_map(|r| r.project_path)
+                    .filter(|p| !p.is_empty())
+                    .collect::<std::collections::HashSet<_>>()
+                    .into_iter()
+                    .collect()
+            } else {
+                Vec::new()
+            }
+        };
+
+        for proj_path in project_paths {
             for agent in &agents {
                 if let Some(project_skill_path) =
-                    agent_config::get_agent_project_path(&agent.id, proj_path)
+                    agent_config::get_agent_project_path(&agent.id, &proj_path)
                 {
                     if project_skill_path.exists() {
                         scan_directory(
@@ -138,7 +155,7 @@ fn scan_directory(
 
         let found_plugin_marketplace = find_plugin_for_skill(&skill_name, marketplace);
         
-        // Project Scope: Strict Marketplace Matching
+        // Project Scope: Match Marketplace OR read Local Metadata
         if scope == "project" {
             if let Some(plugin) = found_plugin_marketplace {
                process_record(
@@ -152,8 +169,21 @@ fn scan_directory(
                    agent_id, 
                    result
                )?;
+            } else {
+                // If not found in marketplace, still try to identify as a local skill
+                let metadata = read_skill_metadata(&path);
+                process_record(
+                    skill_name.clone(),
+                    metadata.category,
+                    metadata.description.or_else(|| Some("Project local skill".to_string())),
+                    skill_name,
+                    path,
+                    scope,
+                    project_path.clone(),
+                    agent_id,
+                    result
+                )?;
             }
-            // If not found in marketplace, ignore for project scope
         } 
         // Global Scope: Skill-Centric (Ignore Marketplace Grouping)
         else if scope == "global" {
@@ -229,9 +259,11 @@ fn process_record(
     agent_id: &str,
     result: &mut ScanResult,
 ) -> Result<(), String> {
-    let version = read_skill_metadata(&path).version;
+    let meta = read_skill_metadata(&path);
+    let version = meta.version;
     let install_time = get_install_time(&path)?;
     let size = calculate_dir_size(&path)?;
+    let source_type = meta.source_type;
 
     // Check if record exists (by Name)
     let existing = result
@@ -276,6 +308,7 @@ fn process_record(
             skills: vec![skill_name],
             size_bytes: size,
             paths_by_agent,
+            source_type,
         };
         result.plugins.push(installed);
     }
@@ -316,6 +349,7 @@ struct SkillMetadata {
     version: Option<String>,
     description: Option<String>,
     category: Option<String>,
+    source_type: Option<String>,
 }
 
 fn read_skill_metadata(dir: &std::path::Path) -> SkillMetadata {
@@ -323,6 +357,7 @@ fn read_skill_metadata(dir: &std::path::Path) -> SkillMetadata {
         version: None,
         description: None,
         category: None,
+        source_type: None,
     };
 
     // 1. Try to read from SKILL.md (Frontmatter) first for rich description
@@ -369,6 +404,19 @@ fn read_skill_metadata(dir: &std::path::Path) -> SkillMetadata {
             }
         }
     }
+
+    // 3. Read .metadata.json (Installed Metadata)
+    let meta_json_path = dir.join(".metadata.json");
+    if meta_json_path.exists() {
+        if let Ok(content) = std::fs::read_to_string(&meta_json_path) {
+            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+                if let Some(st) = json.get("source_type") {
+                    metadata.source_type = st.as_str().map(|s| s.to_string());
+                }
+            }
+        }
+    }
+
     metadata
 }
 

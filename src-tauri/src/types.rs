@@ -14,6 +14,7 @@ pub struct InstalledPlugin {
     pub skills: Vec<String>,
     pub size_bytes: u64,
     pub paths_by_agent: HashMap<String, String>, // agent_id -> path
+    pub source_type: Option<String>, // "Marketplace" or "LocalDirectory"
 }
 
 // 插件安装位置信息
@@ -42,6 +43,7 @@ pub struct ScanSummary {
 
 // 卸载结果
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct UninstallResult {
     pub success: bool,
     pub removed_paths: Vec<String>,
@@ -57,6 +59,7 @@ pub struct HistoryRecord {
     pub agents: Vec<String>,
     pub scope: String,
     pub project_path: Option<String>,
+    pub operation: String, // "install" | "uninstall"
     pub installed_at: String,
     pub status: String, // "success", "partial", "failed"
     pub error_message: Option<String>,
@@ -73,6 +76,7 @@ pub struct HistoryFile {
 
 // 批量删除结果
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct BatchDeleteResult {
     pub total: usize,
     pub succeeded: usize,
@@ -130,7 +134,7 @@ impl Default for GeneralSettings {
     }
 }
 
-fn default_theme() -> String { "auto".to_string() }
+fn default_theme() -> String { "light".to_string() }
 fn default_language() -> String { "zh-CN".to_string() }
 fn default_startup_page() -> String { "install".to_string() }
 fn default_card_density() -> String { "comfortable".to_string() }
@@ -211,6 +215,7 @@ fn default_max_history() -> u32 { 500 }
 
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct UpdateResult {
     pub success: bool,
     pub changes: String,
@@ -223,3 +228,51 @@ pub struct ValidationResult {
     pub errors: Vec<String>,
     pub plugin_count: u32,
 }
+
+// --- Local Skills Types ---
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LocalSkill {
+    pub name: String,
+    pub description: String,
+    pub path: String,  // 本地路径 (绝对路径)
+    pub source: SkillSource,  // 来源标记
+    pub has_scripts: bool,
+    pub has_references: bool,
+    pub has_assets: bool,
+    pub size_bytes: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum SkillSource {
+    Marketplace,  // 来自 Skill-Box/marketplace.json
+    LocalDirectory,  // 来自本地导入
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillMetadata {
+    pub name: String,
+    pub description: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct LocalSkillScanResult {
+    pub success: bool,
+    pub path: String,
+    pub skills_found: Vec<LocalSkill>,
+    pub error_message: Option<String>,
+    pub total_skills: usize,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct LocalDirectory {
+    pub path: String,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct LocalSkillsRegistry {
+    pub registered_directories: Vec<LocalDirectory>,  // 已注册的本地skills目录
+    pub last_updated: String,  // ISO 8601 时间戳
+}
+

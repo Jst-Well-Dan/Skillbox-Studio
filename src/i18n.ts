@@ -21,14 +21,14 @@ i18n
                 marketplace: marketplaceZh
             },
         },
-        fallbackLng: 'en',
+        fallbackLng: 'zh',
         defaultNS: 'translation',
         debug: true,
         interpolation: {
             escapeValue: false,
         },
         detection: {
-            order: ['localStorage', 'navigator'],
+            order: ['localStorage'],
             caches: ['localStorage'],
         },
     });

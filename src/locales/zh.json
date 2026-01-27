@@ -8,7 +8,20 @@
         "installing": "正在安装...",
         "troubleshoot": "故障排除：",
         "troubleshoot_repo": "确保 <code>Skill-Box</code> 仓库已克隆到同一工作区。",
-        "close": "关闭"
+        "close": "关闭",
+        "cancel": "取消",
+        "show_more": "显示更多",
+        "show_less": "收起",
+        "all": "全部",
+        "just_now": "刚刚",
+        "minutes_ago": "{{count}} 分钟前",
+        "hours_ago": "{{count}} 小时前",
+        "days_ago": "{{count}} 天前",
+        "no_history": "暂无历史记录",
+        "installing_local": "正在安装本地技能：{{name}}...",
+        "installing_market": "正在安装 {{name}}...",
+        "install_result": "{{name}}：{{result}}",
+        "plugin": "插件"
     },
     "agent_selector": {
         "title": "选择目标智能体",
@@ -23,7 +36,16 @@
         "next": "下一步",
         "search_placeholder": "搜索插件...",
         "all_categories": "所有分类",
-        "all_sources": "所有来源"
+        "all_sources": "所有来源",
+        "marketplace": "插件市场",
+        "local_skills": "本地技能",
+        "sources": "来源",
+        "plugins_found": "找到 {{count}} 个插件",
+        "selected_plugins": "已选择: {{count}} 个插件",
+        "add_source": "添加来源",
+        "add_repository": "添加仓库",
+        "add": "添加",
+        "skills": "个技能"
     },
     "install_scope": {
         "title": "安装范围",
@@ -46,6 +68,87 @@
         "title": "已安装插件",
         "loading": "正在加载已安装插件...",
         "load_failed": "加载插件失败",
-        "no_plugins": "未找到插件"
+        "no_plugins": "未找到插件",
+        "all_scopes": "所有范围",
+        "all_agents": "所有智能体",
+        "install_history": "安装历史",
+        "records": "{{count}} 条记录"
+    },
+    "settings": {
+        "title": "设置",
+        "tabs": {
+            "general": "常规",
+            "marketplace": "插件市场",
+            "local_skills": "本地技能"
+        },
+        "general": {
+            "appearance": "外观",
+            "theme_light": "浅色",
+            "theme_dark": "深色",
+            "theme_system": "系统",
+            "language": "语言",
+            "updates": "更新",
+            "check_updates_startup": "启动时检查更新",
+            "check_updates_hint": "自动检查 Skillbox Studio 的新版本"
+        },
+        "local_skills": {
+            "title": "本地技能目录",
+            "add_directory": "添加目录",
+            "no_directories": "未注册本地目录。",
+            "display_name": "显示名称",
+            "path": "路径"
+        },
+        "marketplace": {
+            "repositories": "仓库",
+            "add_repository": "添加仓库",
+            "add_new_repository": "添加新仓库",
+            "git_url": "Git 链接 (HTTPS)",
+            "name_optional": "名称 (可选)",
+            "no_repositories": "未配置仓库。添加一个以开始。",
+            "edit_repository": "编辑仓库",
+            "remove_repository": "移除仓库"
+        }
+    },
+    "dialogs": {
+        "confirm_remove_directory": "确定要从注册表中移除此目录吗？（这不会删除物理文件）",
+        "confirm_remove_repository": "确定要移除此仓库吗？（已安装的技能不会被删除）",
+        "confirm_clear_history": "确定要清除所有历史记录吗？",
+        "clear_history_success": "已清除 {{count}} 条历史记录",
+        "clear_history_failed": "清除历史失败: {{error}}",
+        "local_install_handler_missing": "请求安装 {{count}} 个技能，但缺少处理程序。",
+        "titles": {
+            "confirm_remove": "确认移除",
+            "confirm_clear": "确认清除",
+            "success": "操作成功",
+            "error": "错误",
+            "warning": "警告"
+        }
+    },
+    "local_skills": {
+        "directories": "目录",
+        "add_directory": "添加本地目录",
+        "all_directories": "所有目录",
+        "no_directories": "未添加目录",
+        "skills_found": "找到 {{count}} 个技能",
+        "scanning": "正在扫描...",
+        "select_all": "全选",
+        "deselect_all": "取消全选",
+        "install_selected": "安装所选 ({{count}})",
+        "no_skills_found": "此目录中未找到有效的技能。",
+        "ensure_skill_md": "确保子目录包含 SKILL.md 文件。",
+        "select_directory_hint": "选择或添加目录以浏览本地技能"
+    },
+    "plugin_card": {
+        "scope": "作用域",
+        "size": "大小",
+        "installed_at": "安装时间",
+        "open_folder": "打开文件夹"
+    },
+    "topbar": {
+        "install": "安装",
+        "installed": "已安装",
+        "market": "市场",
+        "scope": "范围",
+        "agents": "智能体"
     }
 }

@@ -28,7 +28,15 @@ pub fn run() {
             commands::config_manager::remove_repository_from_config,
             commands::config_manager::update_repository_enabled,
             commands::config_manager::update_repository_in_config,
+            // Local Skills
+            commands::local_skills_scanner::scan_local_skills,
+            commands::local_skills_registry::register_local_directory,
+            commands::local_skills_registry::unregister_local_directory,
+            commands::local_skills_registry::list_registered_directories,
+            commands::local_skills_registry::update_local_directory,
+            commands::local_skills_installer::install_local_skill,
         ])
+
 
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

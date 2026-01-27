@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ask, message } from '@tauri-apps/plugin-dialog';
 import {
     scanInstalledPlugins,
     ScanResult,
@@ -33,7 +34,8 @@ export function InstalledPluginsPage() {
         scope: "all",
         agent: null,
     });
-    const [selectedPlugins, setSelectedPlugins] = useState<string[]>([]);
+    // State for plugins selection removed as per user request
+
 
     const [history, setHistory] = useState<HistoryRecord[]>([]);
 
@@ -107,14 +109,24 @@ export function InstalledPluginsPage() {
 
     // 清除历史
     const handleClearHistory = async () => {
-        if (!confirm("确定要清除所有历史记录吗？")) return;
+        const confirmed = await ask(t('dialogs.confirm_clear_history'), {
+            title: t('dialogs.titles.confirm_clear'),
+            kind: "warning",
+        });
+        if (!confirmed) return;
 
         try {
             const count = await clearInstallHistory();
-            alert(`已清除 ${count} 条历史记录`);
+            await message(t('dialogs.clear_history_success', { count }), {
+                title: t('dialogs.titles.success'),
+                kind: "info"
+            });
             await loadHistory();
         } catch (e: any) {
-            alert(`清除历史失败: ${e.toString()}`);
+            await message(t('dialogs.clear_history_failed', { error: e.toString() }), {
+                title: t('dialogs.titles.error'),
+                kind: "error"
+            });
         }
     };
 
@@ -187,14 +199,6 @@ export function InstalledPluginsPage() {
                             key={plugin.name}
                             plugin={plugin}
                             selectedAgent={filters.agent}
-                            isSelected={selectedPlugins.includes(plugin.name)}
-                            onSelect={(selected) => {
-                                setSelectedPlugins((prev) =>
-                                    selected
-                                        ? [...prev, plugin.name]
-                                        : prev.filter((p) => p !== plugin.name)
-                                );
-                            }}
                         />
                     ))}
                 </div>

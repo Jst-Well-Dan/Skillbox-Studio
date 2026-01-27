@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-use crate::types::{AppConfig, GeneralSettings, MarketplaceConfig, AgentsConfig, AdvancedSettings, RepositoryInfo};
+use crate::types::{AppConfig, GeneralSettings, RepositoryInfo};
 
 fn get_config_path() -> Result<PathBuf, String> {
     let home_dir = dirs::home_dir().ok_or("Could not find home directory")?;
@@ -31,7 +31,7 @@ pub fn get_app_config() -> Result<AppConfig, String> {
         .partition(|r| r.id == official_id || r.url == official_url || r.name == "Skillbox Official");
         
     // Take the best official candidate or create one
-    let mut official = if !officials.is_empty() {
+    let official = if !officials.is_empty() {
         let mut r = officials.remove(0); // Take first
         r.id = official_id.to_string();
         r.name = "Skillbox".to_string(); // Update name

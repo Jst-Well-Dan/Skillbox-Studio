@@ -2,7 +2,7 @@ import React from 'react';
 import { AppConfig } from '../../lib/types_config';
 import { Moon, Sun, Monitor, Check } from 'lucide-react';
 import { updateGeneralSettings } from '../../lib/api';
-
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../ThemeProvider';
 
 interface GeneralSettingsProps {
@@ -11,6 +11,7 @@ interface GeneralSettingsProps {
 }
 
 export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ config, onChange }) => {
+    const { t } = useTranslation();
     const { setTheme } = useTheme();
 
     const handleChange = async (key: keyof AppConfig['general'], value: any) => {
@@ -33,32 +34,32 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ config, onChan
         <div className="space-y-8">
             {/* Theme Section */}
             <section className="space-y-4">
-                <h3 className="text-base font-medium text-foreground">Appearance</h3>
+                <h3 className="text-base font-medium text-foreground">{t('settings.general.appearance')}</h3>
                 <div className="grid grid-cols-3 gap-4 max-w-md">
                     <ThemeOption
                         active={config.general.theme === 'light'}
                         onClick={() => handleChange('theme', 'light')}
                         icon={<Sun size={20} />}
-                        label="Light"
+                        label={t('settings.general.theme_light')}
                     />
                     <ThemeOption
                         active={config.general.theme === 'dark'}
                         onClick={() => handleChange('theme', 'dark')}
                         icon={<Moon size={20} />}
-                        label="Dark"
+                        label={t('settings.general.theme_dark')}
                     />
                     <ThemeOption
                         active={config.general.theme === 'auto'}
                         onClick={() => handleChange('theme', 'auto')}
                         icon={<Monitor size={20} />}
-                        label="System"
+                        label={t('settings.general.theme_system')}
                     />
                 </div>
             </section>
 
             {/* Language Section */}
             <section className="space-y-4">
-                <h3 className="text-base font-medium text-foreground">Language</h3>
+                <h3 className="text-base font-medium text-foreground">{t('settings.general.language')}</h3>
                 <div className="bg-card border border-border rounded-lg divide-y divide-border max-w-md">
                     <button
                         onClick={() => handleChange('language', 'zh-CN')}
@@ -85,11 +86,11 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ config, onChan
 
             {/* Update Section */}
             <section className="space-y-4">
-                <h3 className="text-base font-medium text-foreground">Updates</h3>
+                <h3 className="text-base font-medium text-foreground">{t('settings.general.updates')}</h3>
                 <div className="flex items-center justify-between max-w-md p-4 bg-card border border-border rounded-lg">
                     <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium">Check for updates on startup</span>
-                        <span className="text-xs text-muted-foreground">Automatically check for new versions of Skillbox Studio</span>
+                        <span className="text-sm font-medium">{t('settings.general.check_updates_startup')}</span>
+                        <span className="text-xs text-muted-foreground">{t('settings.general.check_updates_hint')}</span>
                     </div>
                     <Switch
                         checked={config.general.auto_check_updates}

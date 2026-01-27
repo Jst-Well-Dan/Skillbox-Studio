@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings, Package } from 'lucide-react';
+import { X, Settings, Package, Folder } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { MarketplaceSettings } from './MarketplaceSettings';
 import { GeneralSettings } from './GeneralSettings';
+import { LocalSkillsSettings } from './LocalSkillsSettings';
 import { AppConfig } from '../../lib/types_config';
 
 interface SettingsDialogProps {
@@ -13,6 +15,7 @@ interface SettingsDialogProps {
 }
 
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, config, onConfigChange }) => {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('general');
 
     if (!open) return null;
@@ -43,19 +46,25 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                         >
                             {/* Sidebar */}
                             <div className="w-64 bg-muted/30 border-r border-border p-4 flex flex-col gap-2">
-                                <div className="text-xl font-bold px-4 py-2 mb-4 text-foreground/80">Settings</div>
+                                <div className="text-xl font-bold px-4 py-2 mb-4 text-foreground/80">{t('settings.title')}</div>
 
                                 <TabButton
                                     active={activeTab === 'general'}
                                     onClick={() => setActiveTab('general')}
                                     icon={<Settings size={18} />}
-                                    label="General"
+                                    label={t('settings.tabs.general')}
                                 />
                                 <TabButton
                                     active={activeTab === 'marketplace'}
                                     onClick={() => setActiveTab('marketplace')}
                                     icon={<Package size={18} />}
-                                    label="Marketplace"
+                                    label={t('settings.tabs.marketplace')}
+                                />
+                                <TabButton
+                                    active={activeTab === 'local_skills'}
+                                    onClick={() => setActiveTab('local_skills')}
+                                    icon={<Folder size={18} />}
+                                    label={t('settings.tabs.local_skills')}
                                 />
                                 {/* 
                 <TabButton 
@@ -70,7 +79,11 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                             {/* Content */}
                             <div className="flex-1 flex flex-col min-w-0">
                                 <div className="flex items-center justify-between p-4 border-b border-border">
-                                    <h2 className="text-lg font-semibold capitalize">{activeTab}</h2>
+                                    <h2 className="text-lg font-semibold capitalize">
+                                        {activeTab === 'general' && t('settings.tabs.general')}
+                                        {activeTab === 'marketplace' && t('settings.tabs.marketplace')}
+                                        {activeTab === 'local_skills' && t('settings.tabs.local_skills')}
+                                    </h2>
                                     <button
                                         onClick={onClose}
                                         className="p-2 hover:bg-muted rounded-full transition-colors"
@@ -85,6 +98,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                     )}
                                     {activeTab === 'marketplace' && (
                                         <MarketplaceSettings config={config} onChange={onConfigChange} />
+                                    )}
+                                    {activeTab === 'local_skills' && (
+                                        <LocalSkillsSettings />
                                     )}
                                     {/*
                   {activeTab === 'agents' && (

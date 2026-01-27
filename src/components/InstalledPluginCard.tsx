@@ -1,23 +1,20 @@
 import { memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { InstalledPlugin, openProjectFolder } from "../lib/api";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Checkbox } from "./ui/checkbox";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, ChevronDown } from "lucide-react";
 
 interface InstalledPluginCardProps {
     plugin: InstalledPlugin;
     selectedAgent?: string | null;
-    isSelected: boolean;
-    onSelect: (selected: boolean) => void;
 }
 
 export const InstalledPluginCard = memo(function InstalledPluginCard({
     plugin,
     selectedAgent,
-    isSelected,
-    onSelect,
 }: InstalledPluginCardProps) {
+    const { t } = useTranslation();
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString();
     };
@@ -50,29 +47,22 @@ export const InstalledPluginCard = memo(function InstalledPluginCard({
     };
 
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
 
     // Check if description is long enough to need truncation
     const isLongDescription = (plugin.description?.length || 0) > 100;
 
     return (
         <Card
-            className={`flex flex-col transition-all ${isSelected
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50"
-                }`}
+            className="flex flex-col transition-all border-border hover:border-primary/50"
         >
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start gap-2">
                     <CardTitle className="text-lg flex-1">{plugin.name}</CardTitle>
-                    <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) => onSelect(!!checked)}
-                        className="pointer-events-auto"
-                    />
                 </div>
                 <div className="flex flex-wrap gap-1">
                     {plugin.agents.map(agent => (
-                        <Badge key={agent} className="w-fit font-mono text-xs bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                        <Badge key={agent} className="w-fit font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/80">
                             {agent}
                         </Badge>
                     ))}
@@ -92,38 +82,92 @@ export const InstalledPluginCard = memo(function InstalledPluginCard({
                                 setIsExpanded(!isExpanded);
                             }}
                         >
-                            {isExpanded ? "收起" : "显示更多"}
+                            {isExpanded ? t('common.show_less') : t('common.show_more')}
                         </button>
                     )}
                 </div>
 
                 <div className="space-y-2 text-xs text-muted-foreground">
                     <div>
-                        <span className="font-medium">作用域:</span>{" "}
-                        {plugin.location.scope === 'global' ? '全局' : '项目'}
+                        <span className="font-medium">{t('plugin_card.scope')}:</span>{" "}
+                        {plugin.location.scope === 'global' ? t('install_scope.global') : t('install_scope.project')}
                     </div>
 
 
                     <div>
-                        <span className="font-medium">大小:</span>{" "}
+                        <span className="font-medium">{t('plugin_card.size')}:</span>{" "}
                         {formatSize(plugin.size_bytes)}
                     </div>
                     <div>
-                        <span className="font-medium">安装时间:</span>{" "}
+                        <span className="font-medium">{t('plugin_card.installed_at')}:</span>{" "}
                         {formatDate(plugin.installed_at)}
                     </div>
+
                 </div>
             </CardContent>
 
-            <CardFooter className="border-t p-3">
-                <button
-                    onClick={handleOpenFolder}
-                    className="h-9 px-3 w-full bg-background border border-input text-foreground hover:bg-accent hover:text-accent-foreground rounded-md flex items-center justify-center transition-colors text-sm font-medium"
-                    title="打开安装目录"
-                >
-                    <FolderOpen className="h-4 w-4 mr-2" />
-                    打开文件夹
-                </button>
+            <CardFooter className="border-t p-3 relative">
+                {(() => {
+                    const availableAgents = plugin.paths_by_agent ? Object.keys(plugin.paths_by_agent) : [];
+                    const isMultiAgent = availableAgents.length > 1;
+
+                    return (
+                        <>
+                            {showMenu && isMultiAgent && (
+                                <div
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => setShowMenu(false)}
+                                />
+                            )}
+
+                            <div className="w-full relative">
+                                <button
+                                    onClick={() => {
+                                        if (isMultiAgent) {
+                                            setShowMenu(!showMenu);
+                                        } else {
+                                            handleOpenFolder();
+                                        }
+                                    }}
+                                    className="h-9 px-3 w-full bg-background border border-input text-foreground hover:bg-accent hover:text-accent-foreground rounded-md flex items-center justify-center transition-colors text-sm font-medium"
+                                    title={t('plugin_card.open_folder')}
+                                >
+                                    <FolderOpen className="h-4 w-4 mr-2" />
+                                    {t('plugin_card.open_folder')}
+                                    {isMultiAgent && <ChevronDown className="h-4 w-4 ml-2 opacity-50" />}
+                                </button>
+
+                                {showMenu && isMultiAgent && (
+                                    <div className="absolute bottom-full left-0 w-full mb-1 bg-popover text-popover-foreground border rounded-md shadow-lg z-50 overflow-hidden flex flex-col p-1 min-w-[200px]">
+                                        {availableAgents.map(agent => (
+                                            <button
+                                                key={agent}
+                                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-sm flex items-center justify-between transition-colors cursor-pointer"
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    const path = plugin.paths_by_agent[agent];
+                                                    if (path) {
+                                                        try {
+                                                            await openProjectFolder(path);
+                                                        } catch (e) {
+                                                            console.error("Failed to open folder:", e);
+                                                        }
+                                                    }
+                                                    setShowMenu(false);
+                                                }}
+                                            >
+                                                <span className="font-medium capitalize">{agent}</span>
+                                                <span className="inline-flex items-center rounded-sm border border-border bg-muted/30 px-1.5 py-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
+                                                    {t('plugin_card.open_folder')}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    );
+                })()}
             </CardFooter>
         </Card>
     );

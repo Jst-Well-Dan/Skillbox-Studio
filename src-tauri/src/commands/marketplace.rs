@@ -20,6 +20,8 @@ pub struct Plugin {
     pub authors: Option<Vec<Author>>,
     #[serde(default)]
     pub source_repo: Option<String>,
+    #[serde(default)]
+    pub source_url: Option<String>,
     pub skills: Vec<String>,
 }
 

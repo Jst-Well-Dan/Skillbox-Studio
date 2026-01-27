@@ -3,25 +3,9 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use uuid::Uuid;
+use crate::types::{HistoryRecord, HistoryFile};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HistoryRecord {
-    pub id: String,
-    pub plugin_name: String,
-    pub agents: Vec<String>,
-    pub scope: String,
-    pub operation: String, // "install" | "uninstall"
-    pub installed_at: String,
-    pub status: String, // "success" | "failed"
-    pub error_message: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct HistoryFile {
-    pub version: String,
-    pub records: Vec<HistoryRecord>,
-    pub last_updated: String,
-}
+// Structs moved to crate::types to avoid duplication
 
 /// 获取安装历史记录
 #[tauri::command]
@@ -54,24 +38,30 @@ pub fn record_install_history(
     plugin_name: &str,
     agents: &[String],
     scope: &str,
+    project_path: Option<String>,
     success: bool,
     error_message: Option<String>,
+    skills_installed: Vec<String>,
 ) -> Result<(), String> {
     record_history(
         plugin_name,
         agents,
         scope,
+        project_path,
         "install",
         success,
         error_message,
+        skills_installed,
     )
 }
 
 /// 记录卸载历史
+#[allow(dead_code)]
 pub fn record_uninstall_history(
     plugin_name: &str,
     agents: &[String],
     scope: &str,
+    project_path: Option<String>,
     success: bool,
     error_message: Option<String>,
 ) -> Result<(), String> {
@@ -79,9 +69,11 @@ pub fn record_uninstall_history(
         plugin_name,
         agents,
         scope,
+        project_path,
         "uninstall",
         success,
         error_message,
+        Vec::new(),
     )
 }
 
@@ -90,9 +82,11 @@ fn record_history(
     plugin_name: &str,
     agents: &[String],
     scope: &str,
+    project_path: Option<String>,
     operation: &str,
     success: bool,
     error_message: Option<String>,
+    skills_installed: Vec<String>,
 ) -> Result<(), String> {
     let mut history = load_history_file().unwrap_or_else(|_| HistoryFile {
         version: "1.0".to_string(),
@@ -105,10 +99,12 @@ fn record_history(
         plugin_name: plugin_name.to_string(),
         agents: agents.to_vec(),
         scope: scope.to_string(),
+        project_path,
         operation: operation.to_string(),
         installed_at: Utc::now().to_rfc3339(),
         status: if success { "success" } else { "failed" }.to_string(),
         error_message,
+        skills_installed,
     };
 
     history.records.push(record);
@@ -246,10 +242,12 @@ mod tests {
             plugin_name: "test-plugin".to_string(),
             agents: vec!["claude".to_string()],
             scope: "global".to_string(),
+            project_path: None,
             operation: "install".to_string(),
             installed_at: Utc::now().to_rfc3339(),
             status: "success".to_string(),
             error_message: None,
+            skills_installed: Vec::new(),
         };
 
         assert_eq!(record.plugin_name, "test-plugin");

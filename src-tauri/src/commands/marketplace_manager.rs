@@ -27,6 +27,7 @@ pub fn aggregate_marketplace_data(config: &AppConfig) -> MarketplaceData {
                         // If we process high priority first, we keep the first one we see.
                         if !all_plugins.iter().any(|p| p.name == plugin.name) {
                             plugin.source_repo = Some(repo.name.clone());
+                            plugin.source_url = Some(repo.url.clone());
                             all_plugins.push(plugin);
                         }
                     }

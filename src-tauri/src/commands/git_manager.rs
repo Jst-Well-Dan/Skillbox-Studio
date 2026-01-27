@@ -1,6 +1,6 @@
 use std::process::Command;
-use std::path::{Path, PathBuf};
-use crate::types::{RepositoryInfo, UpdateResult, ValidationResult};
+use std::path::Path;
+use crate::types::{RepositoryInfo, ValidationResult};
 use crate::commands::marketplace::MarketplaceData;
 
 pub async fn clone_repository(url: &str, dest: &Path) -> Result<(), String> {
@@ -22,6 +22,7 @@ pub async fn clone_repository(url: &str, dest: &Path) -> Result<(), String> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn pull_repository(path: &Path) -> Result<String, String> {
     let output = Command::new("git")
         .args(&["-C", path.to_str().unwrap(), "pull"])

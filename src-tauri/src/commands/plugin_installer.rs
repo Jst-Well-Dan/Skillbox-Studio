@@ -105,8 +105,10 @@ pub fn install_plugin(
         &plugin_name,
         &agents,
         &scope_type,
+        scope_path,
         success,
         error_message,
+        plugin.skills.clone(),
     ) {
         eprintln!("Failed to record install history: {}", e);
     }
