@@ -1,0 +1,51 @@
+{
+    "common": {
+        "loading": "正在加载 Skillbox Studio...",
+        "error": "加载 Skillbox Studio 失败",
+        "retry": "重试",
+        "back": "返回",
+        "install": "安装",
+        "installing": "正在安装...",
+        "troubleshoot": "故障排除：",
+        "troubleshoot_repo": "确保 <code>Skill-Box</code> 仓库已克隆到同一工作区。",
+        "close": "关闭"
+    },
+    "agent_selector": {
+        "title": "选择目标智能体",
+        "subtitle": "哪些智能体将接收这些技能？",
+        "select_all": "全选",
+        "deselect_all": "取消全选",
+        "start_install": "开始安装"
+    },
+    "skill_market": {
+        "title": "选择技能",
+        "subtitle": "选择要安装的技能",
+        "next": "下一步",
+        "search_placeholder": "搜索插件...",
+        "all_categories": "所有分类",
+        "all_sources": "所有来源"
+    },
+    "install_scope": {
+        "title": "安装范围",
+        "subtitle": "选择技能安装后可被访问的范围",
+        "global": "全局",
+        "global_description": "将技能安装到用户主目录 (~/)。本机的每个项目中均可使用。",
+        "project": "项目",
+        "project_description": "将技能安装到特定项目文件夹。仅在该项目中可用。",
+        "path_placeholder": "项目路径",
+        "path_hint": "输入项目根目录的绝对路径。",
+        "browse": "浏览"
+    },
+    "install_result": {
+        "installing": "正在安装...",
+        "success": "安装完成",
+        "failed": "安装失败",
+        "please_wait": "请稍候..."
+    },
+    "installed_plugins": {
+        "title": "已安装插件",
+        "loading": "正在加载已安装插件...",
+        "load_failed": "加载插件失败",
+        "no_plugins": "未找到插件"
+    }
+}

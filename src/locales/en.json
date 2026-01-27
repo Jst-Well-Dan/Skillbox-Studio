@@ -1,0 +1,34 @@
+{
+    "common": {
+        "loading": "Loading Skillbox Studio...",
+        "error": "Failed to load Skillbox Studio",
+        "retry": "Retry",
+        "back": "Back",
+        "install": "Install",
+        "installing": "Installing...",
+        "troubleshoot": "Troubleshooting:",
+        "troubleshoot_repo": "Ensure <code>Skill-Box</code> repository is cloned in the same workspace.",
+        "troubleshoot_market": "Check if <code>marketplace.json</code> exists in the plugin folder."
+    },
+    "agent_selector": {
+        "title": "Select Target Agent",
+        "subtitle": "Which agents will receive these skills?",
+        "select_all": "Select All",
+        "deselect_all": "Deselect All",
+        "start_install": "Start Install"
+    },
+    "skill_market": {
+        "title": "Select Skills",
+        "subtitle": "Choose skills to install",
+        "next": "Next",
+        "search_placeholder": "Search plugins...",
+        "all_categories": "All Categories",
+        "all_sources": "All Sources"
+    },
+    "install_scope": {
+        "title": "Installation Scope",
+        "global": "Global",
+        "project": "Project",
+        "path_placeholder": "Project Path"
+    }
+}
