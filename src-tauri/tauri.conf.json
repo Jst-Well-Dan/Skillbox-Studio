@@ -11,7 +11,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCNjZGN0I3RUU0QzRGOTkKUldTWlQwenV0L2RtTzdnTWd0VmczMFZ3Zmo1WDhWUldvSjdFdkc3aWtHc3RpbFVqMmREZjF2M0kK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIyMERFM0Q0NDVERTQ1M0IKUldRN1JkNUYxT01OSXRjcHpsQzR0c2ZONFk0ZTZSbnd6RkNEWHlqa2VlZXZLbTk1bzRSVXl4ZGIK",
       "endpoints": [
         "https://github.com/Jst-Well-Dan/Skillbox-Studio/releases/latest/download/latest.json"
       ]
