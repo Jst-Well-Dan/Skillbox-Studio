@@ -35,9 +35,9 @@ pub struct MarketplaceData {
 }
 
 #[tauri::command]
-pub fn get_marketplace_data() -> Result<MarketplaceData, String> {
+pub fn get_marketplace_data(app: tauri::AppHandle) -> Result<MarketplaceData, String> {
     // Load config
-    let config = crate::commands::config_manager::get_app_config()?;
+    let config = crate::commands::config_manager::load_config(&app)?;
     
     // If no repositories are configured (first run?), we might want to default to the local one 
     // or the "official" one if it's in the default config.

@@ -2,16 +2,18 @@ use crate::commands::agent_config;
 use crate::commands::marketplace;
 use std::fs;
 use std::path::{Path, PathBuf};
+use tauri::Manager;
 
 #[tauri::command]
 pub fn install_plugin(
+    app: tauri::AppHandle,
     plugin_name: String,
     agents: Vec<String>,
     scope_type: String, // "global" or "project"
     scope_path: Option<String>,
 ) -> Result<String, String> {
     // 1. Get marketplace data to find skills
-    let data = marketplace::get_marketplace_data().map_err(|e| e)?;
+    let data = marketplace::get_marketplace_data(app.clone()).map_err(|e| e)?;
     let plugin = data
         .plugins
         .iter()
@@ -20,10 +22,15 @@ pub fn install_plugin(
 
     // 2. Resolve Source Root (Skill-Box root)
     // 检查当前目录和上级目录 (因为运行时可能在 src-tauri 文件夹内)
-    let paths = vec![
+    let mut paths = vec![
         PathBuf::from("Skill-Box"),
         PathBuf::from("../Skill-Box"),
     ];
+
+    // Check for packaged resources
+    if let Ok(resource_dir) = app.path().resource_dir() {
+        paths.push(resource_dir.join("Skill-Box"));
+    }
     
     let source_root = paths
         .iter()
