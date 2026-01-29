@@ -8,7 +8,7 @@ import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Search, Globe, FolderOpen, Plus, Loader2, X, Pencil, Trash2, Check, Languages } from "lucide-react";
+import { Search, Globe, FolderOpen, Plus, Loader2, X, Pencil, Trash2, Check } from "lucide-react";
 import { LocalSkillsPanel } from "./LocalSkillsPanel";
 import { SkillsDetailModal } from "./SkillsDetailModal";
 import { cn } from "../lib/utils";
