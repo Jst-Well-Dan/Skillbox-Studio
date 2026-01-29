@@ -7,6 +7,8 @@ import {
     clearInstallHistory,
     HistoryRecord,
     searchInstalledPlugins,
+    translateBatch,
+    TranslationConfig,
 } from "../lib/api";
 import { useDebounce } from "../lib/hooks";
 import { InstalledPluginCard } from "./InstalledPluginCard";
@@ -24,8 +26,15 @@ interface FilterState {
     agent: string | null;
 }
 
-export function InstalledPluginsPage() {
-    const { t } = useTranslation();
+interface InstalledPluginsPageProps {
+    showTranslated?: boolean;
+    translationConfig?: TranslationConfig | null;
+    onTranslationStatusChange?: (status: 'idle' | 'translating' | 'translated' | 'error') => void;
+    onTranslationError?: (message: string) => void;
+}
+
+export function InstalledPluginsPage({ showTranslated = false, translationConfig, onTranslationStatusChange, onTranslationError }: InstalledPluginsPageProps) {
+    const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [scanResult, setScanResult] = useState<ScanResult | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -36,6 +45,7 @@ export function InstalledPluginsPage() {
     });
     // State for plugins selection removed as per user request
 
+    const [translationCache, setTranslationCache] = useState<Record<string, { name: string; description: string }>>({});
 
     const [history, setHistory] = useState<HistoryRecord[]>([]);
 
@@ -150,6 +160,67 @@ export function InstalledPluginsPage() {
         return matchScope && matchAgent;
     }) || [];
 
+    useEffect(() => {
+        if (showTranslated) {
+            handleTranslateInstalled();
+        }
+    }, [showTranslated, filteredPlugins, translationConfig]);
+
+    const handleTranslateInstalled = async () => {
+        if (!showTranslated) return;
+        if (!translationConfig || !translationConfig.enabled) {
+            onTranslationError?.("翻译功能未启用，请在设置中开启并配置 API Key。");
+            if (onTranslationStatusChange) onTranslationStatusChange('idle');
+            return;
+        }
+        if (!translationConfig.api_key) {
+            onTranslationError?.("未配置翻译 API Key，请在设置中填写后重试。");
+            if (onTranslationStatusChange) onTranslationStatusChange('idle');
+            return;
+        }
+
+        const itemsToTranslate = filteredPlugins.filter(p => !translationCache[p.name]);
+        if (itemsToTranslate.length === 0) {
+            if (onTranslationStatusChange) onTranslationStatusChange('translated');
+            return;
+        }
+
+        if (onTranslationStatusChange) onTranslationStatusChange('translating');
+
+        try {
+            const texts: string[] = [];
+            itemsToTranslate.forEach(p => {
+                texts.push(p.name);
+                texts.push(p.description || "");
+            });
+
+            const targetLang = i18n.language.startsWith('zh') ? 'zh' : 'en';
+            const results = await translateBatch(texts, targetLang);
+
+            setTranslationCache(prev => {
+                const next = { ...prev };
+                itemsToTranslate.forEach((p, index) => {
+                    const nameIdx = index * 2;
+                    const descIdx = index * 2 + 1;
+                    next[p.name] = {
+                        name: results[nameIdx] || p.name,
+                        description: results[descIdx] || p.description || ""
+                    };
+                });
+                return next;
+            });
+
+            if (onTranslationStatusChange) onTranslationStatusChange('translated');
+        } catch (error) {
+            console.error("Installed plugins translation failed:", error);
+            if (onTranslationStatusChange) onTranslationStatusChange('error');
+            onTranslationError?.(error?.toString?.() || "Translation failed");
+            setTimeout(() => {
+                if (onTranslationStatusChange) onTranslationStatusChange('idle');
+            }, 3000);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex h-full items-center justify-center">
@@ -199,6 +270,9 @@ export function InstalledPluginsPage() {
                             key={plugin.name}
                             plugin={plugin}
                             selectedAgent={filters.agent}
+                            translatedName={translationCache[plugin.name]?.name}
+                            translatedDesc={translationCache[plugin.name]?.description}
+                            showTranslated={showTranslated}
                         />
                     ))}
                 </div>

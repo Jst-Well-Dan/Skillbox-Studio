@@ -33,7 +33,18 @@
     "active": true,
     "targets": "all",
     "resources": [
-      "../Skill-Box"
+      "../Skill-Box/README.md",
+      "../Skill-Box/README.zh.md",
+      "../Skill-Box/添加技能指南.md",
+      "../Skill-Box/.claude-plugin",
+      "../Skill-Box/brand-marketing",
+      "../Skill-Box/business-analyst",
+      "../Skill-Box/content-pipeline",
+      "../Skill-Box/i18n",
+      "../Skill-Box/immersive-reading",
+      "../Skill-Box/no-code-builder",
+      "../Skill-Box/office-automation",
+      "../Skill-Box/visual-creative"
     ],
     "icon": [
       "icons/32x32.png",

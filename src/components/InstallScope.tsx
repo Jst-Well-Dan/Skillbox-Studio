@@ -32,7 +32,7 @@ export function InstallScope({ scope, projectPath, onScopeChange, onProjectPathC
                         <Globe className={`h-16 w-16 ${scope === 'global' ? 'text-primary' : 'text-muted-foreground'}`} />
                         <div>
                             <CardTitle className="mb-2">{t('install_scope.global')}</CardTitle>
-                            <CardDescription>
+                            <CardDescription className="whitespace-pre-line">
                                 {t('install_scope.global_description')}
                             </CardDescription>
                         </div>

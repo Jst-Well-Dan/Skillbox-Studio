@@ -9,6 +9,7 @@
         "troubleshoot": "故障排除：",
         "troubleshoot_repo": "确保 <code>Skill-Box</code> 仓库已克隆到同一工作区。",
         "close": "关闭",
+        "save": "保存",
         "cancel": "取消",
         "show_more": "显示更多",
         "show_less": "收起",
@@ -21,7 +22,8 @@
         "installing_local": "正在安装本地技能：{{name}}...",
         "installing_market": "正在安装 {{name}}...",
         "install_result": "{{name}}：{{result}}",
-        "plugin": "插件"
+        "plugin": "插件",
+        "translation_error": "翻译错误：{{error}}"
     },
     "agent_selector": {
         "title": "选择目标智能体",
@@ -51,7 +53,7 @@
         "title": "安装范围",
         "subtitle": "选择技能安装后可被访问的范围",
         "global": "全局",
-        "global_description": "将技能安装到用户主目录 (~/)。本机的每个项目中均可使用。",
+        "global_description": "将技能安装到用户主目录 (~/)。\n本机的每个项目中均可使用。",
         "project": "项目",
         "project_description": "将技能安装到特定项目文件夹。仅在该项目中可用。",
         "path_placeholder": "项目路径",
@@ -79,13 +81,14 @@
         "tabs": {
             "general": "常规",
             "marketplace": "插件市场",
-            "local_skills": "本地技能"
+            "local_skills": "本地技能",
+            "translation": "翻译"
         },
         "general": {
             "appearance": "外观",
             "theme_light": "浅色",
             "theme_dark": "深色",
-            "theme_system": "系统",
+            "theme_system": "跟随系统",
             "language": "语言",
             "updates": "更新",
             "check_updates_startup": "启动时检查更新",
@@ -107,6 +110,29 @@
             "no_repositories": "未配置仓库。添加一个以开始。",
             "edit_repository": "编辑仓库",
             "remove_repository": "移除仓库"
+        },
+        "translation": {
+            "title": "翻译设置",
+            "description": "配置 Zhipu AI (GLM-4-Flash) API 以启用插件和技能的自动翻译功能。",
+            "enabled": "启用翻译",
+            "enabled_hint": "启用后才会调用翻译服务。",
+            "api_key": "API 密钥",
+            "get_api_key_prefix": "请访问 ",
+            "get_api_key_suffix": " 获取 API Key",
+            "model": "模型",
+            "api_base_url": "API 基础地址",
+            "save": "保存配置",
+            "test": "测试连接",
+            "cache_stats": "缓存统计",
+            "total": "总条目",
+            "active": "有效",
+            "expired": "过期",
+            "clear_cache": "清空所有缓存",
+            "confirm_clear": "确定要清空所有翻译缓存吗？",
+            "save_success": "配置已保存",
+            "save_failed": "保存失败",
+            "test_success": "测试成功",
+            "test_failed": "测试失败"
         }
     },
     "dialogs": {
@@ -149,6 +175,13 @@
         "installed": "已安装",
         "market": "市场",
         "scope": "范围",
-        "agents": "智能体"
+        "agents": "智能体",
+        "language_en": "English - 点击切换至中文",
+        "language_zh": "中文 - 点击切换至英文",
+        "ai_translation_enable": "启用AI翻译",
+        "ai_translation_disable": "关闭AI翻译",
+        "ai_translation_translating": "正在翻译...",
+        "ai_translation_error": "翻译失败，请检查设置",
+        "ai_translation_disabled_en": "仅支持中文翻译"
     }
 }

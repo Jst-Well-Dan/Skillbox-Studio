@@ -7,9 +7,25 @@ export function LanguageSwitcher() {
     const { i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
 
-    const changeLanguage = (lng: string) => {
+    const changeLanguage = async (lng: string) => {
         i18n.changeLanguage(lng);
         setIsOpen(false);
+
+        // Sync with backend config
+        try {
+            const { getAppConfig, updateGeneralSettings } = await import('../lib/api');
+            const config = await getAppConfig();
+            const configLang = lng === 'zh' ? 'zh-CN' : lng;
+
+            if (config.general.language !== configLang) {
+                await updateGeneralSettings({
+                    ...config.general,
+                    language: configLang
+                });
+            }
+        } catch (e) {
+            console.error("Failed to sync language setting:", e);
+        }
     };
 
     return (

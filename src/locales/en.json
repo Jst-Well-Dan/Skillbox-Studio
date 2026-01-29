@@ -4,6 +4,7 @@
         "error": "Failed to load Skillbox Studio",
         "retry": "Retry",
         "back": "Back",
+        "close": "Close",
         "install": "Install",
         "installing": "Installing...",
         "troubleshoot": "Troubleshooting:",
@@ -21,7 +22,8 @@
         "installing_local": "Installing local skill: {{name}}...",
         "installing_market": "Installing {{name}}...",
         "install_result": "{{name}}: {{result}}",
-        "plugin": "Plugin"
+        "plugin": "Plugin",
+        "translation_error": "Translation error: {{error}}"
     },
     "agent_selector": {
         "title": "Select Target Agent",
@@ -73,7 +75,8 @@
         "tabs": {
             "general": "General",
             "marketplace": "Marketplace",
-            "local_skills": "Local Skills"
+            "local_skills": "Local Skills",
+            "translation": "Translation"
         },
         "general": {
             "appearance": "Appearance",
@@ -101,6 +104,29 @@
             "no_repositories": "No repositories configured. Add one to get started.",
             "edit_repository": "Edit Repository",
             "remove_repository": "Remove Repository"
+        },
+        "translation": {
+            "title": "Translation Settings",
+            "description": "Configure Zhipu AI (GLM-4-Flash) API to enable automatic translation for plugins and skills.",
+            "enabled": "Enable Translation",
+            "enabled_hint": "Translation calls are only allowed when enabled.",
+            "api_key": "API Key",
+            "get_api_key_prefix": "Visit ",
+            "get_api_key_suffix": " to get API Key",
+            "model": "Model",
+            "api_base_url": "API Base URL",
+            "save": "Save Configuration",
+            "test": "Test Connection",
+            "cache_stats": "Cache Stats",
+            "total": "Total",
+            "active": "Active",
+            "expired": "Expired",
+            "clear_cache": "Clear All Cache",
+            "confirm_clear": "Are you sure you want to clear all translation cache?",
+            "save_success": "Configuration saved",
+            "save_failed": "Save failed",
+            "test_success": "Test passed",
+            "test_failed": "Test failed"
         }
     },
     "dialogs": {
@@ -143,6 +169,13 @@
         "installed": "Installed",
         "market": "Market",
         "scope": "Scope",
-        "agents": "Agents"
+        "agents": "Agents",
+        "language_en": "English - Click for Chinese",
+        "language_zh": "Chinese - Click for English",
+        "ai_translation_enable": "Enable AI Translation",
+        "ai_translation_disable": "Disable AI Translation",
+        "ai_translation_translating": "Translating...",
+        "ai_translation_error": "Translation failed, check settings",
+        "ai_translation_disabled_en": "AI translation only for Chinese"
     }
 }

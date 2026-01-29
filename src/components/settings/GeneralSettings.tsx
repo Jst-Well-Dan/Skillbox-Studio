@@ -11,7 +11,7 @@ interface GeneralSettingsProps {
 }
 
 export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ config, onChange }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { setTheme } = useTheme();
 
     const handleChange = async (key: keyof AppConfig['general'], value: any) => {
@@ -27,6 +27,10 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ config, onChan
         await updateGeneralSettings(newConfig.general);
         if (key === 'theme') {
             setTheme(value);
+        }
+        if (key === 'language') {
+            const i18nLang = value === 'zh-CN' ? 'zh' : value;
+            i18n.changeLanguage(i18nLang);
         }
     };
 

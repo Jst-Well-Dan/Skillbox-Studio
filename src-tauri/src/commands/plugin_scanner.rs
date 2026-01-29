@@ -7,6 +7,7 @@ use crate::commands::{agent_config, marketplace, install_history};
 
 #[tauri::command]
 pub fn scan_installed_plugins(
+    app: tauri::AppHandle,
     scope: Option<String>,
     project_path: Option<String>,
 ) -> Result<ScanResult, String> {
@@ -21,7 +22,7 @@ pub fn scan_installed_plugins(
     };
 
     // 获取市场数据和所有代理配置
-    let marketplace = marketplace::get_marketplace_data()?;
+    let marketplace = marketplace::get_marketplace_data(app)?;
     let agents = agent_config::all_agents();
 
     // 扫描全局作用域
@@ -87,16 +88,17 @@ pub fn scan_installed_plugins(
 
 #[tauri::command]
 pub fn search_installed_plugins(
+    app: tauri::AppHandle,
     query: String,
     scope: Option<String>,
     project_path: Option<String>,
 ) -> Result<Vec<InstalledPlugin>, String> {
     if query.is_empty() {
-        let all = scan_installed_plugins(scope, project_path)?;
+        let all = scan_installed_plugins(app, scope, project_path)?;
         return Ok(all.plugins);
     }
 
-    let all_plugins_result = scan_installed_plugins(scope, project_path)?;
+    let all_plugins_result = scan_installed_plugins(app, scope, project_path)?;
     let mut results = Vec::new();
     let query_lower = query.to_lowercase();
 

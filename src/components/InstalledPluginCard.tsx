@@ -8,11 +8,17 @@ import { FolderOpen, ChevronDown } from "lucide-react";
 interface InstalledPluginCardProps {
     plugin: InstalledPlugin;
     selectedAgent?: string | null;
+    translatedName?: string;
+    translatedDesc?: string;
+    showTranslated?: boolean;
 }
 
 export const InstalledPluginCard = memo(function InstalledPluginCard({
     plugin,
     selectedAgent,
+    translatedName,
+    translatedDesc,
+    showTranslated = false,
 }: InstalledPluginCardProps) {
     const { t } = useTranslation();
     const formatDate = (dateStr: string) => {
@@ -49,8 +55,11 @@ export const InstalledPluginCard = memo(function InstalledPluginCard({
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
 
+    const displayName = showTranslated ? (translatedName || plugin.name) : plugin.name;
+    const displayDesc = showTranslated ? (translatedDesc || plugin.description) : plugin.description;
+
     // Check if description is long enough to need truncation
-    const isLongDescription = (plugin.description?.length || 0) > 100;
+    const isLongDescription = (displayDesc?.length || 0) > 100;
 
     return (
         <Card
@@ -58,7 +67,7 @@ export const InstalledPluginCard = memo(function InstalledPluginCard({
         >
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start gap-2">
-                    <CardTitle className="text-lg flex-1">{plugin.name}</CardTitle>
+                    <CardTitle className="text-lg flex-1">{displayName}</CardTitle>
                 </div>
                 <div className="flex flex-wrap gap-1">
                     {plugin.agents.map(agent => (
@@ -72,7 +81,7 @@ export const InstalledPluginCard = memo(function InstalledPluginCard({
             <CardContent className="flex-1">
                 <div className="mb-3">
                     <p className={`text-sm text-muted-foreground ${isExpanded ? "" : "line-clamp-2"}`}>
-                        {plugin.description}
+                        {displayDesc}
                     </p>
                     {isLongDescription && (
                         <button

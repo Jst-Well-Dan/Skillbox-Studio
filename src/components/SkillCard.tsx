@@ -15,7 +15,9 @@ interface SkillCardProps {
 export function SkillCard({ skill, isSelected, onToggle, className }: SkillCardProps) {
 
     const [isExpanded, setIsExpanded] = useState(false);
-    const isLongDescription = (skill.description?.length || 0) > 100;
+    const hasChinese = /[\u4e00-\u9fa5]/.test(skill.description || '');
+    const threshold = hasChinese ? 80 : 120;
+    const isLongDescription = (skill.description?.length || 0) > threshold;
 
     return (
         <Card

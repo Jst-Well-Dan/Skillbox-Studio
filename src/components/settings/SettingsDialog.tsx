@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { MarketplaceSettings } from './MarketplaceSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { LocalSkillsSettings } from './LocalSkillsSettings';
+import { TranslationSettings } from './TranslationSettings';
 import { AppConfig } from '../../lib/types_config';
+import { Volume2 } from 'lucide-react'; // Import icon
 
 interface SettingsDialogProps {
     open: boolean;
@@ -66,14 +68,12 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                     icon={<Folder size={18} />}
                                     label={t('settings.tabs.local_skills')}
                                 />
-                                {/* 
-                <TabButton 
-                  active={activeTab === 'agents'} 
-                  onClick={() => setActiveTab('agents')}
-                  icon={<AppWindow size={18} />}
-                  label="Agents"
-                />
-                */}
+                                <TabButton
+                                    active={activeTab === 'translation'}
+                                    onClick={() => setActiveTab('translation')}
+                                    icon={<Volume2 size={18} />}
+                                    label={t('settings.tabs.translation')}
+                                />
                             </div>
 
                             {/* Content */}
@@ -83,6 +83,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                         {activeTab === 'general' && t('settings.tabs.general')}
                                         {activeTab === 'marketplace' && t('settings.tabs.marketplace')}
                                         {activeTab === 'local_skills' && t('settings.tabs.local_skills')}
+                                        {activeTab === 'translation' && t('settings.translation.title')}
                                     </h2>
                                     <button
                                         onClick={onClose}
@@ -102,11 +103,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                     {activeTab === 'local_skills' && (
                                         <LocalSkillsSettings />
                                     )}
-                                    {/*
-                  {activeTab === 'agents' && (
-                    <div>Agent Settings Coming Soon</div>
-                  )}
-                  */}
+                                    {activeTab === 'translation' && (
+                                        <TranslationSettings />
+                                    )}
                                 </div>
                             </div>
                         </div>

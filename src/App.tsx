@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getAgents, getMarketplaceData, installPlugin, installLocalSkill, AgentConfig, Plugin, LocalSkill } from "./lib/api";
+import { getAgents, getMarketplaceData, installPlugin, installLocalSkill, getTranslationConfig, AgentConfig, Plugin, LocalSkill, TranslationConfig } from "./lib/api";
 import { Topbar } from "./components/Topbar";
 import { SkillMarket } from "./components/SkillMarket";
 import { InstallScope } from "./components/InstallScope";
@@ -16,10 +16,12 @@ function App() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [translationError, setTranslationError] = useState<string | null>(null);
 
   // Data
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [plugins, setPlugins] = useState<Plugin[]>([]);
+  const [translationConfig, setTranslationConfig] = useState<TranslationConfig | null>(null);
 
   // Selection State
   const [selectedPlugins, setSelectedPlugins] = useState<string[]>([]);
@@ -38,6 +40,14 @@ function App() {
   const loadData = async () => {
     setLoading(true);
     try {
+      let config: TranslationConfig | null = null;
+      try {
+        config = await getTranslationConfig();
+      } catch (e) {
+        console.error("Failed to load translation config", e);
+      }
+      setTranslationConfig(config);
+
       // Load Agents locally first, then try loading marketplace
       const agentsData = await getAgents();
       setAgents(agentsData);
@@ -78,6 +88,12 @@ function App() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Global Smart Translation State
+  const [globalShowTranslated, setGlobalShowTranslated] = useState(false);
+  const [globalTranslationStatus, setGlobalTranslationStatus] = useState<'idle' | 'translating' | 'translated' | 'error'>('idle');
+
+  // Keep global translation state across pages
 
   const handleInstall = async () => {
     setInstallStatus("installing");
@@ -159,7 +175,34 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden font-sans antialiased">
-      <Topbar currentPage={currentPage} onPageChange={setCurrentPage} currentStep={currentPage === "install" ? step : undefined} onRefresh={loadData} />
+      <Topbar
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        currentStep={currentPage === "install" ? step : undefined}
+        onRefresh={loadData}
+
+        // Smart Translation Props
+        showTranslated={globalShowTranslated}
+        onToggleTranslation={(enabled) => setGlobalShowTranslated(enabled)}
+        translationStatus={globalTranslationStatus}
+        translationConfig={translationConfig}
+        onTranslationError={setTranslationError}
+      />
+
+      {translationError && (
+        <div className="px-6 py-3 border-b bg-destructive/10 text-destructive flex items-center justify-between gap-4">
+          <div className="flex items-start gap-2 text-sm">
+            <AlertCircle className="h-4 w-4 mt-0.5" />
+            <span>{t('common.translation_error', { error: translationError })}</span>
+          </div>
+          <button
+            onClick={() => setTranslationError(null)}
+            className="text-xs font-medium px-2 py-1 rounded-md border border-destructive/30 hover:bg-destructive/10"
+          >
+            {t('common.close')}
+          </button>
+        </div>
+      )}
 
       <main className="flex-1 overflow-hidden relative">
         {currentPage === "install" ? (
@@ -176,6 +219,12 @@ function App() {
                 onNext={() => setStep(2)}
                 onLocalInstall={handleLocalInstallRequest}
                 onRefresh={loadData}
+
+                // Smart Translation Props
+                showTranslated={globalShowTranslated}
+                onTranslationStatusChange={setGlobalTranslationStatus}
+                translationConfig={translationConfig}
+                onTranslationError={setTranslationError}
               />
             )}
 
@@ -206,7 +255,12 @@ function App() {
             )}
           </>
         ) : (
-          <InstalledPluginsPage />
+          <InstalledPluginsPage
+            showTranslated={globalShowTranslated}
+            translationConfig={translationConfig}
+            onTranslationStatusChange={setGlobalTranslationStatus}
+            onTranslationError={setTranslationError}
+          />
         )}
       </main>
 

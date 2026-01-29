@@ -1,7 +1,7 @@
 mod commands;
 mod types;
 
-use commands::{agent_config, marketplace, plugin_installer, plugin_scanner, install_history, system};
+use commands::{agent_config, marketplace, plugin_installer, plugin_scanner, install_history, system, skill_metadata, translator};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -19,6 +19,8 @@ pub fn run() {
             install_history::clear_install_history,
             install_history::get_history_stats,
             system::open_project_folder,
+            skill_metadata::get_plugin_skills_details,
+            skill_metadata::export_marketplace_catalog,
             // Git & Config
             commands::git_manager::add_marketplace_repository,
             commands::git_manager::validate_marketplace_repository,
@@ -36,6 +38,15 @@ pub fn run() {
             commands::local_skills_registry::list_registered_directories,
             commands::local_skills_registry::update_local_directory,
             commands::local_skills_installer::install_local_skill,
+            // Translation
+            translator::translate,
+            translator::translate_batch,
+            translator::get_translation_config,
+            translator::update_translation_config,
+            translator::clear_translation_cache,
+            translator::get_translation_cache_stats,
+            translator::detect_text_language,
+            translator::init_translation_service_command,
         ])
 
 

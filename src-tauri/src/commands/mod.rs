@@ -2,6 +2,7 @@ pub mod agent_config;
 pub mod marketplace;
 pub mod plugin_installer;
 pub mod plugin_scanner;
+pub mod skill_metadata;
 
 pub mod install_history;
 pub mod system;
@@ -12,3 +13,5 @@ pub mod marketplace_manager;
 pub mod local_skills_scanner;
 pub mod local_skills_registry;
 pub mod local_skills_installer;
+pub mod translator;
+

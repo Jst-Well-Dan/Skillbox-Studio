@@ -15,6 +15,11 @@ export interface Author {
     url: string;
 }
 
+export interface SkillMetadata {
+    name: string;
+    description: string;
+}
+
 export interface Plugin {
     name: string;
     description: string;
@@ -24,6 +29,11 @@ export interface Plugin {
     skills: string[];
     source_repo?: string;
     source_url?: string;
+}
+
+export interface PluginSkillsDetails {
+    plugin_name: string;
+    skills: SkillMetadata[];
 }
 
 export interface MarketplaceData {
@@ -51,6 +61,16 @@ export async function installPlugin(
         agents,
         scopeType,
         scopePath
+    });
+}
+
+export async function getPluginSkillsDetails(
+    pluginName: string,
+    skillPaths: string[]
+): Promise<PluginSkillsDetails> {
+    return invoke("get_plugin_skills_details", {
+        pluginName: pluginName,
+        skillPaths: skillPaths
     });
 }
 
@@ -259,3 +279,54 @@ export async function installLocalSkill(
         scopePath
     });
 }
+
+// --- Translation API ---
+
+export interface TranslationConfig {
+    enabled: boolean;
+    api_base_url: string;
+    api_key: string;
+    model: string;
+    timeout_seconds: number;
+    cache_ttl_seconds: number;
+    enable_response_translation: boolean;
+}
+
+export interface CacheStats {
+    total_entries: number;
+    expired_entries: number;
+    active_entries: number;
+}
+
+export async function translateText(text: string, targetLang?: string): Promise<string> {
+    return invoke("translate", { text, targetLang });
+}
+
+export async function translateBatch(texts: string[], targetLang?: string): Promise<string[]> {
+    return invoke("translate_batch", { texts, targetLang });
+}
+
+export async function getTranslationConfig(): Promise<TranslationConfig> {
+    return invoke("get_translation_config");
+}
+
+export async function updateTranslationConfig(config: TranslationConfig): Promise<string> {
+    return invoke("update_translation_config", { config });
+}
+
+export async function clearTranslationCache(): Promise<string> {
+    return invoke("clear_translation_cache");
+}
+
+export async function getTranslationCacheStats(): Promise<CacheStats> {
+    return invoke("get_translation_cache_stats");
+}
+
+export async function detectTextLanguage(text: string): Promise<string> {
+    return invoke("detect_text_language", { text });
+}
+
+export async function initTranslationServiceCommand(config?: TranslationConfig): Promise<string> {
+    return invoke("init_translation_service_command", { config });
+}
+
