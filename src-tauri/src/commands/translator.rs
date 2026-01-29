@@ -475,22 +475,6 @@ pub async fn init_translation_service(config: TranslationConfig) {
     info!("Translation service initialized");
 }
 
-/// 使用保存的配置初始化翻译服务
-pub async fn init_translation_service_with_saved_config() {
-    match load_translation_config_from_file() {
-        Ok(config) => {
-            info!("Initializing translation service with saved config");
-            init_translation_service(config).await;
-        }
-        Err(e) => {
-            warn!(
-                "Failed to load saved translation config: {}, using default",
-                e
-            );
-            init_translation_service(TranslationConfig::default()).await;
-        }
-    }
-}
 
 /// 获取全局翻译服务
 fn get_translation_service() -> Arc<Mutex<TranslationService>> {
