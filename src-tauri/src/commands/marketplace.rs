@@ -23,6 +23,8 @@ pub struct Plugin {
     pub source_repo: Option<String>,
     #[serde(default)]
     pub source_url: Option<String>,
+    #[serde(default)]
+    pub source_path: Option<String>,
     pub skills: Vec<String>,
 }
 
@@ -62,6 +64,7 @@ pub fn get_marketplace_data(app: tauri::AppHandle) -> Result<MarketplaceData, St
         // Add resource directory path if available
         if let Ok(resource_dir) = app.path().resource_dir() {
             paths.push(resource_dir.join("Skill-Box").join(".claude-plugin").join("marketplace.json"));
+            paths.push(resource_dir.join("_up_").join("Skill-Box").join(".claude-plugin").join("marketplace.json"));
             // Also try flat structure just in case
             paths.push(resource_dir.join(".claude-plugin").join("marketplace.json"));
         }

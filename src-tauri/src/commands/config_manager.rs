@@ -36,6 +36,7 @@ pub fn load_config(app: &tauri::AppHandle) -> Result<AppConfig, String> {
         // Paths to check for the .claude-plugin marker
         let candidates = vec![
             resource_dir.join("Skill-Box"),
+            resource_dir.join("_up_").join("Skill-Box"),
             resource_dir.clone(),
             resource_dir.parent().unwrap_or(&resource_dir).join("Skill-Box"),
         ];

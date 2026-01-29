@@ -28,6 +28,7 @@ pub fn aggregate_marketplace_data(config: &AppConfig) -> MarketplaceData {
                         if !all_plugins.iter().any(|p| p.name == plugin.name) {
                             plugin.source_repo = Some(repo.name.clone());
                             plugin.source_url = Some(repo.url.clone());
+                            plugin.source_path = Some(repo.local_path.clone());
                             all_plugins.push(plugin);
                         }
                     }

@@ -21,15 +21,21 @@ pub fn install_plugin(
         .ok_or_else(|| format!("Plugin {} not found", plugin_name))?;
 
     // 2. Resolve Source Root (Skill-Box root)
-    // 检查当前目录和上级目录 (因为运行时可能在 src-tauri 文件夹内)
-    let mut paths = vec![
-        PathBuf::from("Skill-Box"),
-        PathBuf::from("../Skill-Box"),
-    ];
+    let mut paths = Vec::new();
+
+    // If plugin has a pre-defined source path (e.g. from a configured repository), use it first
+    if let Some(ref sp) = plugin.source_path {
+        paths.push(PathBuf::from(sp));
+    }
+
+    // Fallback paths for development or packaged resources
+    paths.push(PathBuf::from("Skill-Box"));
+    paths.push(PathBuf::from("../Skill-Box"));
 
     // Check for packaged resources
     if let Ok(resource_dir) = app.path().resource_dir() {
         paths.push(resource_dir.join("Skill-Box"));
+        paths.push(resource_dir.join("_up_").join("Skill-Box"));
     }
     
     let source_root = paths

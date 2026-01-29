@@ -91,6 +91,10 @@ fn find_skill_box_root() -> Option<std::path::PathBuf> {
             if candidate.exists() && candidate.is_dir() {
                 return Some(candidate);
             }
+            let up_candidate = current.join("_up_").join("Skill-Box");
+            if up_candidate.exists() && up_candidate.is_dir() {
+                return Some(up_candidate);
+            }
             if !current.pop() { break; }
         }
     }
@@ -131,6 +135,7 @@ pub fn get_plugin_skills_details(
     // Default fallback paths relative to CWD
     let fallback_bases = vec![
         "Skill-Box",
+        "_up_/Skill-Box",
         "../Skill-Box",
         "../../Skill-Box",
         "./Skill-Box",
