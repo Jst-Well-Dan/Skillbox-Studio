@@ -31,7 +31,9 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "nsis"
+    ],
     "resources": [
       "../Skill-Box/README.md",
       "../Skill-Box/README.zh.md",
