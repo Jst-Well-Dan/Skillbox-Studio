@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "skillbox-studio",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "identifier": "com.a.skillbox-studio",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -35,17 +35,7 @@
       "nsis"
     ],
     "resources": [
-      "../Skill-Box/README.md",
-      "../Skill-Box/README.zh.md",
-      "../Skill-Box/.claude-plugin",
-      "../Skill-Box/brand-marketing",
-      "../Skill-Box/business-analyst",
-      "../Skill-Box/content-pipeline",
-      "../Skill-Box/i18n",
-      "../Skill-Box/immersive-reading",
-      "../Skill-Box/no-code-builder",
-      "../Skill-Box/office-automation",
-      "../Skill-Box/visual-creative"
+      "../Skill-Box"
     ],
     "icon": [
       "icons/32x32.png",

@@ -33,9 +33,13 @@ pub fn load_config(app: &tauri::AppHandle) -> Result<AppConfig, String> {
     // Determine best path for official repo
     let mut official_local_path = "../Skill-Box".to_string();
     if let Ok(resource_dir) = app.path().resource_dir() {
+        // Try Skill-Box subfolder first
         let resource_skillbox = resource_dir.join("Skill-Box");
-        if resource_skillbox.exists() {
+        if resource_skillbox.join(".claude-plugin").exists() {
              official_local_path = resource_skillbox.to_string_lossy().to_string();
+        } else if resource_dir.join(".claude-plugin").exists() {
+             // Fallback to resource root if it looks like the repo contents are there
+             official_local_path = resource_dir.to_string_lossy().to_string();
         }
     }
 

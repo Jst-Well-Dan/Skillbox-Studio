@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use tauri::Manager;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Author {
@@ -51,17 +52,23 @@ pub fn get_marketplace_data(app: tauri::AppHandle) -> Result<MarketplaceData, St
     let data = crate::commands::marketplace_manager::aggregate_marketplace_data(&config);
     
     // Fallback: if aggregation yields 0 plugins, 
-    // try the old hardcoded paths for backward compatibility / dev convenience
+    // try the old hardcoded paths and resource directory for backward compatibility
     if data.plugins.is_empty() {
-         let paths = vec![
-            "Skill-Box/.claude-plugin/marketplace.json",
-            "../Skill-Box/.claude-plugin/marketplace.json",
+        let mut paths = vec![
+            PathBuf::from("Skill-Box/.claude-plugin/marketplace.json"),
+            PathBuf::from("../Skill-Box/.claude-plugin/marketplace.json"),
         ];
 
-        for p in paths {
-            let path = Path::new(p);
+        // Add resource directory path if available
+        if let Ok(resource_dir) = app.path().resource_dir() {
+            paths.push(resource_dir.join("Skill-Box").join(".claude-plugin").join("marketplace.json"));
+            // Also try flat structure just in case
+            paths.push(resource_dir.join(".claude-plugin").join("marketplace.json"));
+        }
+
+        for path in paths {
             if path.exists() {
-                if let Ok(content) = fs::read_to_string(path) {
+                if let Ok(content) = fs::read_to_string(&path) {
                     if let Ok(legacy_data) = serde_json::from_str::<MarketplaceData>(&content) {
                         return Ok(legacy_data);
                     }
