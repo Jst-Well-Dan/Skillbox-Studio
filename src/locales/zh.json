@@ -55,7 +55,7 @@
         "global": "全局",
         "global_description": "将技能安装到用户主目录 (~/)。\n本机的每个项目中均可使用。",
         "project": "项目",
-        "project_description": "将技能安装到特定项目文件夹。仅在该项目中可用。",
+        "project_description": "将技能安装到特定项目文件夹。\n仅在该项目中可用。",
         "path_placeholder": "项目路径",
         "path_hint": "输入项目根目录的绝对路径。",
         "browse": "浏览"

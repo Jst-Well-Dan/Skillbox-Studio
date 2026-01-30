@@ -141,12 +141,12 @@ export function Topbar({ currentPage, onPageChange, currentStep, onRefresh, show
                         <div className="w-8 h-px bg-border"></div>
                         <div className={`flex items-center gap-2 ${currentStep >= 2 ? "text-primary" : "text-muted-foreground"}`}>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep >= 2 ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>2</div>
-                            <span>{t('topbar.scope')}</span>
+                            <span>{t('topbar.agents')}</span>
                         </div>
                         <div className="w-8 h-px bg-border"></div>
                         <div className={`flex items-center gap-2 ${currentStep >= 3 ? "text-primary" : "text-muted-foreground"}`}>
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep >= 3 ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>3</div>
-                            <span>{t('topbar.agents')}</span>
+                            <span>{t('topbar.scope')}</span>
                         </div>
                     </div>
                 )}

@@ -31,7 +31,7 @@ export function SkillsDetailModal({
     translationConfig,
     onTranslationError,
 }: SkillsDetailModalProps) {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [translationStatus, setTranslationStatus] = useState<TranslationStatus>('idle');
     const [displayMode, setDisplayMode] = useState<DisplayMode>('original');
     const [translatedSkills, setTranslatedSkills] = useState<SkillMetadata[]>([]);
@@ -136,8 +136,8 @@ export function SkillsDetailModal({
                         </Dialog.Title>
 
                         <div className="flex items-center gap-1">
-                            {/* Translation Toggle Pill */}
-                            {!isLoading && skills.length > 0 && (
+                            {/* Translation Toggle Pill - Hidden in English */}
+                            {!isLoading && skills.length > 0 && !i18n.language.startsWith('en') && (
                                 <button
                                     onClick={handleTranslate}
                                     disabled={translationStatus === 'translating'}
@@ -147,22 +147,22 @@ export function SkillsDetailModal({
                                             ? "bg-primary/10 text-primary hover:bg-primary/20"
                                             : "hover:bg-muted text-muted-foreground hover:text-foreground"
                                     )}
-                                    title={displayMode === 'translated' ? "显示原文" : "翻译内容"}
+                                    title={displayMode === 'translated' ? t('skills_detail.show_original') : t('skills_detail.translate_content')}
                                 >
                                     {translationStatus === 'translating' ? (
                                         <>
                                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                            <span>翻译中...</span>
+                                            <span>{t('skills_detail.translating')}</span>
                                         </>
                                     ) : translationStatus === 'translated' && displayMode === 'translated' ? (
                                         <>
                                             <Check className="h-3.5 w-3.5" />
-                                            <span>已翻译</span>
+                                            <span>{t('skills_detail.translated')}</span>
                                         </>
                                     ) : (
                                         <>
                                             <Languages className="h-3.5 w-3.5" />
-                                            <span>{translationStatus === 'translated' ? '显示翻译' : '翻译'}</span>
+                                            <span>{translationStatus === 'translated' ? t('skills_detail.show_translation') : t('skills_detail.translate')}</span>
                                         </>
                                     )}
                                 </button>
@@ -190,7 +190,7 @@ export function SkillsDetailModal({
                             </div>
                         ) : skills.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                                <p className="text-sm">该插件暂无技能描述</p>
+                                <p className="text-sm">{t('skills_detail.no_skills_desc')}</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -220,6 +220,7 @@ function SkillItem({
     translated?: SkillMetadata,
     showTranslated: boolean
 }) {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
 
     // Use translated content if available and mode is enabled
@@ -254,7 +255,7 @@ function SkillItem({
                                 )}
                                 title={!isExpanded ? currentSkill.description : undefined}
                             >
-                                {currentSkill.description || "暂无描述"}
+                                {currentSkill.description || t('skills_detail.no_description')}
                             </motion.p>
                         </AnimatePresence>
 
@@ -263,7 +264,7 @@ function SkillItem({
                                 onClick={() => setIsExpanded(!isExpanded)}
                                 className="text-[10px] font-medium text-primary/80 hover:text-primary hover:underline mt-1 bg-transparent border-none cursor-pointer p-0"
                             >
-                                {isExpanded ? "收起" : "阅读更多"}
+                                {isExpanded ? t('common.show_less') : t('common.show_more')}
                             </button>
                         )}
                     </div>

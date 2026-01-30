@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { Search, Globe, FolderOpen, Plus, Loader2, X, Pencil, Trash2, Check } from "lucide-react";
 import { LocalSkillsPanel } from "./LocalSkillsPanel";
 import { SkillsDetailModal } from "./SkillsDetailModal";
-import { cn } from "../lib/utils";
+import { cn, extractNameFromUrl } from "../lib/utils";
 
 interface SkillMarketProps {
     plugins: Plugin[];
@@ -68,19 +68,10 @@ function MarketplaceCard({ plugin: p, isSelected, onToggle, t, translatedName, t
     const displayName = hasStaticName ? staticName : (showTranslated ? (translatedName || p.name) : p.name);
     const displayDesc = hasStaticDesc ? staticDesc : (showTranslated ? (translatedDesc || p.description) : p.description);
 
-    // Get GitHub owner from URL
-    const getGithubOwner = (url?: string) => {
-        if (!url) return null;
-        try {
-            const match = url.match(/(?:github\.com|gitee\.com)\/([^\/]+)/);
-            if (match && match[1]) return match[1];
-        } catch (e) { }
-        return null;
-    };
 
     const cat = p.category || "Uncategorized";
     const displayCategory = (p.source_repo !== "Skillbox" && cat === "Uncategorized" && p.source_url)
-        ? (getGithubOwner(p.source_url) || cat)
+        ? (extractNameFromUrl(p.source_url) || cat)
         : cat;
 
     const isLongDescription = (displayDesc?.length || 0) > 100;
@@ -259,7 +250,7 @@ export function SkillMarket({ plugins, selectedPlugins, onTogglePlugin, onNext, 
 
         try {
             // 1. Validate & Clone
-            const repoInfo = await addMarketplaceRepository(newRepoUrl, "Custom Repo", "public"); // allow backend to name it or user? using simplified flow for now
+            const repoInfo = await addMarketplaceRepository(newRepoUrl, extractNameFromUrl(newRepoUrl), "public"); // Automatically extract name from URL
             // 2. Add to config
             await addRepositoryToConfig(repoInfo);
             // 3. Refresh

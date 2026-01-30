@@ -229,17 +229,6 @@ function App() {
             )}
 
             {step === 2 && (
-              <InstallScope
-                scope={scope}
-                projectPath={projectPath}
-                onScopeChange={setScope}
-                onProjectPathChange={setProjectPath}
-                onNext={() => setStep(3)}
-                onBack={() => setStep(1)}
-              />
-            )}
-
-            {step === 3 && (
               <AgentSelector
                 agents={agents}
                 selectedAgents={selectedAgents}
@@ -248,11 +237,23 @@ function App() {
                     prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
                   );
                 }}
+                onBack={() => setStep(1)}
+                onNext={() => setStep(3)}
+              />
+            )}
+
+            {step === 3 && (
+              <InstallScope
+                scope={scope}
+                projectPath={projectPath}
+                onScopeChange={setScope}
+                onProjectPathChange={setProjectPath}
                 onBack={() => setStep(2)}
                 onInstall={handleInstall}
                 installing={installStatus === 'installing'}
               />
             )}
+
           </>
         ) : (
           <InstalledPluginsPage

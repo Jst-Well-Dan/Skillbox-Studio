@@ -1,7 +1,7 @@
 import { Card, CardContent, CardTitle, CardDescription } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Globe, FolderOpen } from "lucide-react";
+import { Globe, FolderOpen, Loader2 } from "lucide-react";
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from "react-i18next";
 
@@ -10,11 +10,12 @@ interface InstallScopeProps {
     projectPath: string;
     onScopeChange: (s: "global" | "project") => void;
     onProjectPathChange: (p: string) => void;
-    onNext: () => void;
+    onInstall: () => void;
     onBack: () => void;
+    installing?: boolean;
 }
 
-export function InstallScope({ scope, projectPath, onScopeChange, onProjectPathChange, onNext, onBack }: InstallScopeProps) {
+export function InstallScope({ scope, projectPath, onScopeChange, onProjectPathChange, onInstall, onBack, installing = false }: InstallScopeProps) {
     const { t } = useTranslation();
     return (
         <div className="flex flex-col h-full p-6 max-w-4xl mx-auto w-full">
@@ -95,15 +96,17 @@ export function InstallScope({ scope, projectPath, onScopeChange, onProjectPathC
                 <Button
                     className="border border-input bg-background text-foreground hover:bg-muted"
                     onClick={onBack}
+                    disabled={installing}
                 >
                     {t('common.back')}
                 </Button>
                 <Button
-                    onClick={onNext}
-                    disabled={scope === 'project' && !projectPath.trim()}
-                    className="px-8"
+                    onClick={onInstall}
+                    disabled={(scope === 'project' && !projectPath.trim()) || installing}
+                    className="px-8 font-bold"
                 >
-                    {t('skill_market.next')}
+                    {installing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {installing ? t('common.installing') : t('common.install', 'Install')}
                 </Button>
             </div>
         </div>

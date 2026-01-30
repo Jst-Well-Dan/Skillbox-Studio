@@ -53,9 +53,9 @@
         "title": "Installation Scope",
         "subtitle": "Choose where the skills will be accessible after installation",
         "global": "Global",
-        "global_description": "Install skills to your home directory (~/). Accessible in every project on this machine.",
+        "global_description": "Install skills to your home directory (~/). \nAccessible in every project on this machine.",
         "project": "Project",
-        "project_description": "Install skills to a specific project folder. Only accessible within that project.",
+        "project_description": "Install skills to a specific project folder. \nOnly accessible within that project.",
         "path_placeholder": "Project Path",
         "path_hint": "Enter the absolute path to the project root directory.",
         "browse": "Browse"
@@ -177,5 +177,15 @@
         "ai_translation_translating": "Translating...",
         "ai_translation_error": "Translation failed, check settings",
         "ai_translation_disabled_en": "AI translation only for Chinese"
+    },
+    "skills_detail": {
+        "show_original": "Show Original",
+        "translate_content": "Translate Content",
+        "translating": "Translating...",
+        "translated": "Translated",
+        "show_translation": "Show Translation",
+        "translate": "Translate",
+        "no_skills_desc": "No skill descriptions available for this plugin",
+        "no_description": "No description available"
     }
 }

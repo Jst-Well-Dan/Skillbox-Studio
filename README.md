@@ -4,46 +4,82 @@
 
 <img src="public/Skillbox-with-words.svg" alt="Skillbox Studio Logo" width="400" />
 
-**AI Agent 技能的一站式管理中心 | The Ultimate Skill Manager for Your AI Agents**
+**Unified Skill Management Center for AI Agents**
 
 [![Tauri](https://img.shields.io/badge/Tauri-v2-24C8DB?style=flat&logo=tauri&logoColor=white)](https://tauri.app/)
 [![React](https://img.shields.io/badge/React-v19-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-lightgrey)](https://github.com/Jst-Well-Dan/Skillbox-Studio/releases)
 
-[下载最新版 (Download)](https://github.com/Jst-Well-Dan/Skillbox-Studio/releases) • [功能特性 (Features)](#-核心功能-features) • [使用指南 (Usage)](#-快速开始-getting-started) • [开发指南 (Development)](#-开发指南-development)
+[Download](https://github.com/Jst-Well-Dan/Skillbox-Studio/releases) • [Features](#-features) • [Screenshots](#-screenshots) • [Usage](#-usage) • [Development](#-development) • [中文版](./README.zh.md)
 
 </div>
 
 ---
 
-## 📖 简介 Introduction
+## 📖 Introduction
 
-**Skillbox Studio** 是一款现代化的桌面应用程序，专为统一管理多种 AI Agent 的扩展技能（Skills / MCP Tools）而设计。
+**Skillbox Studio** is a modern desktop application designed to unify the management of extended skills (Skills / MCP Tools) for various AI Agents.
 
-在 AI 辅助编程日益普及的今天，我们经常需要在不同的 Agent（如 **Claude**、**Cursor**、**Windsurf**）之间切换。Skillbox Studio 致力于解决技能碎片化的问题，让您通过一个精美的可视化界面，轻松发现、安装、同步和管理所有强大的 AI 技能包。
+In today's AI-assisted programming landscape, we often switch between different Agents like **Claude**, **Cursor**, and **Windsurf**. Skillbox Studio is dedicated to solving the problem of skill fragmentation, allowing you to easily discover, install, synchronize, and manage all powerful AI skill packages through a beautiful visual interface.
 
-**Skillbox Studio** brings order to the chaos of AI agent skills. Whether you're coding with **Claude**, building with **Cursor** or **Windsurf**, manage all your extensions in one premium, unified interface.
+## ✨ Features
 
-## ✨ 核心功能 Features
-
-- **🌐 统一技能市场 (Unified Marketplace)**
-  内置精选技能库（Business, Coding, Writing, Automation 等），提供类似 App Store 的浏览和安装体验。
+- **🌐 Unified Marketplace**
+  Built-in curated skill library (Business, Coding, Writing, Automation, etc.), providing an App Store-like browsing and installation experience.
   
-- **🤖 多 Agent 支持 (Multi-Agent Support)**
-  一次下载，到处运行。支持一键将技能安装到 Claude, Cursor, Trae 等十余种主流 AI 助手。
+- **🤖 Multi-Agent Support**
+  Download once, run everywhere. Supports one-click installation of skills to over ten mainstream AI assistants including Claude, Cursor, and Trae.
   
-- **📂 本地技能管理 (Local Skills Management)**
-  扫描并识别您本地已有的技能目录，轻松将其注册到不同的 Agent 中，无需手动复制粘贴配置文件。
+- **📂 Local Skills Management**
+  Scans and recognizes your existing local skill directories, easily registering them to different Agents without manual copy-pasting of configuration files.
 
-- **🎨 现代化极简设计 (Premium Modern UI)**
-  采用最新的 Fluent/Glassmorphism 设计语言，完美适配深色模式（Dark Mode），提供丝滑的交互动画。
+- **🎨 Premium Modern UI**
+  Adopts the latest Fluent/Glassmorphism design language, perfectly fits Dark Mode, and provides smooth interaction animations.
 
-- **🔗 自定义源 (Custom Repositories)**
-  支持添加第三方的 GitHub 仓库作为技能源，灵活扩展您的技能库边界。
+- **🔗 Custom Repositories**
+  Supports adding third-party GitHub repositories as skill sources, flexibly expanding the boundaries of your skill library.
 
-## 🤝 支持的 Agents Supported Agents
+## 📸 Screenshots
 
-Skillbox Studio 目前支持以下 AI 助手和环境：
+<details>
+<summary><b>Click to expand screenshots / 点击展开界面预览</b></summary>
+
+### 1. Discovery & Installation
+Follow the intuitive workflow from browsing the marketplace to completing skill installation.
+
+#### 🌐 Browse Marketplace
+<img src="public/screenshot/en/1. marketplace.png" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
+
+#### 🤖 Select Target Agent
+<img src="public/screenshot/en/2.select agents.png" width="100%" style="border-radius: 8px;" />
+
+#### 📂 Confirm Installation Scope
+<img src="public/screenshot/en/3.select scope.png" width="100%" style="border-radius: 8px;" />
+
+### 2. Details & AI Assistance
+Deep dive into skill features with comprehensive descriptions
+
+#### 📖 Skill Details
+<img src="public/screenshot/en/5.skills description.png" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
+
+---
+
+### 3. Advanced Management & Extensibility
+Advanced features for custom repositories, local imports, and global management.
+
+#### 🔗 Custom Repos & Local Skills
+
+<img src="public/screenshot/en/4.add repository.png" width="100%" style="border-radius: 8px;" />
+<img src="public/screenshot/en/6.local skills.png" width="100%" style="border-radius: 8px; margin-top: 10px;" />
+
+#### 📊 Global Status Monitoring
+<img src="public/screenshot/en/7.installed skillls.png" width="100%" style="border-radius: 8px;" />
+
+</details>
+
+## 🤝 Supported Agents
+
+Skillbox Studio currently supports the following AI assistants and environments:
 
 | Category | Agents |
 |----------|--------|
@@ -52,59 +88,46 @@ Skillbox Studio 目前支持以下 AI 助手和环境：
 | **Open Source** | Roo Code, Goose, OpenCode, Kilo Code, Kiro CLI |
 | **Others** | Clawdbot, Amp, Droid |
 
-## 🚀 快速开始 Getting Started
+## 🚀 Usage
 
-### 安装 Installation
+1. **Installation**: Download the latest installer for your system from the [Releases page](https://github.com/Jst-Well-Dan/Skillbox-Studio/releases).
+2. **Browse Marketplace**: Open the app and browse recommended skills in the "Marketplace" tab.
+3. **Install Skill**: Click on a skill card, select your target Agent (e.g., Claude or Cursor), and confirm the installation scope.
+4. **Manage Installed**: View installed skills for each Agent in the "Usage" page, where you can uninstall or update them with one click.
+5. **Import Local**: If you have your own skills, import them in the "Local" page for quick distribution to multiple Agents.
 
-请前往 [Releases 页面](https://github.com/Jst-Well-Dan/Skillbox-Studio/releases) 下载适用于您系统的最新安装包。
-- **Windows**: 下载 `.msi` 或 `.exe` 安装包。
-- **macOS / Linux**: (即将推出 / Coming Soon)
+## 🛠️ Development
 
-### 使用 Usage
-
-1. **浏览市场 (Marketplace)**: 
-   打开应用，在 "Marketplace" 标签页浏览官方推荐的技能。
-2. **安装技能 (Install)**: 
-   点击技能卡片，选择您想要安装的目标 Agent（例如 Claude 或 Cursor）。Skillbox Studio 会自动处理配置文件。
-3. **管理已安装 (Usage)**: 
-   在 "Usage" 页面查看各 Agent 已安装的技能，支持一键卸载或更新。
-4. **导入本地库 (Local Skills)**: 
-   如果您在本地有自己编写的技能，可在 "Local" 页面将其导入，并快速分发给多个 Agent。
-
-## 🛠️ 开发指南 Development
-
-如果您想参与 Skillbox Studio 的开发，请按照以下步骤配置环境。
-
-### 前置要求 Prerequisites
+### Prerequisites
 - [Node.js](https://nodejs.org/) (v18+)
 - [Rust](https://www.rust-lang.org/) (v1.75+)
 - [pnpm](https://pnpm.io/) or npm
 
-### 启动项目 Run Locally
+### Run Locally
 
 ```bash
-# 1. 克隆项目
+# 1. Clone the repository
 git clone https://github.com/Jst-Well-Dan/Skillbox-Studio.git
 
-# 2. 安装前端依赖
+# 2. Install dependencies
 npm install
 
-# 3. 启动开发服务器 (同时启动 Frontend 和 Tauri Backend)
+# 3. Start development server
 npm run tauri dev
 ```
 
-### 构建 Release
+### Build Release
 
 ```bash
 npm run tauri build
 ```
 
-## 🤝 贡献 Contribution
+## 🤝 Contribution
 
-欢迎提交 Pull Request 或 Issue！
-- 对于**应用本身**的改进，请直接提交 PR 到本仓库。
-- 对于**技能库**的扩充，请参考 `Skill-Box/添加技能指南.md`。
+Contributions are welcome!
+- For **app improvements**, please submit a PR to this repo.
+- For **skill library** expansion, please refer to `Skill-Box/Adding Skills Guide.md`.
 
-## 📄 许可证 License
+## 📄 License
 
-本项目采用 MIT 许可证开源。
+This project is open-source under the MIT License.

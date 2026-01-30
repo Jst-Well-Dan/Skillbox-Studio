@@ -38,11 +38,10 @@ interface AgentSelectorProps {
     selectedAgents: string[];
     onToggleAgent: (id: string) => void;
     onBack: () => void;
-    onInstall: () => void;
-    installing: boolean;
+    onNext: () => void;
 }
 
-export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, onInstall, installing }: AgentSelectorProps) {
+export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, onNext }: AgentSelectorProps) {
     const { t } = useTranslation();
     const [starredAgents, setStarredAgents] = useState<string[]>(() => {
         try {
@@ -183,16 +182,15 @@ export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, o
                 <Button
                     className="border border-input bg-background text-foreground hover:bg-muted"
                     onClick={onBack}
-                    disabled={installing}
                 >
                     {t('common.back')}
                 </Button>
                 <Button
-                    onClick={onInstall}
-                    disabled={selectedAgents.length === 0 || installing}
+                    onClick={onNext}
+                    disabled={selectedAgents.length === 0}
                     className="px-8 font-bold"
                 >
-                    {installing ? t('common.installing') : t('common.install', 'Install')}
+                    {t('skill_market.next')}
                 </Button>
             </div>
         </div>

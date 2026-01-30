@@ -4,6 +4,7 @@ import { AppConfig } from '../../lib/types_config';
 import { addMarketplaceRepository, addRepositoryToConfig, removeRepositoryFromConfig, updateRepositoryEnabled, updateRepositoryInConfig } from '../../lib/api';
 import { Plus, Trash2, GitBranch, AlertCircle, Loader2, Pencil, X, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { extractNameFromUrl } from '../../lib/utils';
 
 interface MarketplaceSettingsProps {
     config: AppConfig;
@@ -32,7 +33,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ config
 
         try {
             // 1. Call backend to clone and validate
-            const repoInfo = await addMarketplaceRepository(newRepoUrl, newRepoName || 'Custom Repo', 'public');
+            const repoInfo = await addMarketplaceRepository(newRepoUrl, newRepoName || extractNameFromUrl(newRepoUrl), 'public');
 
             // 2. Add to config via backend
             await addRepositoryToConfig(repoInfo);
