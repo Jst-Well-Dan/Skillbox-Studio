@@ -8,6 +8,7 @@ export interface AgentConfig {
     project_path: string;
     global_path: string;
     icon: string;
+    category?: string; // "Core" | "Community"
 }
 
 export interface Author {

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings, Package, Folder } from 'lucide-react';
+import { X, Settings, Package, Folder, Volume2, Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MarketplaceSettings } from './MarketplaceSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { LocalSkillsSettings } from './LocalSkillsSettings';
 import { TranslationSettings } from './TranslationSettings';
+import { AgentSettings } from './AgentSettings';
 import { AppConfig } from '../../lib/types_config';
-import { Volume2 } from 'lucide-react'; // Import icon
 
 interface SettingsDialogProps {
     open: boolean;
@@ -63,6 +63,12 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                     label={t('settings.tabs.marketplace')}
                                 />
                                 <TabButton
+                                    active={activeTab === 'agents'}
+                                    onClick={() => setActiveTab('agents')}
+                                    icon={<Bot size={18} />}
+                                    label={t('settings.tabs.agents', 'Agents')}
+                                />
+                                <TabButton
                                     active={activeTab === 'local_skills'}
                                     onClick={() => setActiveTab('local_skills')}
                                     icon={<Folder size={18} />}
@@ -82,6 +88,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                     <h2 className="text-lg font-semibold capitalize">
                                         {activeTab === 'general' && t('settings.tabs.general')}
                                         {activeTab === 'marketplace' && t('settings.tabs.marketplace')}
+                                        {activeTab === 'agents' && t('settings.tabs.agents', 'Agents')}
                                         {activeTab === 'local_skills' && t('settings.tabs.local_skills')}
                                         {activeTab === 'translation' && t('settings.translation.title')}
                                     </h2>
@@ -99,6 +106,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose, c
                                     )}
                                     {activeTab === 'marketplace' && (
                                         <MarketplaceSettings config={config} onChange={onConfigChange} />
+                                    )}
+                                    {activeTab === 'agents' && (
+                                        <AgentSettings />
                                     )}
                                     {activeTab === 'local_skills' && (
                                         <LocalSkillsSettings />

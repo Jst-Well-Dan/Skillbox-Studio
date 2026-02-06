@@ -17,7 +17,8 @@ const IconMap: Record<string, any> = {
     "roo": Bot,
     "code": Code2,
     "antigravity": "/antigravity.svg",
-    "clawdbot": "/clawdbot.svg",
+    "cline": "/cline.svg",
+    "openclaw": "/clawdbot.svg",
     "goose": Bot,
     "opencode": "/opencode-wordmark-light.svg",
     "kilocode": "/kilocode-light.svg",
@@ -43,6 +44,15 @@ interface AgentSelectorProps {
 
 export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, onNext }: AgentSelectorProps) {
     const { t } = useTranslation();
+    const [enabledCommunityAgents, setEnabledCommunityAgents] = useState<string[]>(() => {
+        try {
+            const saved = localStorage.getItem("enabled_community_agents");
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            return [];
+        }
+    });
+
     const [starredAgents, setStarredAgents] = useState<string[]>(() => {
         try {
             const saved = localStorage.getItem("starred_agents");
@@ -52,6 +62,19 @@ export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, o
             return [];
         }
     });
+
+    // Listen for changes from SettingsDialog
+    useEffect(() => {
+        const handleStorageChange = () => {
+            try {
+                const saved = localStorage.getItem("enabled_community_agents");
+                setEnabledCommunityAgents(saved ? JSON.parse(saved) : []);
+            } catch (e) { }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
 
     useEffect(() => {
         try {
@@ -76,18 +99,24 @@ export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, o
         }
     };
 
+    // Filter agents: Show Core + Enabled Community
+    const visibleAgents = agents.filter(agent => {
+        if (agent.category === "Core" || !agent.category) return true;
+        return enabledCommunityAgents.includes(agent.id);
+    });
+
     const toggleAll = () => {
-        if (selectedAgents.length === agents.length) {
-            agents.filter(a => selectedAgents.includes(a.id)).forEach(a => onToggleAgent(a.id));
+        if (selectedAgents.length === visibleAgents.length) {
+            visibleAgents.filter(a => selectedAgents.includes(a.id)).forEach(a => onToggleAgent(a.id));
         } else {
-            agents.forEach(a => {
+            visibleAgents.forEach(a => {
                 if (!selectedAgents.includes(a.id)) onToggleAgent(a.id);
             });
         }
     }
 
-    // Sort agents: Starred first, then by original order (or name if preferred, but original order is usually safe)
-    const sortedAgents = [...agents].sort((a, b) => {
+    // Sort agents: Starred first, then by original order
+    const sortedAgents = [...visibleAgents].sort((a, b) => {
         const isAStarred = starredAgents.includes(a.id);
         const isBStarred = starredAgents.includes(b.id);
         if (isAStarred && !isBStarred) return -1;
@@ -107,14 +136,20 @@ export function AgentSelector({ agents, selectedAgents, onToggleAgent, onBack, o
                             style={{ height: '2rem', fontSize: '0.75rem' }}
                             className="border border-input bg-background text-foreground hover:bg-muted"
                         >
-                            {selectedAgents.length === agents.length ? t('agent_selector.deselect_all') : t('agent_selector.select_all')}
+                            {selectedAgents.length === visibleAgents.length ? t('agent_selector.deselect_all') : t('agent_selector.select_all')}
                         </Button>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto min-h-0 flex-1 pr-2 pb-2">
-                {sortedAgents.map(agent => {
+                {sortedAgents.length === 0 ? (
+                    <div className="col-span-full flex flex-col items-center justify-center h-full text-muted-foreground p-8 border border-dashed rounded-lg">
+                        <Bot className="h-10 w-10 mb-4 opacity-20" />
+                        <p className="mb-2">{t('agent_selector.no_agents_visible', 'No agents visible.')}</p>
+                        <p className="text-sm">{t('agent_selector.check_settings', 'Check Settings > Agents to enable more tools.')}</p>
+                    </div>
+                ) : sortedAgents.map(agent => {
                     const isSelected = selectedAgents.includes(agent.id);
                     const isStarred = starredAgents.includes(agent.id);
                     // Try exact match, then partial match, then fallback

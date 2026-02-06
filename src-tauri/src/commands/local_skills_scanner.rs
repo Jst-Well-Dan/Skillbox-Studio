@@ -3,7 +3,7 @@ use std::path::Path;
 use regex::Regex;
 use crate::types::{LocalSkill, SkillMetadata, LocalSkillScanResult, SkillSource};
 
-/// 扫描指定目录下的本地 skills
+/// 扫描指定目录下的本地 skills (递归)
 #[tauri::command]
 pub async fn scan_local_skills(directory: String) -> Result<LocalSkillScanResult, String> {
     let path = Path::new(&directory);
@@ -22,62 +22,8 @@ pub async fn scan_local_skills(directory: String) -> Result<LocalSkillScanResult
     let mut skills = Vec::new();
     let mut errors = Vec::new();
 
-    // 遍历目录下的每个子目录（每个可能是一个skill）
-    match fs::read_dir(path) {
-        Ok(entries) => {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-
-                    // 跳过非目录项
-                    if !path.is_dir() {
-                        continue;
-                    }
-
-                    // 查找 SKILL.md
-                    let skill_md_path = path.join("SKILL.md");
-                    if skill_md_path.exists() {
-                        match parse_skill_metadata(&skill_md_path) {
-                            Ok(metadata) => {
-                                let size = calculate_dir_size(&path);
-                                
-                                let has_scripts = path.join("scripts").exists();
-                                let has_references = path.join("references").exists();
-                                let has_assets = path.join("assets").exists();
-
-                                skills.push(LocalSkill {
-                                    name: metadata.name,
-                                    description: metadata.description,
-                                    path: path.to_string_lossy().to_string(),
-                                    source: SkillSource::LocalDirectory,
-                                    has_scripts,
-                                    has_references,
-                                    has_assets,
-                                    size_bytes: size,
-                                });
-                            }
-                            Err(e) => {
-                                errors.push(format!(
-                                    "Failed to parse {}: {}",
-                                    path.display(),
-                                    e
-                                ));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Err(e) => {
-            return Ok(LocalSkillScanResult {
-                success: false,
-                path: directory,
-                skills_found: vec![],
-                error_message: Some(format!("读取目录失败: {}", e)),
-                total_skills: 0,
-            });
-        }
-    }
+    // 开始递归扫描，最大深度 5
+    scan_dir_recursive(path, &mut skills, &mut errors, 0, 5);
 
     let total = skills.len();
     Ok(LocalSkillScanResult {
@@ -87,6 +33,71 @@ pub async fn scan_local_skills(directory: String) -> Result<LocalSkillScanResult
         error_message: if errors.is_empty() { None } else { Some(errors.join("; ")) },
         total_skills: total,
     })
+}
+
+fn scan_dir_recursive(
+    dir: &Path,
+    skills: &mut Vec<LocalSkill>,
+    errors: &mut Vec<String>,
+    depth: u32,
+    max_depth: u32
+) {
+    if depth > max_depth {
+        return;
+    }
+
+    // 定义需要忽略的目录
+    let ignore_dirs = [
+        "node_modules", ".git", "target", "dist", "build", 
+        ".vscode", ".idea", "__pycache__", "pkg", "bin", "obj"
+    ];
+
+    // 1. 检查当前目录是否是 Skill (存在 SKILL.md)
+    let skill_md_path = dir.join("SKILL.md");
+    if skill_md_path.exists() {
+        match parse_skill_metadata(&skill_md_path) {
+            Ok(metadata) => {
+                let size = calculate_dir_size(dir);
+                let has_scripts = dir.join("scripts").exists();
+                let has_references = dir.join("references").exists();
+                let has_assets = dir.join("assets").exists();
+
+                skills.push(LocalSkill {
+                    name: metadata.name,
+                    description: metadata.description,
+                    path: dir.to_string_lossy().to_string(),
+                    source: SkillSource::LocalDirectory,
+                    has_scripts,
+                    has_references,
+                    has_assets,
+                    size_bytes: size,
+                });
+            }
+            Err(e) => {
+                errors.push(format!("Failed to parse {}: {}", dir.display(), e));
+            }
+        }
+    }
+
+    // 2. 遍历子目录
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                // 检查是否在忽略列表中
+                if let Some(dir_name) = path.file_name().and_then(|n| n.to_str()) {
+                    if ignore_dirs.contains(&dir_name) {
+                        continue;
+                    }
+                    if dir_name.starts_with('.') && dir_name != ".agent" { // 忽略大多数隐藏目录，除了 .agent
+                         continue;
+                    }
+                }
+                
+                scan_dir_recursive(&path, skills, errors, depth + 1, max_depth);
+            }
+        }
+    }
 }
 
 /// 从 SKILL.md 解析元数据
