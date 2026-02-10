@@ -5,13 +5,15 @@ import {
     unregisterLocalDirectory,
     listRegisteredDirectories,
     scanLocalSkills,
+    updateLocalDirectory,
+    openProjectFolder,
     LocalSkill,
     LocalSkillScanResult,
     LocalDirectory
 } from '../lib/api';
 import { SkillCard } from './SkillCard';
 import { Button } from './ui/button';
-import { FolderPlus, Trash2, RefreshCw } from 'lucide-react';
+import { FolderPlus, Trash2, RefreshCw, Pencil, FolderOpen } from 'lucide-react';
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -27,6 +29,8 @@ export function LocalSkillsPanel({ onInstall }: LocalSkillsPanelProps) {
     const [selectedDir, setSelectedDir] = useState<string | null>(null);
     const [scanResult, setScanResult] = useState<LocalSkillScanResult | null>(null);
     const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set());
+    const [editingPath, setEditingPath] = useState<string | null>(null);
+    const [editName, setEditName] = useState("");
 
     // Load directories on mount
     useEffect(() => {
@@ -168,6 +172,37 @@ export function LocalSkillsPanel({ onInstall }: LocalSkillsPanelProps) {
         }
     };
 
+    const startEditing = (dir: LocalDirectory, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingPath(dir.path);
+        setEditName(dir.name);
+    };
+
+    const saveEdit = async () => {
+        if (editingPath && editName.trim()) {
+            await updateLocalDirectory(editingPath, editName.trim());
+            setEditingPath(null);
+            loadDirectories();
+        } else {
+            cancelEdit();
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingPath(null);
+        setEditName("");
+    };
+
+    const handleOpenFolder = async () => {
+        if (selectedDir && selectedDir !== "all_directories") {
+            try {
+                await openProjectFolder(selectedDir);
+            } catch (error) {
+                console.error("Failed to open folder:", error);
+            }
+        }
+    };
+
     const selectedDirObj = registeredDirs.find(d => d.path === selectedDir);
 
     return (
@@ -215,15 +250,40 @@ export function LocalSkillsPanel({ onInstall }: LocalSkillsPanelProps) {
                                 )}
                                 onClick={() => handleScanDirectory(dir.path)}
                             >
-                                <div className="truncate flex-1 font-medium" title={dir.path}>
-                                    {dir.name}
+                                {editingPath === dir.path ? (
+                                    <input
+                                        autoFocus
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        onBlur={saveEdit}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') saveEdit();
+                                            if (e.key === 'Escape') cancelEdit();
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex-1 min-w-0 h-6 text-sm px-1 py-0 mr-2 bg-background border border-input rounded"
+                                    />
+                                ) : (
+                                    <div className="truncate flex-1 font-medium" title={dir.path}>
+                                        {dir.name}
+                                    </div>
+                                )}
+                                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={(e) => startEditing(dir, e)}
+                                        className="p-1 hover:text-primary mr-1"
+                                        title={t('common.edit') || "Edit"}
+                                    >
+                                        <Pencil className="h-3 w-3" />
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleRemoveDirectory(dir.path, e)}
+                                        className="p-1 hover:text-destructive"
+                                        title={t('common.remove') || "Remove"}
+                                    >
+                                        <Trash2 className="h-3 w-3" />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={(e) => handleRemoveDirectory(dir.path, e)}
-                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-opacity"
-                                >
-                                    <Trash2 className="h-3 w-3" />
-                                </button>
                             </div>
                         ))}
                     </div>
@@ -270,9 +330,20 @@ export function LocalSkillsPanel({ onInstall }: LocalSkillsPanelProps) {
                                         onClick={() => handleScanDirectory(selectedDir)}
                                         disabled={loading}
                                         className="h-8 w-8 border border-input bg-muted/60 text-foreground hover:bg-accent hover:text-accent-foreground p-0 transition-all hover:scale-105 active:scale-95 shadow-sm ml-2"
+                                        title={t('common.refresh') || "Refresh"}
                                     >
                                         <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
                                     </Button>
+
+                                    {selectedDir !== "all_directories" && (
+                                        <Button
+                                            onClick={handleOpenFolder}
+                                            className="h-8 w-8 border border-input bg-muted/60 text-foreground hover:bg-accent hover:text-accent-foreground p-0 transition-all hover:scale-105 active:scale-95 shadow-sm ml-2"
+                                            title={t('plugin_card.open_folder')}
+                                        >
+                                            <FolderOpen className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
 

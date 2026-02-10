@@ -81,10 +81,16 @@ pub async fn register_local_directory(path: String, name: Option<String>) -> Res
 
     if !registry.registered_directories.iter().any(|r| r.path == path) {
         let name = name.unwrap_or_else(|| {
-            path_buf.file_name()
+            let file_name = path_buf.file_name()
                 .and_then(|n| n.to_str())
-                .unwrap_or("Unknown")
-                .to_string()
+                .unwrap_or("Unknown");
+
+            if file_name.eq_ignore_ascii_case("skills") {
+                if let Some(parent_name) = path_buf.parent().and_then(|p| p.file_name()).and_then(|n| n.to_str()) {
+                    return parent_name.to_string();
+                }
+            }
+            file_name.to_string()
         });
         
         registry.registered_directories.push(LocalDirectory { path, name });

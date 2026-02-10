@@ -11,6 +11,8 @@
         "close": "关闭",
         "save": "保存",
         "cancel": "取消",
+        "edit": "编辑",
+        "remove": "移除",
         "show_more": "显示更多",
         "show_less": "收起",
         "all": "全部",

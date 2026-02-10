@@ -11,6 +11,8 @@
         "troubleshoot_repo": "Ensure <code>Skill-Box</code> repository is cloned in the same workspace.",
         "troubleshoot_market": "Check if <code>marketplace.json</code> exists in the plugin folder.",
         "cancel": "Cancel",
+        "edit": "Edit",
+        "remove": "Remove",
         "show_more": "Show More",
         "show_less": "Show Less",
         "all": "All",
