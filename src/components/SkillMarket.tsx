@@ -548,7 +548,7 @@ export function SkillMarket({ plugins, selectedPlugins, onTogglePlugin, onNext, 
                                 value={category}
                                 onChange={e => setCategory(e.target.value)}
                             >
-                                {categories.map(c => <option key={c} value={c}>{c === "all" ? t('skill_market.all_categories') : c}</option>)}
+                                {categories.map(c => <option key={c} value={c}>{c === "all" ? t('skill_market.all_categories') : t(`skill_market.categories.${c}`, c)}</option>)}
                             </select>
                         </div>
 
