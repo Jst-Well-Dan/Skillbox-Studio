@@ -1,4 +1,4 @@
-# Skillbox Studio
+﻿# Skillbox Studio
 
 <div align="center">
 
@@ -90,7 +90,7 @@ Skillbox Studio 目前支持以下 AI 助手和环境：
 | **核心 AI** | Claude Code, Gemini CLI |
 | **IDE / 编辑器** | Cursor, Windsurf, Trae, GitHub Copilot |
 | **开源助手** | Roo Code, Goose, OpenCode, Kilo Code, Kiro CLI |
-| **其他** | Clawdbot, Amp, Droid |
+| **其他** | OpenClaw, Amp, Droid |
 
 ## 🚀 快速开始
 

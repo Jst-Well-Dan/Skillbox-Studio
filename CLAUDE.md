@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -100,7 +100,7 @@ Each agent has distinct project and global installation paths:
 - Windsurf: `.windsurf/skills/` / `~/.codeium/windsurf/skills/`
 - Cursor: `.cursor/skills/` / `~/.cursor/skills/`
 - GitHub Copilot: `.github/skills/` / `~/.copilot/skills/`
-- Trae, Gemini CLI, Roo Code, Antigravity, Clawdbot, Goose, OpenCode, Kilo Code, Kiro CLI, Amp, Codex, Droid
+- Trae, Gemini CLI, Roo Code, Antigravity, OpenClaw, Goose, OpenCode, Kilo Code, Kiro CLI, Amp, Codex, Droid
 
 Agent configuration is hardcoded in `src-tauri/src/commands/agent_config.rs`.
 

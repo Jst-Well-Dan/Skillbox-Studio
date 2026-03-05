@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEvent } from "react";
+﻿import { useState, useEffect, MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { AgentConfig } from "../lib/api";
 import { Card, CardContent, CardTitle } from "./ui/card";
@@ -18,7 +18,7 @@ const IconMap: Record<string, any> = {
     "code": Code2,
     "antigravity": "/antigravity.svg",
     "cline": "/cline.svg",
-    "openclaw": "/clawdbot.svg",
+    "openclaw": "/openclaw.svg",
     "goose": Bot,
     "opencode": "/opencode-wordmark-light.svg",
     "kilocode": "/kilocode-light.svg",

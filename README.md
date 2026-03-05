@@ -1,4 +1,4 @@
-# Skillbox Studio
+﻿# Skillbox Studio
 
 <div align="center">
 
@@ -86,7 +86,7 @@ Skillbox Studio currently supports the following AI assistants and environments:
 | **Core AI** | Claude Code, Gemini CLI |
 | **IDE / Editors** | Cursor, Windsurf, Trae, GitHub Copilot |
 | **Open Source** | Roo Code, Goose, OpenCode, Kilo Code, Kiro CLI |
-| **Others** | Clawdbot, Amp, Droid |
+| **Others** | OpenClaw, Amp, Droid |
 
 ## 🚀 Usage
 
