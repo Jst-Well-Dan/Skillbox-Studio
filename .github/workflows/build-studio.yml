@@ -12,6 +12,8 @@ on:
       - "vite.config.*"
       - "tsconfig*.json"
       - "tailwind.config.*"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 jobs:
