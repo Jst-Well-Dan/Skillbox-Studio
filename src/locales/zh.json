@@ -52,9 +52,13 @@
         "skills": "个技能",
         "categories": {
             "dev-tools": "开发者工具",
-            "ai-meta": "AI 元技能",
-            "obsidian": "Obsidian 生态",
-            "productivity": "生产力套件"
+            "ai-meta": "AI 元能力",
+            "obsidian": "Obsidian",
+            "productivity": "生产力套件",
+            "content-pipeline": "内容流水线",
+            "visual-creative": "视觉与创意",
+            "business-analyst": "商业分析",
+            "Uncategorized": "未分类"
         }
     },
     "install_scope": {

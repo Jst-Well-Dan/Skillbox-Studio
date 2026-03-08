@@ -51,10 +51,14 @@
         "add": "Add",
         "skills": "skills",
         "categories": {
-            "dev-tools": "Developer Tools",
-            "ai-meta": "AI & Meta Skills",
-            "obsidian": "Obsidian Ecosystem",
-            "productivity": "Productivity Suite"
+            "dev-tools": "Dev Tools",
+            "ai-meta": "AI Meta",
+            "obsidian": "Obsidian",
+            "productivity": "Productivity",
+            "content-pipeline": "Content Pipeline",
+            "visual-creative": "Visual & Creative",
+            "business-analyst": "Business Analyst",
+            "Uncategorized": "Uncategorized"
         }
     },
     "install_scope": {
