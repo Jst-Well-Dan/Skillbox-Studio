@@ -38,13 +38,13 @@
     ],
     "resources": [
       "../Skill-Box/.claude-plugin/**/*",
-      "../Skill-Box/brand-marketing/**/*",
+      "../Skill-Box/ai-meta/**/*",
       "../Skill-Box/business-analyst/**/*",
       "../Skill-Box/content-pipeline/**/*",
+      "../Skill-Box/dev-tools/**/*",
       "../Skill-Box/i18n/**/*",
-      "../Skill-Box/immersive-reading/**/*",
-      "../Skill-Box/no-code-builder/**/*",
-      "../Skill-Box/office-automation/**/*",
+      "../Skill-Box/obsidian/**/*",
+      "../Skill-Box/productivity/**/*",
       "../Skill-Box/visual-creative/**/*",
       "../Skill-Box/README.md",
       "../Skill-Box/README.zh.md"
