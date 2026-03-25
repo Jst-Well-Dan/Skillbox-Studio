@@ -1,7 +1,7 @@
 {
   "name": "skillbox-studio2",
   "private": true,
-  "version": "0.1.14",
+  "version": "0.1.15",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,7 @@
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-updater": "^2.10.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.29.0",
     "i18next": "^25.8.0",

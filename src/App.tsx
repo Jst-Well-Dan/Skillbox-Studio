@@ -9,9 +9,12 @@ import { InstallResult } from "./components/InstallResult";
 import { InstalledPluginsPage } from "./components/InstalledPluginsPage";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "./components/ui/button";
+import { useAppUpdater } from "./hooks/useAppUpdater";
+import { UpdateBanner } from "./components/UpdateBanner";
 
 function App() {
   const { t } = useTranslation();
+  const updater = useAppUpdater();
   const [currentPage, setCurrentPage] = useState<"install" | "installed">("install");
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -203,6 +206,13 @@ function App() {
           </button>
         </div>
       )}
+
+      <UpdateBanner
+        state={updater.state}
+        version={updater.version}
+        onInstall={updater.install}
+        onDismiss={updater.dismiss}
+      />
 
       <main className="flex-1 overflow-hidden relative">
         {currentPage === "install" ? (

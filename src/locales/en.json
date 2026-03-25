@@ -190,6 +190,13 @@
         "ai_translation_error": "Translation failed, check settings",
         "ai_translation_disabled_en": "AI translation only for Chinese"
     },
+    "updater": {
+        "available": "New version {{version}} is available",
+        "download_install": "Download & Install",
+        "downloading": "Downloading update...",
+        "installed": "Update installed — please restart the app to apply",
+        "dismiss": "Later"
+    },
     "skills_detail": {
         "show_original": "Show Original",
         "translate_content": "Translate Content",
