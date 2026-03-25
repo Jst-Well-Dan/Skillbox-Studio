@@ -7,12 +7,15 @@ on:
       - master
     paths:
       - "src/**"
+      - "src-tauri/**"
       - "public/**"
       - "package.json"
       - "vite.config.*"
       - "tsconfig*.json"
       - "tailwind.config.*"
       - "pnpm-lock.yaml"
+      - "Skill-Box"
+      - "Skill-Box/**"
       - ".github/workflows/**"
   workflow_dispatch:
 
