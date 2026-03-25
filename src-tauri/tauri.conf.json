@@ -46,8 +46,7 @@
       "../Skill-Box/obsidian/**/*",
       "../Skill-Box/productivity/**/*",
       "../Skill-Box/visual-creative/**/*",
-      "../Skill-Box/README.md",
-      "../Skill-Box/README.zh.md"
+      "../Skill-Box/README.md"
     ],
     "icon": [
       "icons/32x32.png",
